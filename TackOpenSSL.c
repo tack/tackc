@@ -21,7 +21,7 @@ TACK_RETVAL tackOpenSSLVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH],
 	EC_GROUP* ec_group = 0;
 	EC_POINT* ec_point = 0;
 	ECDSA_SIG* ecdsa_sig = 0;
-    SHA256_CTX sha256_ctx;	
+	SHA256_CTX sha256_ctx;	
 	TACK_RETVAL retval = TACK_ERR_CRYPTO_FUNC;
 	int ret = 0;
 
@@ -50,9 +50,9 @@ TACK_RETVAL tackOpenSSLVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH],
 		goto end;
 		
 	/* Hash the input data */
-    SHA256_Init(&sha256_ctx);  
-    SHA256_Update(&sha256_ctx, data, dataLen);   
-    SHA256_Final(hashBuf, &sha256_ctx);	
+	SHA256_Init(&sha256_ctx);  
+	SHA256_Update(&sha256_ctx, data, dataLen);   
+	SHA256_Final(hashBuf, &sha256_ctx);	
 
 	/* Verify the signature */
 	ret = ECDSA_do_verify(hashBuf, TACK_HASH_LENGTH, ecdsa_sig, ec_key);

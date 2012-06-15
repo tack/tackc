@@ -51,6 +51,16 @@ TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data)
 
 TACK_RETVAL tackExtensionVerifySignatures(TackExtension* tackExt, VerifyFunc func)
 {
+	TACK_RETVAL retval = TACK_OK;
 	
-	return TACK_OK;
+	if (tackExt->tackCount) {
+		if ((retval=tackTackVerifySignature(&(tackExt->tack), func))<0)
+			return retval;
+	}
+	
+	for (int count=0; count < tackExt->breakSigsCount; count++) {
+		if ((retval=tackBreakSigVerifySignature(&(tackExt->breakSigs[count]), func))<0)
+			return retval;
+	}
+	return retval;
 }
