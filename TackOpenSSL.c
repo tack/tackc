@@ -27,7 +27,7 @@ TACK_RETVAL tackOpenSSLVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH],
 
 	/* Prepare the public key to be passed into OpenSSL */
 	pubKeyBuf[0] = 0x04;
-	memcpy(pubKeyBuf+1, publicKey, 64);
+	memcpy(pubKeyBuf+1, publicKey, TACK_PUBKEY_LENGTH);
 
 	/* Create EC_KEY from raw bytes */
 	if ((ec_key = EC_KEY_new_by_curve_name(OBJ_txt2nid("prime256v1"))) == 0)
