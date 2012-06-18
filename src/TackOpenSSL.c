@@ -38,7 +38,7 @@ TACK_RETVAL tackOpenSSLVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH],
     if ((ec_point = EC_POINT_new(ec_group)) == 0)
         goto end;		
     if (EC_POINT_oct2point(ec_group, ec_point, pubKeyBuf, 65, 0) == 0) {
-        
+        retval = TACK_ERR_BAD_PUBKEY;
         goto end;
     }
     if (EC_KEY_set_public_key(ec_key, ec_point) == 0)

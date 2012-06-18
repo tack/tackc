@@ -20,6 +20,7 @@ char* tackRetvalString(TACK_RETVAL error);
 #define TACK_ERR                                0x80000000
 #define TACK_ERR_BAD_GENERATION                 0x80000001
 #define TACK_ERR_BAD_ACTIVATION_FLAG            0x80000002
+#define TACK_ERR_BAD_PUBKEY                     0x80000003
 
 #define TACK_ERR_BAD_TACK_LENGTH                0x80001001
 #define TACK_ERR_BAD_BREAKSIGS_LENGTH           0x80001002
