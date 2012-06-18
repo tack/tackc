@@ -14,8 +14,8 @@
 #define TACK_BREAK_SIG_LENGTH 128
 
 typedef struct {
-	uint8_t publicKey[TACK_PUBKEY_LENGTH]; 
-	uint8_t signature[TACK_SIG_LENGTH];	
+    uint8_t publicKey[TACK_PUBKEY_LENGTH]; 
+    uint8_t signature[TACK_SIG_LENGTH];	
 } TackBreakSig;
 
 TACK_RETVAL tackBreakSigInit(TackBreakSig* sig, uint8_t* data);

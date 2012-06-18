@@ -12,8 +12,8 @@
 #include "TackCryptoFuncs.h"
 
 TACK_RETVAL tackOpenSSLVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH], 
-						uint8_t signature[TACK_SIG_LENGTH],
-						uint8_t* data, uint32_t dataLen);
+                                  uint8_t signature[TACK_SIG_LENGTH],
+                                  uint8_t* data, uint32_t dataLen);
 
 
 #endif

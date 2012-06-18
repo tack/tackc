@@ -15,13 +15,13 @@
 #define TACK_BREAK_SIGS_MAXCOUNT 8
 
 typedef struct {
-	uint8_t tackCount; /* 0 or 1 */
-	Tack tack;
-	
-	uint8_t breakSigsCount; /* 0...8 */
-	TackBreakSig breakSigs[TACK_BREAK_SIGS_MAXCOUNT];
-
-	uint8_t activationFlag;
+    uint8_t tackCount; /* 0 or 1 */
+    Tack tack;
+    
+    uint8_t breakSigsCount; /* 0...8 */
+    TackBreakSig breakSigs[TACK_BREAK_SIGS_MAXCOUNT];
+    
+    uint8_t activationFlag;
 } TackExtension;
 
 TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data);
