@@ -13,6 +13,6 @@ and NSS include files and libraries.
 
 Then run:
 
-  ./tackc test testoutdata/TACK.dat
+  ./tackc test testdata/TACK.dat
 
 To see if it can verify the binary TACK correctly.
