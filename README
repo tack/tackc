@@ -1,0 +1,18 @@
+
+This is a simple, verify-only C codebase for enabling client
+applications to support TACK.  The ECDSA verification can be done with
+either OpenSSL or NSS.
+
+To compile the test "tackc" program use:
+
+  make TACKC_OPENSSL=1 TACK_NSS=1
+
+If you only want to test OpenSSL or NSS, then omit one of the variable
+declarations.  You may need to edit the Makefile to find your OpenSSL
+and NSS include files and libraries.
+
+Then run:
+
+  ./tackc test testoutdata/TACK.dat
+
+To see if it can verify the binary TACK correctly.
