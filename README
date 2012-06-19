@@ -5,7 +5,7 @@ either OpenSSL or NSS.
 
 To compile the test "tackc" program use:
 
-  make TACKC_OPENSSL=1 TACK_NSS=1
+  make TACKC_OPENSSL=1 TACKC_NSS=1
 
 If you only want to test OpenSSL or NSS, then omit one of the variable
 declarations.  You may need to edit the Makefile to find your OpenSSL
