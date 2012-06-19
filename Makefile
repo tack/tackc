@@ -1,14 +1,37 @@
 
-OPENSSL_INCLUDE = /Users/trevp/Downloads/openssl-1.0.0d/include/
-OPENSSL_LIB = /Users/trevp/Downloads/openssl-1.0.0d/libcrypto.a
+HEADERS = src/Tack.h src/TackExtension.h src/TackRetval.h \
+	src/TackBreakSig.h src/TackUtil.h \
+	src/TackCryptoFuncs.h
 
-tackc:  Makefile src/TackBreakSig.h src/TackBreakSig.c src/TackExtension.h \
-	src/TackExtension.c src/TackMain.c src/TackNss.h src/TackNss.c \
-	src/TackOpenSSL.h src/TackOpenSSL.c src/TackRetval.h src/TackRetval.c \
-	src/Tack.h src/Tack.c src/TackUtil.h src/TackUtil.c
+SRCS = src/Tack.c src/TackExtension.c src/TackRetval.c \
+	src/TackBreakSig.c src/TackUtil.c \
+	src/TackMain.c \
+
+DEFINES = 
+INCLUDEDIRS = -I/opt/local/include
+LIBDIRS = -L/opt/local/lib
+LIBS = 
+
+ifdef TACKC_OPENSSL
+HEADERS += src/TackOpenSSL.h
+SRCS += src/TackOpenSSL.c
+DEFINES += -DTACKC_OPENSSL
+LIBS += -lcrypto
+endif
+
+ifdef TACKC_NSS
+HEADERS += src/TackNss.h
+SRCS += src/TackNss.c
+DEFINES += -DTACKC_NSS
+INCLUDEDIRS += -I/opt/local/include/nspr/
+LIBDIRS += -L/opt/local/lib/nss/
+LIBS += -lnss3
+endif
+
+
+tackc:  Makefile $(HEADERS) $(SRCS)
 	gcc -Wall -std=c99 -o tackc \
-	-I$(OPENSSL_INCLUDE) \
-	$(OPENSSL_LIB) \
-	src/TackBreakSig.c src/TackExtension.c src/TackMain.c \
-	src/TackNss.h src/TackNss.c src/TackOpenSSL.c src/TackRetval.c \
-	src/Tack.c src/TackUtil.c
+	$(DEFINES) $(INCLUDEDIRS) $(LIBDIRS) $(LIBS) $(SRCS)
+
+clean:
+	rm -f tackc

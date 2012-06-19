@@ -9,13 +9,21 @@
 #include <string.h>
 #include "TackRetval.h"
 #include "TackExtension.h"
+
+#ifdef TACKC_OPENSSL
 #include "TackOpenSSL.h"
+#endif
+
+#ifdef TACKC_NSS
+#include "TackNss.h"
+#endif
 
 void printUsage()
 {
     printf(
 "\n"
 "commands:\n"
+"  test TACK.dat"
 "  help\n"
 "\n");
 }
@@ -51,7 +59,17 @@ TACK_RETVAL test(int argc, char* argv[])
 	TACK_RETVAL retval;
 	if ((retval=tackTackInit(&tack, inbuf))<0)
 		return retval;	
-	return tackTackVerifySignature(&tack, tackOpenSSLVerifyFunc);
+
+
+#ifdef TACKC_OPENSSL
+	retval = tackTackVerifySignature(&tack, tackOpenSSLVerifyFunc);
+        printf("OPENSSL RESULT: %s\n", tackRetvalString(retval));        
+#endif
+#ifdef TACKC_NSS
+	retval = tackTackVerifySignature(&tack, tackNssVerifyFunc);
+        printf("NSS RESULT: %s\n", tackRetvalString(retval));
+#endif
+        return TACK_OK;
 }
 
 int main(int argc, char* argv[]) 
@@ -68,7 +86,6 @@ int main(int argc, char* argv[])
     }    
     else if (strcmp(argv[1], "test")==0) {
         retval = test(argc-2, argv+2);
-		printf("RESULT: %s\n", tackRetvalString(retval));
     }    
 	return retval;
 }	
