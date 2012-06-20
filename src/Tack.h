@@ -24,7 +24,7 @@ typedef struct {
     uint8_t dataForVerify[TACK_LENGTH - TACK_SIG_LENGTH];
 } Tack;
 
-TACK_RETVAL tackTackInit(Tack* tack, uint8_t* data);
+TACK_RETVAL tackTackInit(Tack* tack, uint8_t* data, uint32_t len);
 TACK_RETVAL tackTackVerifySignature(Tack* tack, VerifyFunc func);
 
 #endif

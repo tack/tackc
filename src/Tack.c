@@ -9,8 +9,11 @@
 #include "TackUtil.h"
 
 
-TACK_RETVAL tackTackInit(Tack* tack, uint8_t* data)
+TACK_RETVAL tackTackInit(Tack* tack, uint8_t* data, uint32_t len)
 {
+    if (len != TACK_LENGTH)
+        return TACK_ERR_BAD_TACK_LENGTH;
+
     memcpy(tack->dataForVerify, data, TACK_LENGTH - TACK_SIG_LENGTH);       
 
     memcpy(tack->publicKey, data, 64); data += 64;

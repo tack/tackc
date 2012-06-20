@@ -7,8 +7,11 @@
 #include <string.h>
 #include "TackBreakSig.h"
 
-TACK_RETVAL tackBreakSigInit(TackBreakSig* sig, uint8_t* data)
+TACK_RETVAL tackBreakSigInit(TackBreakSig* sig, uint8_t* data, uint32_t len)
 {
+    if (len != TACK_BREAKSIG_LENGTH)
+        return TACK_ERR_BAD_BREAKSIG_LENGTH;
+
     memcpy(sig->publicKey, data, TACK_PUBKEY_LENGTH); data += TACK_PUBKEY_LENGTH;
     memcpy(sig->signature, data, TACK_SIG_LENGTH); data += TACK_SIG_LENGTH; 
     return TACK_OK;

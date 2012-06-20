@@ -12,19 +12,19 @@
 #include "Tack.h"
 #include "TackBreakSig.h"
 
-#define TACK_BREAK_SIGS_MAXCOUNT 8
+#define TACK_BREAKSIGS_MAXCOUNT 8
 
 typedef struct {
     uint8_t tackCount; /* 0 or 1 */
     Tack tack;
     
     uint8_t breakSigsCount; /* 0...8 */
-    TackBreakSig breakSigs[TACK_BREAK_SIGS_MAXCOUNT];
+    TackBreakSig breakSigs[TACK_BREAKSIGS_MAXCOUNT];
     
     uint8_t activationFlag;
 } TackExtension;
 
-TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data);
+TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data, uint32_t len);
 TACK_RETVAL tackExtensionVerifySignatures(TackExtension* tackExt, VerifyFunc func);
 
 #endif

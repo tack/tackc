@@ -57,8 +57,10 @@ TACK_RETVAL test(int argc, char* argv[])
 	//TackBreakSig sig;
 	//TackExtension tackExt;
 	TACK_RETVAL retval;
-	if ((retval=tackTackInit(&tack, inbuf))<0)
-		return retval;	
+	if ((retval=tackTackInit(&tack, inbuf, nbytes))<0) {
+            printf("ERROR INIT'ING TACK: %s\n", tackRetvalString(retval));
+            return TACK_ERR;
+        }
 
 
 #ifdef TACKC_OPENSSL

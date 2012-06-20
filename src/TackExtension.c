@@ -8,10 +8,11 @@
 #include "TackUtil.h"
 #include "TackExtension.h"
 
-TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data)
+TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data, uint32_t len)
 {
     uint8_t tackLen = 0;
     uint16_t breakSigsLen = 0;
+    uint8_t* dataEnd = data + len;
     TACK_RETVAL retval = TACK_OK;
     
     memset(tackExt, 0, sizeof(TackExtension));
@@ -22,7 +23,7 @@ TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data)
         return TACK_ERR_BAD_TACK_LENGTH;
     
     if (tackLen == TACK_LENGTH) {
-        if ((retval=tackTackInit(&(tackExt->tack), data)) != TACK_OK)
+        if ((retval=tackTackInit(&(tackExt->tack), data, TACK_LENGTH)) != TACK_OK)
             return retval;
         data += TACK_LENGTH;
         tackExt->tackCount = 1;
@@ -30,15 +31,16 @@ TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data)
     
     /* Parse Break Sigs */
     breakSigsLen = ptou16(data); data += 2;
-    if ((breakSigsLen % TACK_BREAK_SIG_LENGTH != 0) || 
-        (breakSigsLen > TACK_BREAK_SIGS_MAXCOUNT * TACK_BREAK_SIG_LENGTH))
+    if ((breakSigsLen % TACK_BREAKSIG_LENGTH != 0) || 
+        (breakSigsLen > TACK_BREAKSIGS_MAXCOUNT * TACK_BREAKSIG_LENGTH))
         return TACK_ERR_BAD_BREAKSIGS_LENGTH;
     
-    tackExt->breakSigsCount = breakSigsLen / TACK_BREAK_SIG_LENGTH;	
+    tackExt->breakSigsCount = breakSigsLen / TACK_BREAKSIG_LENGTH;	
     for (uint8_t count=0; count < tackExt->breakSigsCount; count++) {
-        if ((retval=tackBreakSigInit(&(tackExt->breakSigs[count]), data)) != TACK_OK)
+        if ((retval=tackBreakSigInit(&(tackExt->breakSigs[count]), 
+                                     data, TACK_BREAKSIG_LENGTH)) != TACK_OK)
             return retval;
-        data += TACK_BREAK_SIG_LENGTH;
+        data += TACK_BREAKSIG_LENGTH;
     }
     
     /* Parse Activation Flag */
@@ -46,6 +48,9 @@ TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data)
     if (tackExt->activationFlag > 1)
         return TACK_ERR_BAD_ACTIVATION_FLAG;
     
+    if (data != dataEnd)
+        return TACK_ERR_BAD_TACKEXT_LENGTH;
+
     return retval;
 }
 
