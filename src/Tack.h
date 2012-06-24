@@ -6,6 +6,9 @@
 
 #ifndef __TACK_TACK_H__
 #define __TACK_TACK_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 #include "TackRetval.h"
@@ -27,4 +30,9 @@ typedef struct {
 TACK_RETVAL tackTackInit(Tack* tack, uint8_t* data, uint32_t len);
 TACK_RETVAL tackTackVerifySignature(Tack* tack, VerifyFunc func);
 
+#ifdef __cplusplus
+}
 #endif
+#endif
+
+

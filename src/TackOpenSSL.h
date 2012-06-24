@@ -6,6 +6,9 @@
 
 #ifndef __TACK_OPENSSL_H__
 #define __TACK_OPENSSL_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 #include "TackRetval.h"
@@ -16,4 +19,7 @@ TACK_RETVAL tackOpenSSLVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH],
                                   uint8_t* data, uint32_t dataLen);
 
 
+#ifdef __cplusplus
+}
+#endif
 #endif

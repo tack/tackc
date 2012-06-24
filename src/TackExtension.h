@@ -6,6 +6,9 @@
 
 #ifndef __TACK_EXTENSION_H__
 #define __TACK_EXTENSION_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "TackRetval.h"
 #include "TackCryptoFuncs.h"
@@ -27,4 +30,7 @@ typedef struct {
 TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data, uint32_t len);
 TACK_RETVAL tackExtensionVerifySignatures(TackExtension* tackExt, VerifyFunc func);
 
+#ifdef __cplusplus
+}
+#endif
 #endif

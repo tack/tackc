@@ -23,7 +23,7 @@ ifdef TACKC_NSS
 HEADERS += src/TackNss.h
 SRCS += src/TackNss.c
 DEFINES += -DTACKC_NSS
-INCLUDEDIRS += -I/opt/local/include/nspr/
+INCLUDEDIRS += -I/opt/local/include/nspr/ -I/opt/local/include/nss
 LIBDIRS += -L/opt/local/lib/nss/
 LIBS += -lnss3
 endif

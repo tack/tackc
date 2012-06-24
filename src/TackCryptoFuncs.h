@@ -6,6 +6,9 @@
 
 #ifndef __TACK_CRYPTO_FUNCS_H__
 #define __TACK_CRYPTO_FUNCS_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 #include "TackRetval.h"
@@ -19,4 +22,7 @@ typedef TACK_RETVAL (*VerifyFunc)(uint8_t publicKey[TACK_PUBKEY_LENGTH],
                                   uint8_t* data, uint32_t dataLen);
 
 
+#ifdef __cplusplus
+}
+#endif
 #endif

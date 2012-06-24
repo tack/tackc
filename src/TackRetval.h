@@ -6,6 +6,9 @@
 
 #ifndef __TACK_RETVAL_H__
 #define __TACK_RETVAL_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 
@@ -32,4 +35,7 @@ char* tackRetvalString(TACK_RETVAL error);
 #define TACK_ERR_CRYPTO_FUNC                    0x80003001
 
 
+#ifdef __cplusplus
+}
+#endif
 #endif

@@ -1,8 +1,8 @@
-#include <nspr/prtypes.h>
+#include <prtypes.h>
 
-#include <nss/sechash.h>
-#include <nss/keyhi.h>
-#include <nss/pk11pub.h>
+#include <sechash.h>
+#include <keyhi.h>
+#include <pk11pub.h>
 
 #include "TackNss.h"
 

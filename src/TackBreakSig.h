@@ -6,6 +6,9 @@
 
 #ifndef __TACK_BREAK_SIG_H__
 #define __TACK_BREAK_SIG_H__
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdint.h>
 #include "TackRetval.h"
@@ -21,4 +24,7 @@ typedef struct {
 TACK_RETVAL tackBreakSigInit(TackBreakSig* sig, uint8_t* data, uint32_t len);
 TACK_RETVAL tackBreakSigVerifySignature(TackBreakSig* sig, VerifyFunc func);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
