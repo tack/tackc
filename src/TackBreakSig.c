@@ -20,7 +20,7 @@ TACK_RETVAL tackBreakSigInit(TackBreakSig* sig, uint8_t* data, uint32_t len)
 #define TACK_BREAKSIG_TAG "tack_break_sig"
 #define TACK_BREAKSIG_TAG_LENGTH 14
 
-TACK_RETVAL tackBreakSigVerifySignature(TackBreakSig* sig, VerifyFunc func)
+TACK_RETVAL tackBreakSigVerifySignature(TackBreakSig* sig, TackVerifyFunc func)
 {
     char* tag = TACK_BREAKSIG_TAG;
     return func(sig->publicKey, sig->signature, (uint8_t*)tag, 

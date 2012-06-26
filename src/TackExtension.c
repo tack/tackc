@@ -54,7 +54,7 @@ TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data, uint32_t le
     return retval;
 }
 
-TACK_RETVAL tackExtensionVerifySignatures(TackExtension* tackExt, VerifyFunc func)
+TACK_RETVAL tackExtensionVerifySignatures(TackExtension* tackExt, TackVerifyFunc func)
 {
     TACK_RETVAL retval = TACK_OK;
     

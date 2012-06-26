@@ -33,7 +33,7 @@ TACK_RETVAL tackTackInit(Tack* tack, uint8_t* data, uint32_t len)
 #define TACK_TAG_LENGTH 8
 #define TACK_SIGDATA_LENGTH TACK_TAG_LENGTH + TACK_LENGTH - TACK_SIG_LENGTH
 
-TACK_RETVAL tackTackVerifySignature(Tack* tack, VerifyFunc func)
+TACK_RETVAL tackTackVerifySignature(Tack* tack, TackVerifyFunc func)
 {
     char* tag = TACK_TAG;
     uint8_t data[TACK_SIGDATA_LENGTH];

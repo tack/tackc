@@ -28,7 +28,7 @@ typedef struct {
 } Tack;
 
 TACK_RETVAL tackTackInit(Tack* tack, uint8_t* data, uint32_t len);
-TACK_RETVAL tackTackVerifySignature(Tack* tack, VerifyFunc func);
+TACK_RETVAL tackTackVerifySignature(Tack* tack, TackVerifyFunc func);
 
 #ifdef __cplusplus
 }

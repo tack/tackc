@@ -17,9 +17,9 @@ extern "C" {
 #define TACK_SIG_LENGTH 64
 #define TACK_PUBKEY_LENGTH 64
 
-typedef TACK_RETVAL (*VerifyFunc)(uint8_t publicKey[TACK_PUBKEY_LENGTH], 
-                                  uint8_t signature[TACK_SIG_LENGTH],
-                                  uint8_t* data, uint32_t dataLen);
+typedef TACK_RETVAL (*TackVerifyFunc)(uint8_t publicKey[TACK_PUBKEY_LENGTH], 
+                                      uint8_t signature[TACK_SIG_LENGTH],
+                                      uint8_t* data, uint32_t dataLen);
 
 
 #ifdef __cplusplus

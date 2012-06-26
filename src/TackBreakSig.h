@@ -22,7 +22,7 @@ typedef struct {
 } TackBreakSig;
 
 TACK_RETVAL tackBreakSigInit(TackBreakSig* sig, uint8_t* data, uint32_t len);
-TACK_RETVAL tackBreakSigVerifySignature(TackBreakSig* sig, VerifyFunc func);
+TACK_RETVAL tackBreakSigVerifySignature(TackBreakSig* sig, TackVerifyFunc func);
 
 #ifdef __cplusplus
 }
