@@ -54,3 +54,11 @@ TACK_RETVAL tackNssVerifyFunc(uint8_t publicKeyBytes[TACK_PUBKEY_LENGTH],
   else                      return TACK_ERR_SIGNATURE_BAD;
 }
 
+TACK_RETVAL tackNssHashFunc(uint8_t* input, uint32_t inputLen, 
+                                	uint8_t output[TACK_HASH_LENGTH])
+{
+	/* Stubbed to return all-zeros hash */
+	memset(output, 0, TACK_HASH_LENGTH);
+	return TACK_OK;
+}
+
