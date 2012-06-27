@@ -21,6 +21,7 @@ char* tackRetvalString(TACK_RETVAL retval)
     case TACK_ERR_BAD_TACKEXT_LENGTH: return "BAD TACKEXT LENGTH";
     case TACK_ERR_SIGNATURE_BAD: return "SIGNATURE BAD";
     case TACK_ERR_CRYPTO_FUNC: return "CRYPTO FUNC";
+    case TACK_ERR_ASSERTION: return "ASSERTION";
     default: return "uknown error?!";
     }
 }	

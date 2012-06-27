@@ -34,6 +34,8 @@ char* tackRetvalString(TACK_RETVAL error);
 
 #define TACK_ERR_CRYPTO_FUNC                    0x80003001
 
+#define TACK_ERR_ASSERTION                      0x80004001
+
 
 #ifdef __cplusplus
 }

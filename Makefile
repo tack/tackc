@@ -1,11 +1,11 @@
 
 HEADERS = src/Tack.h src/TackExtension.h src/TackRetval.h \
 	src/TackBreakSig.h src/TackUtil.h \
-	src/TackCryptoFuncs.h
+	src/TackCryptoFuncs.h src/TackFingerprints.h
 
 SRCS = src/Tack.c src/TackExtension.c src/TackRetval.c \
 	src/TackBreakSig.c src/TackUtil.c \
-	src/TackMain.c \
+	src/TackMain.c src/TackFingerprints.c \
 
 DEFINES = 
 INCLUDEDIRS = -I/opt/local/include

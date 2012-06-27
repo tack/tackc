@@ -78,3 +78,15 @@ end:
     
     return(retval);
 }
+
+
+TACK_RETVAL tackOpenSSLHashFunc(uint8_t* input, uint32_t inputLen, 
+                                uint8_t output[TACK_HASH_LENGTH])
+{
+    SHA256_CTX sha256_ctx;
+
+    SHA256_Init(&sha256_ctx);  
+    SHA256_Update(&sha256_ctx, input, inputLen);   
+    SHA256_Final(output, &sha256_ctx);
+    return TACK_OK;
+}

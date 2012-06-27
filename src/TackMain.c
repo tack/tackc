@@ -9,6 +9,7 @@
 #include <string.h>
 #include "TackRetval.h"
 #include "TackExtension.h"
+#include "TackFingerprints.h"
 
 #ifdef TACKC_OPENSSL
 #include "TackOpenSSL.h"
@@ -62,14 +63,18 @@ TACK_RETVAL test(int argc, char* argv[])
             return TACK_ERR;
         }
 
-
+        char fingerprint[30];
 #ifdef TACKC_OPENSSL
 	retval = tackTackVerifySignature(&tack, tackOpenSSLVerifyFunc);
-        printf("OPENSSL RESULT: %s\n", tackRetvalString(retval));        
+        printf("OPENSSL RESULT: %s\n", tackRetvalString(retval));      
+        tackGetKeyFingerprint(tack.publicKey, fingerprint, tackOpenSSLHashFunc);
+        printf("OPENSSL FINGERPRINT: %s\n", fingerprint);  
 #endif
 #ifdef TACKC_NSS
 	retval = tackTackVerifySignature(&tack, tackNssVerifyFunc);
         printf("NSS RESULT: %s\n", tackRetvalString(retval));
+        tackGetKeyFingerprint(tack.publicKey, fingerprint, tackNssHashFunc);
+        printf("NSS FINGERPRINT: %s\n", fingerprint);  
 #endif
         return TACK_OK;
 }
