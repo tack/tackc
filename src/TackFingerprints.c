@@ -18,7 +18,6 @@ TACK_RETVAL base32Encode(uint8_t* in, char* out, uint32_t inLen)
     uint8_t outmask = 0x10;
     uint8_t* inptr = in;
     uint8_t inmask = 0x80;
-    uint32_t count = 0;
 
     if (inLen % 5 != 0)
         return TACK_ERR_ASSERTION;
@@ -26,7 +25,7 @@ TACK_RETVAL base32Encode(uint8_t* in, char* out, uint32_t inLen)
     memset(out, 0, (inLen/5)*8);
 
     /* Fill the out buffer with integers from 0..31 */
-    for (count=0; count < inLen*8; count++) {
+    for (uint32_t count=0; count < inLen*8; count++) {
         if (*inptr & inmask)
             *outptr |= outmask;
         if (outmask == 1) {
@@ -44,7 +43,7 @@ TACK_RETVAL base32Encode(uint8_t* in, char* out, uint32_t inLen)
     }
 
     /* Convert the out buffer to base32 chars */
-    for (count=0; count < (outptr-out); count++) {
+    for (uint32_t count=0; count < (uint32_t)(outptr-out); count++) {
         if (out[count] >= 32)
             return TACK_ERR_ASSERTION;
         out[count] = alphabet[(uint8_t)(out[count])];
@@ -60,7 +59,6 @@ TACK_RETVAL tackGetKeyFingerprint(uint8_t publicKey[TACK_PUBKEY_LENGTH],
     TACK_RETVAL retval;
     uint8_t hashResult[TACK_HASH_LENGTH];
     char base32Result[TACK_HASH_LENGTH * 2]; 
-    uint32_t count;
 
     /* Hash the public key */
     if ((retval=func(publicKey, TACK_PUBKEY_LENGTH, hashResult)) != TACK_OK)
@@ -74,7 +72,7 @@ TACK_RETVAL tackGetKeyFingerprint(uint8_t publicKey[TACK_PUBKEY_LENGTH],
         return retval;
 
     /* Split into 5 groups, separated by '.' */
-    for (count=0; count < 5; count++) {
+    for (int count=0; count < 5; count++) {
         memcpy(output+(count*6), base32Result+(count*5), 5);
         if (count != 4)
             output[5+(count*6)] = '.';
