@@ -55,10 +55,12 @@ TACK_RETVAL tackNssVerifyFunc(uint8_t publicKeyBytes[TACK_PUBKEY_LENGTH],
 }
 
 TACK_RETVAL tackNssHashFunc(uint8_t* input, uint32_t inputLen, 
-                                	uint8_t output[TACK_HASH_LENGTH])
+                            uint8_t output[TACK_HASH_LENGTH])
 {
-	/* Stubbed to return all-zeros hash */
-	memset(output, 0, TACK_HASH_LENGTH);
-	return TACK_OK;
+	SECStatus rv = HASH_HashBuf(HASH_AlgSHA256, output, input, inputLen);
+	if (rv == SECSuccess)
+		return TACK_OK;
+	else
+		return TACK_ERR_CRYPTO_FUNC;
 }
 
