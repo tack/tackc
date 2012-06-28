@@ -16,19 +16,16 @@ extern "C" {
 
 #define TACK_LENGTH 166
 
-typedef struct {
-    uint8_t publicKey[TACK_PUBKEY_LENGTH]; 
-    uint8_t minGeneration;
-    uint8_t generation;
-    uint32_t expiration;
-    uint8_t targetHash[TACK_HASH_LENGTH];
-    uint8_t signature[TACK_SIG_LENGTH]; 
-        
-    uint8_t dataForVerify[TACK_LENGTH - TACK_SIG_LENGTH];
-} Tack;
+uint8_t* tackTackGetPublicKey(uint8_t* tack);
+uint8_t  tackTackGetMinGeneration(uint8_t* tack);
+uint8_t  tackTackGetGeneration(uint8_t* tack);
+uint32_t tackTackGetExpiration(uint8_t* tack);
+uint8_t* tackTackGetTargetHash(uint8_t* tack);
+uint8_t* tackTackGetSignature(uint8_t* tack);
 
-TACK_RETVAL tackTackInit(Tack* tack, uint8_t* data, uint32_t len);
-TACK_RETVAL tackTackVerifySignature(Tack* tack, TackVerifyFunc func);
+TACK_RETVAL tackTackSyntaxCheck(uint8_t* tack);
+TACK_RETVAL tackTackVerifySignature(uint8_t* tack, TackVerifyFunc func);
+
 
 #ifdef __cplusplus
 }

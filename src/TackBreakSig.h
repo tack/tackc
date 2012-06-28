@@ -16,13 +16,11 @@ extern "C" {
 
 #define TACK_BREAKSIG_LENGTH 128
 
-typedef struct {
-    uint8_t publicKey[TACK_PUBKEY_LENGTH]; 
-    uint8_t signature[TACK_SIG_LENGTH];	
-} TackBreakSig;
+uint8_t* tackBreakSigGetPublicKey(uint8_t* breakSig);
+uint8_t* tackBreakSigGetSignature(uint8_t* breakSig);
 
-TACK_RETVAL tackBreakSigInit(TackBreakSig* sig, uint8_t* data, uint32_t len);
-TACK_RETVAL tackBreakSigVerifySignature(TackBreakSig* sig, TackVerifyFunc func);
+TACK_RETVAL tackBreakSigVerifySignature(uint8_t* breakSig, TackVerifyFunc func);
+
 
 #ifdef __cplusplus
 }

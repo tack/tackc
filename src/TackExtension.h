@@ -17,18 +17,12 @@ extern "C" {
 
 #define TACK_BREAKSIGS_MAXCOUNT 8
 
-typedef struct {
-    uint8_t tackCount; /* 0 or 1 */
-    Tack tack;
-    
-    uint8_t breakSigsCount; /* 0...8 */
-    TackBreakSig breakSigs[TACK_BREAKSIGS_MAXCOUNT];
-    
-    uint8_t activationFlag;
-} TackExtension;
+uint8_t* tackExtensionGetTack(uint8_t* tackExt);
+uint8_t  tackExtensionGetNumBreakSigs(uint8_t* tackExt);
+uint8_t* tackExtensionGetBreakSig(uint8_t* tackExt, uint8_t index);
+uint8_t  tackExtensionGetActivationFlag(uint8_t* tackExt);
 
-TACK_RETVAL tackExtensionInit(TackExtension* tackExt, uint8_t* data, uint32_t len);
-TACK_RETVAL tackExtensionVerifySignatures(TackExtension* tackExt, TackVerifyFunc func);
+TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 
 #ifdef __cplusplus
 }

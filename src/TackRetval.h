@@ -26,9 +26,8 @@ char* tackRetvalString(TACK_RETVAL error);
 #define TACK_ERR_BAD_PUBKEY                     0x80000003
 
 #define TACK_ERR_BAD_TACK_LENGTH                0x80001001
-#define TACK_ERR_BAD_BREAKSIG_LENGTH            0x80001002
-#define TACK_ERR_BAD_BREAKSIGS_LENGTH           0x80001003
-#define TACK_ERR_BAD_TACKEXT_LENGTH             0x80001004
+#define TACK_ERR_BAD_BREAKSIGS_LENGTH           0x80001002
+#define TACK_ERR_BAD_TACKEXT_LENGTH             0x80001003
 
 #define TACK_ERR_SIGNATURE_BAD                  0x80002001
 
