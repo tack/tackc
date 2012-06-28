@@ -33,6 +33,14 @@ TACK_RETVAL tackTackSyntaxCheck(uint8_t* tack)
 	return TACK_OK;
 }
 
+TACK_RETVAL tackTackGetKeyFingerprint(uint8_t* tack, 
+                         	char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
+                            TackHashFunc func)
+{
+	return tackGetKeyFingerprint(tackTackGetPublicKey(tack), output, func);
+}
+
+
 #define TACK_TAG "tack_sig"
 #define TACK_TAG_LENGTH 8
 #define TACK_SIGDATA_LENGTH TACK_TAG_LENGTH + TACK_LENGTH - TACK_SIG_LENGTH

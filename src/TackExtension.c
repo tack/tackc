@@ -68,15 +68,7 @@ TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
 	if (breakSigsLen / TACK_BREAKSIG_LENGTH > TACK_BREAKSIGS_MAXCOUNT)
 		return TACK_ERR_BAD_BREAKSIGS_LENGTH;
 	
-	// Check break sigs (but there's not syntax-checking for them)
-	/*
-	uint8_t numBreakSigs = tackExtensionNumBreakSigs(tackExt);
-	for (int count=0; count < numBreakSigs; count++) {
-		retval = tackBreakSigSyntaxCheck(tackExtensionGetBreakSig(tackExt, count));
-		if (retval != TACK_OK)
-			return retval;
-	}
-	*/
+	// Nothing to check for break sigs
 	
 	// Check activation flag
 	uint8_t activationFlag = tackExtensionGetActivationFlag(tackExt);

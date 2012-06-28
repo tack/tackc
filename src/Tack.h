@@ -12,6 +12,7 @@ extern "C" {
 
 #include <stdint.h>
 #include "TackRetval.h"
+#include "TackFingerprints.h"
 #include "TackCryptoFuncs.h"
 
 #define TACK_LENGTH 166
@@ -24,6 +25,9 @@ uint8_t* tackTackGetTargetHash(uint8_t* tack);
 uint8_t* tackTackGetSignature(uint8_t* tack);
 
 TACK_RETVAL tackTackSyntaxCheck(uint8_t* tack);
+TACK_RETVAL tackTackGetKeyFingerprint(uint8_t* tack, 
+                         	char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
+                            TackHashFunc func);
 TACK_RETVAL tackTackVerifySignature(uint8_t* tack, TackVerifyFunc func);
 
 

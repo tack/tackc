@@ -67,16 +67,16 @@ TACK_RETVAL test(int argc, char* argv[])
 
  	char fingerprint[30];
 #ifdef TACKC_OPENSSL		
-    tackGetKeyFingerprint(tackTackGetPublicKey(tack), fingerprint, tackOpenSSLHashFunc);
+    tackTackGetKeyFingerprint(tack, fingerprint, tackOpenSSLHashFunc);
     printf("OPENSSL FINGERPRINT: %s\n", fingerprint);
   	retval = tackTackVerifySignature(tack, tackOpenSSLVerifyFunc);
     printf("OPENSSL VERIFY: %s\n", tackRetvalString(retval));      
 #endif
 #ifdef TACKC_NSS
-        tackGetKeyFingerprint(tackTackGetPublicKey(tack), fingerprint, tackNssHashFunc);
-        printf("NSS FINGERPRINT: %s\n", fingerprint);  
-		retval = tackTackVerifySignature(tack, tackNssVerifyFunc);
-        printf("NSS VERIFY: %s\n", tackRetvalString(retval));
+    tackTackGetKeyFingerprint(tack, fingerprint, tackNssHashFunc);
+    printf("NSS FINGERPRINT: %s\n", fingerprint);  
+	retval = tackTackVerifySignature(tack, tackNssVerifyFunc);
+    printf("NSS VERIFY: %s\n", tackRetvalString(retval));
 #endif
         return TACK_OK;
 }

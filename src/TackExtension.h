@@ -24,6 +24,7 @@ uint8_t  tackExtensionGetActivationFlag(uint8_t* tackExt);
 
 TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 
+
 #ifdef __cplusplus
 }
 #endif
