@@ -26,7 +26,7 @@ uint8_t* tackTackGetSignature(uint8_t* tack);
 
 TACK_RETVAL tackTackSyntaxCheck(uint8_t* tack);
 TACK_RETVAL tackTackGetKeyFingerprint(uint8_t* tack, 
-                         	char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
+                            char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
                             TackHashFunc func);
 TACK_RETVAL tackTackVerifySignature(uint8_t* tack, TackVerifyFunc func);
 
