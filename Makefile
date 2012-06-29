@@ -5,12 +5,13 @@ HEADERS = src/Tack.h src/TackExtension.h src/TackRetval.h \
 
 SRCS = src/Tack.c src/TackExtension.c src/TackRetval.c \
 	src/TackBreakSig.c src/TackUtil.c \
-	src/TackMain.c src/TackFingerprints.c \
+	src/TackMain.c src/TackFingerprints.c
 
 DEFINES = 
 INCLUDEDIRS = -I/opt/local/include
 LIBDIRS = -L/opt/local/lib
 LIBS = 
+COMPILER = gcc
 
 ifdef TACKC_OPENSSL
 HEADERS += src/TackOpenSSL.h
@@ -28,9 +29,15 @@ LIBDIRS += -L/opt/local/lib/nss/
 LIBS += -lnss3
 endif
 
+ifdef TACKC_CPP
+COMPILER = g++
+HEADERS += src/TackStore.h
+SRCS += src/TackStore.cc
+endif
+
 
 tackc:  Makefile $(HEADERS) $(SRCS)
-	gcc -Wall -std=c99 -o tackc \
+	$(COMPILER) -Wall -o tackc \
 	$(DEFINES) $(INCLUDEDIRS) $(LIBDIRS) $(LIBS) $(SRCS)
 
 clean:

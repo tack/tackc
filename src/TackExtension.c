@@ -78,7 +78,7 @@ TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
 	// Check length
 	if (tackExt + tackExtLen != tackExtensionPostBreakSigs(tackExt)+1)
 		return TACK_ERR_BAD_TACKEXT_LENGTH;
-		
+
 	return TACK_OK;
 }
 

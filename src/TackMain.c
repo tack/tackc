@@ -29,7 +29,7 @@ void printUsage()
 "\n");
 }
 
-void exitError(char* errStr)
+void exitError(const char* errStr)
 {
 	printf("ERROR: %s\n", errStr);
 	printUsage();
@@ -65,16 +65,17 @@ TACK_RETVAL test(int argc, char* argv[])
     	return TACK_ERR;
 	}
 
- 	char fingerprint[30];
 #ifdef TACKC_OPENSSL		
-    tackTackGetKeyFingerprint(tack, fingerprint, tackOpenSSLHashFunc);
-    printf("OPENSSL FINGERPRINT: %s\n", fingerprint);
+ 	char fingerprintO[30];
+    tackTackGetKeyFingerprint(tack, fingerprintO, tackOpenSSLHashFunc);
+    printf("OPENSSL FINGERPRINT: %s\n", fingerprintO);
   	retval = tackTackVerifySignature(tack, tackOpenSSLVerifyFunc);
     printf("OPENSSL VERIFY: %s\n", tackRetvalString(retval));      
 #endif
 #ifdef TACKC_NSS
-    tackTackGetKeyFingerprint(tack, fingerprint, tackNssHashFunc);
-    printf("NSS FINGERPRINT: %s\n", fingerprint);  
+ 	char fingerprintN[30];
+    tackTackGetKeyFingerprint(tack, fingerprintN, tackNssHashFunc);
+    printf("NSS FINGERPRINT: %s\n", fingerprintN);  
 	retval = tackTackVerifySignature(tack, tackNssVerifyFunc);
     printf("NSS VERIFY: %s\n", tackRetvalString(retval));
 #endif

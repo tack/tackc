@@ -6,7 +6,7 @@
 
 #include "TackRetval.h"
 
-char* tackRetvalString(TACK_RETVAL retval)
+const char* tackRetvalString(TACK_RETVAL retval)
 {
     switch (retval) {
     case TACK_OK: return "OK";
@@ -21,6 +21,7 @@ char* tackRetvalString(TACK_RETVAL retval)
     case TACK_ERR_SIGNATURE_BAD: return "SIGNATURE BAD";
     case TACK_ERR_CRYPTO_FUNC: return "CRYPTO FUNC";
     case TACK_ERR_ASSERTION: return "ASSERTION";
+    case TACK_ERR_NOT_FOUND: return "NOT FOUND";
     default: return "uknown error?!";
     }
 }	
