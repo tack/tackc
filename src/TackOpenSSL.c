@@ -60,9 +60,9 @@ TACK_RETVAL tackOpenSSLVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH],
     /* Verify the signature */
     ret = ECDSA_do_verify(hashBuf, TACK_HASH_LENGTH, ecdsa_sig, ec_key);
     if (ret == 1)
-        retval = TACK_OK_SIGNATURE_GOOD;
+        retval = TACK_OK;
     else if (ret == 0)
-        retval = TACK_ERR_SIGNATURE_BAD;
+        retval = TACK_ERR_BAD_SIGNATURE;
     else if (ret == -1)
         retval = TACK_ERR_CRYPTO_FUNC;
     

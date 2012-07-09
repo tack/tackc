@@ -30,6 +30,12 @@ TACK_RETVAL tackTackGetKeyFingerprint(uint8_t* tack,
                             TackHashFunc func);
 TACK_RETVAL tackTackVerifySignature(uint8_t* tack, TackVerifyFunc func);
 
+TACK_RETVAL tackTackProcess(uint8_t* tack,
+                            uint8_t keyHash[TACK_HASH_LENGTH],
+                            uint8_t* minGeneration,
+                            uint32_t currentTime,
+                            TackVerifyFunc verifyFunc);
+
 
 #ifdef __cplusplus
 }

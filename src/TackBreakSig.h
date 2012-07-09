@@ -13,12 +13,16 @@ extern "C" {
 #include <stdint.h>
 #include "TackRetval.h"
 #include "TackCryptoFuncs.h"
+#include "TackFingerprints.h"
 
 #define TACK_BREAKSIG_LENGTH 128
 
 uint8_t* tackBreakSigGetPublicKey(uint8_t* breakSig);
 uint8_t* tackBreakSigGetSignature(uint8_t* breakSig);
 
+TACK_RETVAL tackBreakSigGetKeyFingerprint(uint8_t* breakSig, 
+                                          char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
+                                          TackHashFunc func);
 TACK_RETVAL tackBreakSigVerifySignature(uint8_t* breakSig, TackVerifyFunc func);
 
 

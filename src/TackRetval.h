@@ -18,7 +18,6 @@ const char* tackRetvalString(TACK_RETVAL error);
 
 
 #define TACK_OK                                 0x00000000
-#define TACK_OK_SIGNATURE_GOOD                  0x00000001
 
 #define TACK_ERR                                -0x00000001
 #define TACK_ERR_BAD_GENERATION                 -0x00000002
@@ -29,13 +28,17 @@ const char* tackRetvalString(TACK_RETVAL error);
 #define TACK_ERR_BAD_BREAKSIGS_LENGTH           -0x00001002
 #define TACK_ERR_BAD_TACKEXT_LENGTH             -0x00001003
 
-#define TACK_ERR_SIGNATURE_BAD                  -0x00002001
+#define TACK_ERR_BAD_SIGNATURE                  -0x00002001
 
 #define TACK_ERR_CRYPTO_FUNC                    -0x00003001
 
 #define TACK_ERR_ASSERTION                      -0x00004001
 
 #define TACK_ERR_NOT_FOUND                      -0x00005001
+
+#define TACK_ERR_MISMATCHED_TARGET_HASH         -0x00006001
+#define TACK_ERR_REVOKED_GENERATION             -0x00006002
+#define TACK_ERR_EXPIRED_EXPIRATION             -0x00006003
 
 #ifdef __cplusplus
 }

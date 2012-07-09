@@ -50,8 +50,8 @@ TACK_RETVAL tackNssVerifyFunc(uint8_t publicKeyBytes[TACK_PUBKEY_LENGTH],
 
   SECKEY_DestroyPublicKey(publicKey);
   
-  if (result == SECSuccess) return TACK_OK_SIGNATURE_GOOD;
-  else                      return TACK_ERR_SIGNATURE_BAD;
+  if (result == SECSuccess) return TACK_OK;
+  else                      return TACK_ERR_BAD_SIGNATURE;
 }
 
 TACK_RETVAL tackNssHashFunc(uint8_t* input, uint32_t inputLen, 

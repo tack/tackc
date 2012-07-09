@@ -1,5 +1,6 @@
 
 #include "TackStore.h"
+#include "TackExtension.h"
 
 TackStore::KeyRecord::KeyRecord():minGeneration(0)
 {}
@@ -83,4 +84,38 @@ TACK_RETVAL TackStore::deleteKeyRecord(std::string keyFingerprint)
     }
     else
         return TACK_ERR_NOT_FOUND;
+}
+
+
+TACK_RETVAL TackStore::processBreakSigs(uint8_t* tackExt, 
+                                        TackHashFunc hashFunc, 
+                                        TackVerifyFunc verifyFunc)
+{
+    TACK_RETVAL retval = TACK_ERR;
+    for (uint8_t count=0; count < tackExtensionGetNumBreakSigs(tackExt); count++) {
+        
+        // Get the fingerprint for each break sig
+        uint8_t* breakSig = tackExtensionGetBreakSig(tackExt, count);
+        char keyFingerprintBuf[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
+        tackBreakSigGetKeyFingerprint(breakSig, keyFingerprintBuf, hashFunc);
+
+        // If there's no matching key record, skip to next break sig
+        std::string keyFingerprint(keyFingerprintBuf);
+        KeyRecord keyRecord;
+        retval = getKeyRecord(keyFingerprint, keyRecord);
+        if (retval == TACK_ERR_NOT_FOUND)
+            continue;
+        else if (retval != TACK_OK)
+            return retval;
+
+        // If there's a matching key record, verify the break sig
+        retval=tackBreakSigVerifySignature(breakSig, verifyFunc);
+        if (retval != TACK_OK)
+            return retval;
+        
+        // If verified, delete the key record
+        if ((retval=deleteKeyRecord(keyFingerprint)) != TACK_OK)
+            return retval;
+    }
+    return TACK_OK;
 }

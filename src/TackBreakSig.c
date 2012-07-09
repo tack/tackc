@@ -13,6 +13,14 @@ uint8_t* tackBreakSigGetPublicKey(uint8_t* breakSig) {
 uint8_t* tackBreakSigGetSignature(uint8_t* breakSig) {
     return breakSig + TACK_PUBKEY_LENGTH; }
 
+TACK_RETVAL tackBreakSigGetKeyFingerprint(uint8_t* breakSig, 
+                                          char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
+                                          TackHashFunc func)
+{
+    return tackGetKeyFingerprint(tackBreakSigGetPublicKey(breakSig), output, func);
+}
+
+
 #define TACK_BREAKSIG_TAG "tack_break_sig"
 #define TACK_BREAKSIG_TAG_LENGTH 14
 

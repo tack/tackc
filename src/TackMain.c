@@ -135,6 +135,7 @@ TACK_RETVAL test(int argc, char* argv[])
     if (store.getPin(dn1, kr, nr) != TACK_ERR_NOT_FOUND)
         printf("ERROR! TackStore retval g %s\n", tackRetvalString(retval));
 
+    printf("TACK STORE OK\n");
 #endif
         return TACK_OK;
 }

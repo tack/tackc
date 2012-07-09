@@ -10,6 +10,7 @@
 
 #include <map>
 #include <string>
+#include "TackCryptoFuncs.h"
 #include "TackRetval.h"
 
 class TackStore {
@@ -41,6 +42,9 @@ public:
     
     TACK_RETVAL getKeyRecord(std::string keyFingerprint, KeyRecord& keyRecord);
     TACK_RETVAL deleteKeyRecord(std::string keyFingerprint);
+
+    TACK_RETVAL processBreakSigs(uint8_t* tackExt, TackHashFunc hashFunc, 
+                                 TackVerifyFunc func);
     
 public:
     
