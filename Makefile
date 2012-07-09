@@ -33,6 +33,7 @@ ifdef TACKC_CPP
 COMPILER = g++
 HEADERS += src/TackStore.h
 SRCS += src/TackStore.cc
+DEFINES += -DTACKC_CPP
 endif
 
 

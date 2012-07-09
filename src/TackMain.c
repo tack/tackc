@@ -19,6 +19,10 @@
 #include "TackNss.h"
 #endif
 
+#ifdef TACKC_CPP
+#include "TackStore.h"
+#endif
+
 void printUsage()
 {
     printf(
@@ -78,6 +82,59 @@ TACK_RETVAL test(int argc, char* argv[])
     printf("NSS FINGERPRINT: %s\n", fingerprintN);  
 	retval = tackTackVerifySignature(tack, tackNssVerifyFunc);
     printf("NSS VERIFY: %s\n", tackRetvalString(retval));
+#endif
+#ifdef TACKC_CPP
+
+    TackStore::KeyRecord kr1, kr2;
+    kr1.minGeneration = 0;
+    kr2.minGeneration = 7;
+    
+    TackStore::NameRecord nr1, nr2;
+    nr1.keyFingerprint = "g5p5x.ov4vi.dgsjv.wxctt.c5iul";
+    nr1.initialTime = 100;
+    nr1.activePeriodEnd = 200; 
+    
+    nr2.keyFingerprint = "quxiz.kpldu.uuedc.j5znm.7mqst";
+    nr2.initialTime = 1000;
+    nr2.activePeriodEnd = 2000;
+
+    std::string dn1 = "a.com";
+    std::string dn2 = "b.com";
+
+    TackStore::KeyRecord kr;
+    TackStore::NameRecord nr;
+    
+    TackStore store;
+
+    // Test addPin and getPin
+    if (store.addPin(dn1, kr1, nr1) != TACK_OK)
+        printf("ERROR! TackStore retval a\n");
+    if (store.addPin(dn2, kr2, nr2) != TACK_OK)
+        printf("ERROR! TackStore retval b\n");
+
+    if (store.getPin(dn1, kr, nr) != TACK_OK)
+        printf("ERROR! TackStore retval c\n");
+    if (kr.minGeneration != kr1.minGeneration || nr.activePeriodEnd != nr1.activePeriodEnd)
+        printf("ERROR! TackStore 1\n");
+
+    if (store.getPin(dn2, kr, nr) != TACK_OK)
+        printf("ERROR! TackStore retval d\n");
+    if (kr.minGeneration != kr2.minGeneration || nr.activePeriodEnd != nr2.activePeriodEnd)
+        printf("ERROR! TackStore 2\n");
+
+    // Test getKeyRecord
+    if (store.getKeyRecord(nr1.keyFingerprint, kr) != TACK_OK)
+        printf("ERROR! TackStore retval e\n");
+    if (kr.minGeneration != kr1.minGeneration)
+        printf("ERROR! TackStore 3\n");    
+
+    // Test deleteKeyRecord
+    if (store.deleteKeyRecord(nr1.keyFingerprint) != TACK_OK)
+        printf("ERROR! TackStore retval f\n");
+
+    if (store.getPin(dn1, kr, nr) != TACK_ERR_NOT_FOUND)
+        printf("ERROR! TackStore retval g %s\n", tackRetvalString(retval));
+
 #endif
         return TACK_OK;
 }
