@@ -1,28 +1,37 @@
 
-HEADERS = src/Tack.h src/TackExtension.h src/TackRetval.h \
-	src/TackBreakSig.h src/TackUtil.h \
-	src/TackCryptoFuncs.h src/TackFingerprints.h
+HEADERS = src/structures/Tack.h \
+	src/structures/TackBreakSig.h \
+	src/structures/TackExtension.h \
+	src/util/TackRetval.h \
+	src/util/TackUtil.h \
+	src/util/TackFingerprints.h \
+	src/crypto/TackCryptoFuncs.h \
+	src/store/TackKeyRecordFuncs.h
 
-SRCS = src/Tack.c src/TackExtension.c src/TackRetval.c \
-	src/TackBreakSig.c src/TackUtil.c \
-	src/TackMain.c src/TackFingerprints.c
+SRCS = src/structures/Tack.c \
+	src/structures/TackBreakSig.c \
+	src/structures/TackExtension.c \
+	src/util/TackRetval.c \
+	src/util/TackUtil.c \
+	src/util/TackFingerprints.c \
+	src/util/TackMain.c
 
 DEFINES = 
-INCLUDEDIRS = -I/opt/local/include
+INCLUDEDIRS = -I/opt/local/include -Isrc/structures -Isrc/util -Isrc/crypto -Isrc/store
 LIBDIRS = -L/opt/local/lib
 LIBS = 
 COMPILER = gcc
 
 ifdef TACKC_OPENSSL
-HEADERS += src/TackOpenSSL.h
-SRCS += src/TackOpenSSL.c
+HEADERS += src/crypto/TackOpenSSL.h
+SRCS += src/crypto/TackOpenSSL.c
 DEFINES += -DTACKC_OPENSSL
 LIBS += -lcrypto
 endif
 
 ifdef TACKC_NSS
-HEADERS += src/TackNss.h
-SRCS += src/TackNss.c
+HEADERS += src/crypto/TackNss.h
+SRCS += src/crypto/TackNss.c
 DEFINES += -DTACKC_NSS
 INCLUDEDIRS += -I/opt/local/include/nspr/ -I/opt/local/include/nss
 LIBDIRS += -L/opt/local/lib/nss/
@@ -31,8 +40,8 @@ endif
 
 ifdef TACKC_CPP
 COMPILER = g++
-HEADERS += src/TackStore.h src/TackStoreDefault.h
-SRCS += src/TackStore.cc src/TackStoreDefault.cc
+HEADERS += src/store/TackStore.h src/store/TackStoreDefault.h
+SRCS += src/store/TackStore.cc src/store/TackStoreDefault.cc
 DEFINES += -DTACKC_CPP
 endif
 

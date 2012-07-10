@@ -104,6 +104,7 @@ TACK_RETVAL tackExtensionProcess(uint8_t* tackExt, uint32_t tackExtLen,
     uint8_t foundKeyRecord = 0;
     uint8_t tackMinGeneration = 0;
     uint8_t* breakSig = NULL;
+    uint8_t count=0;
 
     /* Check basic TACK_Extension syntax */
     if ((retval = tackExtensionSyntaxCheck(tackExt, tackExtLen)) != TACK_OK)
@@ -141,7 +142,7 @@ TACK_RETVAL tackExtensionProcess(uint8_t* tackExt, uint32_t tackExtLen,
     }
 
     // Process the break signatures if present
-    for (uint8_t count=0; count < tackExtensionGetNumBreakSigs(tackExt); count++) {
+    for (count=0; count < tackExtensionGetNumBreakSigs(tackExt); count++) {
         
         // Get the fingerprint for each break sig
         breakSig = tackExtensionGetBreakSig(tackExt, count);

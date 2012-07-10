@@ -20,7 +20,7 @@ const char* tackRetvalString(TACK_RETVAL error);
 #define TACK_OK                                  0x00000000
 #define TACK_OK_NOT_FOUND                        0x00000001
 
-/* Error values are less than 0 */
+/* Error values are less than TACK_OK */
 
 #define TACK_ERR                                -0x00000001
 #define TACK_ERR_BAD_GENERATION                 -0x00000002
