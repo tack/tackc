@@ -2,6 +2,43 @@
 #include "TackStore.h"
 #include "TackExtension.h"
 
+
+// C Callbacks
+
+TACK_RETVAL tackTackStoreGetKeyRecord(void* krArg, char* keyFingerprintBuf, 
+                                  uint8_t* minGeneration)
+{
+    TACK_RETVAL retval = TACK_ERR;
+    TackStore* store = (TackStore*)krArg;
+    std::string keyFingerprint(keyFingerprintBuf);
+    TackStore::KeyRecord keyRecord;
+
+    if ((retval=store->getKeyRecord(keyFingerprint, keyRecord)) != TACK_OK)
+        return retval;
+    *minGeneration = keyRecord.minGeneration;
+    return TACK_OK;
+}
+
+TACK_RETVAL tackTackStoreUpdateKeyRecord(void* krArg, char* keyFingerprintBuf, 
+                                     uint8_t minGeneration)
+{
+    TackStore* store = (TackStore*)krArg;
+    std::string keyFingerprint(keyFingerprintBuf);
+    TackStore::KeyRecord keyRecord(minGeneration);
+
+    return store->updateKeyRecord(keyFingerprint, keyRecord);
+}
+
+TACK_RETVAL tackTackStoreDeleteKeyRecord(void* krArg, char* keyFingerprintBuf)
+{
+    TackStore* store = (TackStore*)krArg;
+    std::string keyFingerprint(keyFingerprintBuf);
+
+    return store->deleteKeyRecord(keyFingerprint);
+}
+
+// KeyRecord and NameRecord constructors
+
 TackStore::KeyRecord::KeyRecord():minGeneration(0)
 {}
 
@@ -17,6 +54,8 @@ TackStore::NameRecord::NameRecord(std::string newKeyFingerprint,
                                                    initialTime(newInitialTime),
                                                    activePeriodEnd(newActivePeriodEnd)
 {}
+
+// TackStore member funcs
 
 TACK_RETVAL TackStore::setPin(std::string hostName, 
                               KeyRecord keyRecord, 
@@ -151,95 +190,6 @@ TACK_RETVAL TackStore::pinActivation(uint8_t* tack,
         nameRecord.initialTime = currentTime;
         nameRecord.activePeriodEnd = 0;
         if ((retval=setPin(hostName, keyRecord, nameRecord)) != TACK_OK)
-            return retval;
-    }
-    return TACK_OK;
-}
-
-TACK_RETVAL TackStore::processTackExtension(uint8_t* tackExt, uint32_t tackExtLen,
-                                            uint8_t keyHash[TACK_HASH_LENGTH],
-                                            uint32_t currentTime,
-                                            TackHashFunc hashFunc, 
-                                            TackVerifyFunc verifyFunc)
-{
-    uint8_t* tack;
-    TACK_RETVAL retval = TACK_ERR;  
-
-    // Check basic TACK_Extension syntax
-    if ((retval = tackExtensionSyntaxCheck(tackExt, tackExtLen)) != TACK_OK)
-        return retval;
-
-    // Convert keyHash -> keyFingerprint 
-    char keyFingerprintBuf[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-    if ((retval=tackGetKeyFingerprintFromHash(keyHash, keyFingerprintBuf)) != TACK_OK)
-        return retval;
-    std::string keyFingerprint(keyFingerprintBuf);
-
-    // Lookup keyFingerprint -> keyRecord
-    TackStore::KeyRecord keyRecord;
-    bool foundKeyRecord = false;
-    if ((retval=getKeyRecord(keyFingerprint, keyRecord)) < TACK_OK)
-        return retval;
-    if (retval == TACK_OK) // could be TACK_OK_NOT_FOUND
-        foundKeyRecord = true;
-   
-    // Process the tack if present
-    tack = tackExtensionGetTack(tackExt);
-    if (tack) {
-
-        // Verify the tack's target_hash, signature, expiration, generation
-        uint8_t minGeneration = keyRecord.minGeneration;
-        retval = tackTackProcess(tack, keyHash,
-                            &minGeneration,
-                            currentTime,
-                            verifyFunc);
-        if (retval != TACK_OK)
-            return retval;
-
-        // If minGeneration was incremented, set the new value in keyRecord
-        if (foundKeyRecord && minGeneration > keyRecord.minGeneration) {
-            keyRecord.minGeneration = minGeneration;
-            if ((retval=updateKeyRecord(keyFingerprint, keyRecord)) != TACK_OK)
-                return retval;
-        }
-    }
-
-    // Process the break signatures if present
-    if ((retval=processBreakSigs(tackExt, hashFunc, verifyFunc)) != TACK_OK)
-        return retval;
-
-    return TACK_OK;
-}
-
-
-
-TACK_RETVAL TackStore::processBreakSigs(uint8_t* tackExt, 
-                                        TackHashFunc hashFunc, 
-                                        TackVerifyFunc verifyFunc)
-{
-    TACK_RETVAL retval = TACK_ERR;
-    for (uint8_t count=0; count < tackExtensionGetNumBreakSigs(tackExt); count++) {
-        
-        // Get the fingerprint for each break sig
-        uint8_t* breakSig = tackExtensionGetBreakSig(tackExt, count);
-        char keyFingerprintBuf[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-        tackBreakSigGetKeyFingerprint(breakSig, keyFingerprintBuf, hashFunc);
-
-        // If there's no matching key record, skip to next break sig
-        std::string keyFingerprint(keyFingerprintBuf);
-        KeyRecord keyRecord;
-        if ((retval = getKeyRecord(keyFingerprint, keyRecord)) < TACK_OK)
-            return retval;
-        if (retval == TACK_OK_NOT_FOUND)
-            continue;
-
-        // If there's a matching key record, verify the break sig
-        retval=tackBreakSigVerifySignature(breakSig, verifyFunc);
-        if (retval != TACK_OK)
-            return retval;
-        
-        // If verified, delete the key record
-        if ((retval=deleteKeyRecord(keyFingerprint)) != TACK_OK)
             return retval;
     }
     return TACK_OK;

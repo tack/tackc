@@ -13,6 +13,14 @@
 #include "TackCryptoFuncs.h"
 #include "TackRetval.h"
 
+/* C callbacks for use with tackExtensionProcess */
+TACK_RETVAL tackTackStoreGetKeyRecord(void* krArg, char* keyFingerprintBuf, 
+                                  uint8_t* minGeneration);
+TACK_RETVAL tackTackStoreUpdateKeyRecord(void* krArg, char* keyFingerprintBuf, 
+                                     uint8_t minGeneration);
+TACK_RETVAL tackTackStoreDeleteKeyRecord(void* krArg, char* keyFingerprintBuf);
+
+
 class TackStore {
 public:
 
@@ -48,13 +56,6 @@ public:
                               std::string hostName,
                               uint32_t currentTime,
                               TackHashFunc func);
-    TACK_RETVAL processTackExtension(uint8_t* tackExt, uint32_t tackExtLen,
-                                     uint8_t keyHash[TACK_HASH_LENGTH],
-                                     uint32_t currentTime,
-                                     TackHashFunc hashFunc, 
-                                     TackVerifyFunc verifyFunc);
-    TACK_RETVAL processBreakSigs(uint8_t* tackExt, TackHashFunc hashFunc, 
-                                 TackVerifyFunc verifyFunc);
     
 public:
     

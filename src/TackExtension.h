@@ -12,6 +12,7 @@ extern "C" {
 
 #include "TackRetval.h"
 #include "TackCryptoFuncs.h"
+#include "TackKeyRecordFuncs.h"
 #include "Tack.h"
 #include "TackBreakSig.h"
 
@@ -24,6 +25,15 @@ uint8_t  tackExtensionGetActivationFlag(uint8_t* tackExt);
 
 TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 
+TACK_RETVAL tackExtensionProcess(uint8_t* tackExt, uint32_t tackExtLen,
+                                 uint8_t keyHash[TACK_HASH_LENGTH],
+                                 uint32_t currentTime,
+                                 void* krArg,
+                                 TackGetKeyRecordFunc getKrFunc,
+                                 TackUpdateKeyRecordFunc updateKrFunc,
+                                 TackDeleteKeyRecordFunc deleteKrFunc,
+                                 TackHashFunc hashFunc, 
+                                 TackVerifyFunc verifyFunc);
 
 #ifdef __cplusplus
 }
