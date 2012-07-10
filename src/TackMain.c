@@ -20,7 +20,7 @@
 #endif
 
 #ifdef TACKC_CPP
-#include "TackStore.h"
+#include "TackStoreDefault.h"
 #endif
 
 void printUsage()
@@ -104,7 +104,7 @@ TACK_RETVAL test(int argc, char* argv[])
     TackStore::KeyRecord kr;
     TackStore::NameRecord nr;
     
-    TackStore store;
+    TackStoreDefault store;
 
     // Test addPin and getPin
     if (store.setPin(dn1, kr1, nr1) != TACK_OK)
