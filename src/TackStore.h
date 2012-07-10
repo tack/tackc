@@ -34,17 +34,27 @@ public:
         uint32_t activePeriodEnd;
     };
     
-    TACK_RETVAL addPin(std::string hostName, 
+    TACK_RETVAL setPin(std::string hostName, 
                        KeyRecord keyRecord, NameRecord nameRecord);  
-
     TACK_RETVAL getPin(std::string hostName, 
                        KeyRecord& keyRecord, NameRecord& nameRecord);
+    TACK_RETVAL deletePin(std::string hostName);
     
+    TACK_RETVAL updateKeyRecord(std::string keyFingerprint, KeyRecord keyRecord);
     TACK_RETVAL getKeyRecord(std::string keyFingerprint, KeyRecord& keyRecord);
     TACK_RETVAL deleteKeyRecord(std::string keyFingerprint);
 
+    TACK_RETVAL pinActivation(uint8_t* tackExt,
+                              std::string hostName,
+                              uint32_t currentTime,
+                              TackHashFunc func);
+    TACK_RETVAL processTackExtension(uint8_t* tackExt, uint32_t tackExtLen,
+                                     uint8_t keyHash[TACK_HASH_LENGTH],
+                                     uint32_t currentTime,
+                                     TackHashFunc hashFunc, 
+                                     TackVerifyFunc verifyFunc);
     TACK_RETVAL processBreakSigs(uint8_t* tackExt, TackHashFunc hashFunc, 
-                                 TackVerifyFunc func);
+                                 TackVerifyFunc verifyFunc);
     
 public:
     

@@ -10,6 +10,7 @@ const char* tackRetvalString(TACK_RETVAL retval)
 {
     switch (retval) {
     case TACK_OK: return "OK";
+    case TACK_OK_NOT_FOUND: return "OK NOT FOUND";
     case TACK_ERR: return "GENERIC ERROR";
     case TACK_ERR_BAD_GENERATION: return "BAD GENERATION";
     case TACK_ERR_BAD_ACTIVATION_FLAG: return "BAD ACTIVATION FLAG";
@@ -20,7 +21,6 @@ const char* tackRetvalString(TACK_RETVAL retval)
     case TACK_ERR_BAD_SIGNATURE: return "BAD SIGNATURE";
     case TACK_ERR_CRYPTO_FUNC: return "CRYPTO FUNC";
     case TACK_ERR_ASSERTION: return "ASSERTION";
-    case TACK_ERR_NOT_FOUND: return "NOT FOUND";
     case TACK_ERR_MISMATCHED_TARGET_HASH: return "MISMATCHED TARGET HASH";
     case TACK_ERR_REVOKED_GENERATION: return "REVOKED GENERATION";
     case TACK_ERR_EXPIRED_EXPIRATION: return "EXPIRED EXPIRATION";

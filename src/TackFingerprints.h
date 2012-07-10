@@ -20,6 +20,9 @@ TACK_RETVAL tackGetKeyFingerprint(uint8_t publicKey[TACK_PUBKEY_LENGTH],
                                   char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
                                   TackHashFunc func);
 
+TACK_RETVAL tackGetKeyFingerprintFromHash(uint8_t keyHash[TACK_HASH_LENGTH], 
+                                          char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1]);
+
 #ifdef __cplusplus
 }
 #endif

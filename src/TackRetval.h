@@ -17,7 +17,10 @@ typedef int32_t TACK_RETVAL;
 const char* tackRetvalString(TACK_RETVAL error);
 
 
-#define TACK_OK                                 0x00000000
+#define TACK_OK                                  0x00000000
+#define TACK_OK_NOT_FOUND                        0x00000001
+
+/* Error values are less than 0 */
 
 #define TACK_ERR                                -0x00000001
 #define TACK_ERR_BAD_GENERATION                 -0x00000002
@@ -34,11 +37,9 @@ const char* tackRetvalString(TACK_RETVAL error);
 
 #define TACK_ERR_ASSERTION                      -0x00004001
 
-#define TACK_ERR_NOT_FOUND                      -0x00005001
-
-#define TACK_ERR_MISMATCHED_TARGET_HASH         -0x00006001
-#define TACK_ERR_REVOKED_GENERATION             -0x00006002
-#define TACK_ERR_EXPIRED_EXPIRATION             -0x00006003
+#define TACK_ERR_MISMATCHED_TARGET_HASH         -0x00005001
+#define TACK_ERR_REVOKED_GENERATION             -0x00005002
+#define TACK_ERR_EXPIRED_EXPIRATION             -0x00005003
 
 #ifdef __cplusplus
 }

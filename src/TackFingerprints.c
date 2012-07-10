@@ -57,20 +57,28 @@ TACK_RETVAL tackGetKeyFingerprint(uint8_t publicKey[TACK_PUBKEY_LENGTH],
                                   char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
                                   TackHashFunc func)
 {
-    TACK_RETVAL retval;
-    uint8_t hashResult[TACK_HASH_LENGTH];
-    char base32Result[TACK_HASH_LENGTH * 2];
-    uint32_t count;
+    TACK_RETVAL retval = TACK_ERR;
+    uint8_t keyHash[TACK_HASH_LENGTH];
 
     /* Hash the public key */
-    if ((retval=func(publicKey, TACK_PUBKEY_LENGTH, hashResult)) != TACK_OK)
+    if ((retval=func(publicKey, TACK_PUBKEY_LENGTH, keyHash)) != TACK_OK)
         return retval;
+
+    return tackGetKeyFingerprintFromHash(keyHash, output);
+}
+
+TACK_RETVAL tackGetKeyFingerprintFromHash(uint8_t keyHash[TACK_HASH_LENGTH], 
+                                          char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1])
+{
+    TACK_RETVAL retval = TACK_ERR;
+    char base32Result[TACK_HASH_LENGTH * 2];
+    uint32_t count;
 
     /* Base32 encode the first 20 bytes of hash result.
        Why 20?  We need to encode the first 125 bits,
        but the base32 encoder works in 40 bit chunks,
        so we round 125 up to 160 bits. */
-    if ((retval=base32Encode(hashResult, base32Result, 20)) != TACK_OK)
+    if ((retval=base32Encode(keyHash, base32Result, 20)) != TACK_OK)
         return retval;
 
     /* Split into 5 groups, separated by '.' */
@@ -81,5 +89,5 @@ TACK_RETVAL tackGetKeyFingerprint(uint8_t publicKey[TACK_PUBKEY_LENGTH],
     }
     output[29] = 0;
 
-    return TACK_OK;
+    return TACK_OK;    
 }
