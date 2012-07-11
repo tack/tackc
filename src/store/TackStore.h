@@ -46,19 +46,18 @@ public:
         uint32_t initialTime;
         uint32_t activePeriodEnd;
     };
-    
-    virtual TACK_RETVAL setPin(std::string hostName, 
-                       KeyRecord keyRecord, NameRecord nameRecord) = 0;  
-    virtual TACK_RETVAL getPin(std::string hostName, 
-                       KeyRecord& keyRecord, NameRecord& nameRecord) = 0;
-    virtual TACK_RETVAL deletePin(std::string hostName) = 0;
-    
-    virtual TACK_RETVAL updateKeyRecord(std::string keyFingerprint, 
-                                        KeyRecord keyRecord) = 0;
+
     virtual TACK_RETVAL getKeyRecord(std::string keyFingerprint, 
                                      KeyRecord& keyRecord) = 0;
+    virtual TACK_RETVAL updateKeyRecord(std::string keyFingerprint, 
+                                        KeyRecord keyRecord) = 0;
     virtual TACK_RETVAL deleteKeyRecord(std::string keyFingerprint) = 0;
-
+    
+    virtual TACK_RETVAL getPin(std::string hostName, 
+                       KeyRecord& keyRecord, NameRecord& nameRecord) = 0;
+    virtual TACK_RETVAL setPin(std::string hostName, 
+                       KeyRecord keyRecord, NameRecord nameRecord) = 0;  
+    virtual TACK_RETVAL deletePin(std::string hostName) = 0;
 
     TACK_RETVAL process(uint8_t* tackExt, uint32_t tackExtLen,
                         std::string hostName,

@@ -17,16 +17,17 @@ extern "C" {
 /* The following callbacks are used by tackExtensionProcess() to implement
    client processing */
 
-/* Used to lookup a key's minGeneration (and existence) */
+/* Lookup a key's minGeneration (and existence) */
 typedef TACK_RETVAL (*TackGetKeyRecordFunc)(void* arg, char* keyFingerprint, 
                                             uint8_t* minGeneration);
 
-/* Used to update a key's minGeneration */
+/* Update a key's minGeneration */
 typedef TACK_RETVAL (*TackUpdateKeyRecordFunc)(void* arg, char* keyFingerprint, 
                                                uint8_t minGeneration);
 
-/* Used to delete a key as a result of break signature */
+/* Delete a key as a result of break signature */
 typedef TACK_RETVAL (*TackDeleteKeyRecordFunc)(void* arg, char* keyFingerprint);
+
 
 /* Used to fetch the relevant pin (if any) */
 typedef struct {
@@ -36,15 +37,16 @@ typedef struct {
     uint32_t activePeriodEnd;
 } TackPinStruct;
 
+/* Get the relevant pin */
 typedef TACK_RETVAL (*TackGetPinFunc)(void* arg, void* argHostName, 
                                       TackPinStruct* pin);
 
-/* Used to set the relevant pin's activePeriodEnd, or create a new pin */
+/* Set the relevant pin's activePeriodEnd, or create a new pin */
 /* Only used by pin activation */
 typedef TACK_RETVAL (*TackSetPinFunc)(void* arg, void* argHostName, 
                                       TackPinStruct* pin);
 
-/* Used to delete a relevant but inactive pin */
+/* Delete a relevant but inactive pin */
 /* Only used by pin activation */
 typedef TACK_RETVAL (*TackDeletePinFunc)(void* arg, void* argHostName);
 

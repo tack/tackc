@@ -12,17 +12,17 @@
 
 class TackStoreDefault : public TackStore {
 public:
-    
-    virtual TACK_RETVAL setPin(std::string hostName, 
-                       KeyRecord keyRecord, NameRecord nameRecord);  
-    virtual TACK_RETVAL getPin(std::string hostName, 
-                       KeyRecord& keyRecord, NameRecord& nameRecord);
-    virtual TACK_RETVAL deletePin(std::string hostName);
-    
-    virtual TACK_RETVAL updateKeyRecord(std::string keyFingerprint, KeyRecord keyRecord);
+
     virtual TACK_RETVAL getKeyRecord(std::string keyFingerprint, KeyRecord& keyRecord);
+    virtual TACK_RETVAL updateKeyRecord(std::string keyFingerprint, KeyRecord keyRecord);
     virtual TACK_RETVAL deleteKeyRecord(std::string keyFingerprint);
 
+    virtual TACK_RETVAL getPin(std::string hostName, 
+                               KeyRecord& keyRecord, NameRecord& nameRecord);    
+    virtual TACK_RETVAL setPin(std::string hostName, 
+                               KeyRecord keyRecord, NameRecord nameRecord);  
+    virtual TACK_RETVAL deletePin(std::string hostName);
+    
 private:
     
     // Maps hostnames to name records

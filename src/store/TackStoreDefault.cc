@@ -1,49 +1,14 @@
 
 #include "TackStoreDefault.h"
 
-TACK_RETVAL TackStoreDefault::setPin(std::string hostName, 
-                              KeyRecord keyRecord, 
-                              NameRecord nameRecord)
+TACK_RETVAL TackStoreDefault::getKeyRecord(std::string keyFingerprint, 
+                                           KeyRecord& keyRecord)
 {
-    // If there's an existing name record, overwrite it
-    nameRecords[hostName] = nameRecord;
-    
-    // If there's no existing key record, add one
-    // If there an existing one, reuse it (ignoring the passed-in minGeneration)
-    KeyRecord tempKeyRecord;
-    TACK_RETVAL retval = TACK_ERR;
-    if ((retval=getKeyRecord(nameRecord.keyFingerprint, tempKeyRecord)) < TACK_OK)
-        return retval;
-    if (retval == TACK_OK_NOT_FOUND)
-        keyRecords[nameRecord.keyFingerprint] = keyRecord;
-    
-    return TACK_OK;
-}
-
-TACK_RETVAL TackStoreDefault::getPin(std::string hostName, 
-                              KeyRecord& keyRecord, 
-                              NameRecord& nameRecord)
-{
-    // Get nameRecord
-    std::map<std::string, NameRecord>::iterator i = nameRecords.find(hostName);
-    if (i == nameRecords.end())
+    std::map<std::string, KeyRecord>::iterator i = keyRecords.find(keyFingerprint);
+    if (i == keyRecords.end())
         return TACK_OK_NOT_FOUND;
-    nameRecord = i->second;
-    
-    // Get keyRecord
-    if (getKeyRecord(nameRecord.keyFingerprint, keyRecord) != TACK_OK)
-        return TACK_ERR_ASSERTION;
-    
+    keyRecord = i->second;
     return TACK_OK;
-}
-
-TACK_RETVAL TackStoreDefault::deletePin(std::string hostName)
-{
-    std::map<std::string, NameRecord>::iterator i = nameRecords.find(hostName);
-    if (i == nameRecords.end())
-        return TACK_OK_NOT_FOUND;
-    nameRecords.erase(i);    
-    return TACK_OK; 
 }
 
 TACK_RETVAL TackStoreDefault::updateKeyRecord(std::string keyFingerprint, 
@@ -53,16 +18,6 @@ TACK_RETVAL TackStoreDefault::updateKeyRecord(std::string keyFingerprint,
     if (getKeyRecord(keyFingerprint, tempKeyRecord) != TACK_OK)
         return TACK_ERR_ASSERTION;
     keyRecords[keyFingerprint] = keyRecord;
-    return TACK_OK;
-}
-
-TACK_RETVAL TackStoreDefault::getKeyRecord(std::string keyFingerprint, 
-                                           KeyRecord& keyRecord)
-{
-    std::map<std::string, KeyRecord>::iterator i = keyRecords.find(keyFingerprint);
-    if (i == keyRecords.end())
-        return TACK_OK_NOT_FOUND;
-    keyRecord = i->second;
     return TACK_OK;
 }
 
@@ -87,4 +42,49 @@ TACK_RETVAL TackStoreDefault::deleteKeyRecord(std::string keyFingerprint)
     }
     else
         return TACK_OK_NOT_FOUND;
+}
+
+TACK_RETVAL TackStoreDefault::getPin(std::string hostName, 
+                              KeyRecord& keyRecord, 
+                              NameRecord& nameRecord)
+{
+    // Get nameRecord
+    std::map<std::string, NameRecord>::iterator i = nameRecords.find(hostName);
+    if (i == nameRecords.end())
+        return TACK_OK_NOT_FOUND;
+    nameRecord = i->second;
+    
+    // Get keyRecord
+    if (getKeyRecord(nameRecord.keyFingerprint, keyRecord) != TACK_OK)
+        return TACK_ERR_ASSERTION;
+    
+    return TACK_OK;
+}
+
+TACK_RETVAL TackStoreDefault::setPin(std::string hostName, 
+                              KeyRecord keyRecord, 
+                              NameRecord nameRecord)
+{
+    // If there's an existing name record, overwrite it
+    nameRecords[hostName] = nameRecord;
+    
+    // If there's no existing key record, add one
+    // If there an existing one, reuse it (ignoring the passed-in minGeneration)
+    KeyRecord tempKeyRecord;
+    TACK_RETVAL retval = TACK_ERR;
+    if ((retval=getKeyRecord(nameRecord.keyFingerprint, tempKeyRecord)) < TACK_OK)
+        return retval;
+    if (retval == TACK_OK_NOT_FOUND)
+        keyRecords[nameRecord.keyFingerprint] = keyRecord;
+    
+    return TACK_OK;
+}
+
+TACK_RETVAL TackStoreDefault::deletePin(std::string hostName)
+{
+    std::map<std::string, NameRecord>::iterator i = nameRecords.find(hostName);
+    if (i == nameRecords.end())
+        return TACK_OK_NOT_FOUND;
+    nameRecords.erase(i);    
+    return TACK_OK; 
 }
