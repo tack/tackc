@@ -102,7 +102,7 @@ TACK_RETVAL test(int argc, char* argv[])
     
     TackStoreDefault store;
 
-    // Test addPin and getPin
+    /* Test addPin and getPin */
     if (store.setPin(dn1, kr1, nr1) != TACK_OK)
         printf("ERROR! TackStore retval a\n");
     if (store.setPin(dn2, kr2, nr2) != TACK_OK)
@@ -118,13 +118,13 @@ TACK_RETVAL test(int argc, char* argv[])
     if (kr.minGeneration != kr2.minGeneration || nr.activePeriodEnd != nr2.activePeriodEnd)
         printf("ERROR! TackStore 2\n");
 
-    // Test getKeyRecord
+    /* Test getKeyRecord */
     if (store.getKeyRecord(nr1.keyFingerprint, kr) != TACK_OK)
         printf("ERROR! TackStore retval e\n");
     if (kr.minGeneration != kr1.minGeneration)
         printf("ERROR! TackStore 3\n");    
 
-    // Test deleteKeyRecord
+    /* Test deleteKeyRecord */
     if (store.deleteKeyRecord(nr1.keyFingerprint) != TACK_OK)
         printf("ERROR! TackStore retval f\n");
 
