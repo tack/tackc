@@ -11,14 +11,19 @@
 #include <map>
 #include <string>
 #include "TackCryptoFuncs.h"
+#include "TackStoreFuncs.h"
 #include "TackRetval.h"
 
 /* C callbacks for use with tackExtensionProcess */
-TACK_RETVAL tackTackStoreGetKeyRecord(void* krArg, char* keyFingerprintBuf, 
+TACK_RETVAL tackStoreGetKeyRecord(void* krArg, char* keyFingerprintBuf, 
                                   uint8_t* minGeneration);
-TACK_RETVAL tackTackStoreUpdateKeyRecord(void* krArg, char* keyFingerprintBuf, 
+TACK_RETVAL tackStoreUpdateKeyRecord(void* krArg, char* keyFingerprintBuf, 
                                      uint8_t minGeneration);
-TACK_RETVAL tackTackStoreDeleteKeyRecord(void* krArg, char* keyFingerprintBuf);
+TACK_RETVAL tackStoreDeleteKeyRecord(void* krArg, char* keyFingerprintBuf);
+
+TACK_RETVAL tackStoreGetPin(void* arg, void* argHostName, TackPinStruct* pin);
+TACK_RETVAL tackStoreSetPin(void* arg, void* argHostName, TackPinStruct* pin);
+TACK_RETVAL tackStoreDeletePin(void* arg, void* argHostName);
 
 
 class TackStore {
@@ -54,10 +59,16 @@ public:
                                      KeyRecord& keyRecord) = 0;
     virtual TACK_RETVAL deleteKeyRecord(std::string keyFingerprint) = 0;
 
-    TACK_RETVAL pinActivation(uint8_t* tackExt,
-                              std::string hostName,
-                              uint32_t currentTime,
-                              TackHashFunc func);
+
+    TACK_RETVAL process(uint8_t* tackExt, uint32_t tackExtLen,
+                        std::string hostName,
+                        uint8_t keyHash[TACK_HASH_LENGTH],
+                        uint32_t currentTime,
+                        uint8_t doPinActivation,
+                        TackCryptoFuncs* crypto);
+
+private:
+    TACK_RETVAL getStoreFuncs(TackStoreFuncs* store, std::string* hostName);
 };
 
 #endif

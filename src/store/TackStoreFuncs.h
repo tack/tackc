@@ -12,6 +12,7 @@ extern "C" {
 
 #include <stdint.h>
 #include "TackRetval.h"
+#include "TackFingerprints.h"
 
 /* The following callbacks are used by tackExtensionProcess() to implement
    client processing */
@@ -43,6 +44,10 @@ typedef TACK_RETVAL (*TackGetPinFunc)(void* arg, void* argHostName,
 typedef TACK_RETVAL (*TackSetPinFunc)(void* arg, void* argHostName, 
                                       TackPinStruct* pin);
 
+/* Used to delete a relevant but inactive pin */
+/* Only used by pin activation */
+typedef TACK_RETVAL (*TackDeletePinFunc)(void* arg, void* argHostName);
+
 
 /* Package all the callbacks, for convenient parameter passing */
 typedef struct {
@@ -53,6 +58,7 @@ typedef struct {
     TackDeleteKeyRecordFunc deleteKeyRecord;
     TackGetPinFunc getPin;
     TackSetPinFunc setPin; /* Only needed for pin activation */
+    TackDeletePinFunc deletePin; /* Only needed for pin activation */
 } TackStoreFuncs;
 
 

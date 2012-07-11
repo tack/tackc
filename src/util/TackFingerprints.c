@@ -55,13 +55,13 @@ TACK_RETVAL base32Encode(uint8_t* in, char* out, uint32_t inLen)
 
 TACK_RETVAL tackGetKeyFingerprint(uint8_t publicKey[TACK_PUBKEY_LENGTH], 
                                   char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
-                                  TackHashFunc func)
+                                  TackCryptoFuncs* crypto)
 {
     TACK_RETVAL retval = TACK_ERR;
     uint8_t keyHash[TACK_HASH_LENGTH];
 
     /* Hash the public key */
-    if ((retval=func(publicKey, TACK_PUBKEY_LENGTH, keyHash)) != TACK_OK)
+    if ((retval=crypto->hash(publicKey, TACK_PUBKEY_LENGTH, keyHash)) != TACK_OK)
         return retval;
 
     return tackGetKeyFingerprintFromHash(keyHash, output);

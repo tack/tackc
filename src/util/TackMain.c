@@ -57,30 +57,26 @@ TACK_RETVAL test(int argc, char* argv[])
     if (nbytes == sizeof(inbuf)) {
 		exitError("Input file too big");
  	}
-
-	//Tack tack;
-	//TackBreakSig sig;
-	//TackExtension tackExt;
-
-	uint8_t* tack = inbuf;	
-	TACK_RETVAL retval;
-	if ((retval = tackTackSyntaxCheck(tack))<0) {
-		printf("ERROR INIT'ING TACK: %s\n", tackRetvalString(retval));
+        
+    uint8_t* tack = inbuf;	
+    TACK_RETVAL retval;
+    if ((retval = tackTackSyntaxCheck(tack))<0) {
+        printf("ERROR INIT'ING TACK: %s\n", tackRetvalString(retval));
     	return TACK_ERR;
-	}
+    }
 
 #ifdef TACKC_OPENSSL		
  	char fingerprintO[30];
-    tackTackGetKeyFingerprint(tack, fingerprintO, tackOpenSSLHashFunc);
+    tackTackGetKeyFingerprint(tack, fingerprintO, tackOpenSSL);
     printf("OPENSSL FINGERPRINT: %s\n", fingerprintO);
-  	retval = tackTackVerifySignature(tack, tackOpenSSLVerifyFunc);
+  	retval = tackTackVerifySignature(tack, tackOpenSSL);
     printf("OPENSSL VERIFY: %s\n", tackRetvalString(retval));      
 #endif
 #ifdef TACKC_NSS
  	char fingerprintN[30];
-    tackTackGetKeyFingerprint(tack, fingerprintN, tackNssHashFunc);
+    tackTackGetKeyFingerprint(tack, fingerprintN, tackNss);
     printf("NSS FINGERPRINT: %s\n", fingerprintN);  
-	retval = tackTackVerifySignature(tack, tackNssVerifyFunc);
+	retval = tackTackVerifySignature(tack, tackNss);
     printf("NSS VERIFY: %s\n", tackRetvalString(retval));
 #endif
 #ifdef TACKC_CPP

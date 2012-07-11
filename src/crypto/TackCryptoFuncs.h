@@ -25,6 +25,12 @@ typedef TACK_RETVAL (*TackVerifyFunc)(uint8_t publicKey[TACK_PUBKEY_LENGTH],
 typedef TACK_RETVAL (*TackHashFunc)(uint8_t* input, uint32_t inputLen, 
                                     uint8_t output[TACK_HASH_LENGTH]);
 
+/* Package all the crypto functions, for convenient parameter passing */
+typedef struct {
+    TackVerifyFunc verify;
+    TackHashFunc hash;
+} TackCryptoFuncs;
+
 #ifdef __cplusplus
 }
 #endif

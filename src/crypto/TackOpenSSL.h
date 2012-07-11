@@ -21,6 +21,10 @@ TACK_RETVAL tackOpenSSLVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH],
 TACK_RETVAL tackOpenSSLHashFunc(uint8_t* input, uint32_t inputLen, 
                                 uint8_t output[TACK_HASH_LENGTH]);
 
+/* Global crypto funcs structure for convenient parameter passing */
+extern TackCryptoFuncs tackOpenSSLStruct;
+extern TackCryptoFuncs* tackOpenSSL;
+
 #ifdef __cplusplus
 }
 #endif

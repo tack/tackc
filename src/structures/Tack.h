@@ -27,14 +27,14 @@ uint8_t* tackTackGetSignature(uint8_t* tack);
 TACK_RETVAL tackTackSyntaxCheck(uint8_t* tack);
 TACK_RETVAL tackTackGetKeyFingerprint(uint8_t* tack, 
                             char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
-                            TackHashFunc func);
-TACK_RETVAL tackTackVerifySignature(uint8_t* tack, TackVerifyFunc func);
+                            TackCryptoFuncs* crypto);
+TACK_RETVAL tackTackVerifySignature(uint8_t* tack, TackCryptoFuncs* crypto);
 
 TACK_RETVAL tackTackProcess(uint8_t* tack,
                             uint8_t keyHash[TACK_HASH_LENGTH],
                             uint8_t* minGeneration,
                             uint32_t currentTime,
-                            TackVerifyFunc verifyFunc);
+                            TackCryptoFuncs* crypto);
 
 
 #ifdef __cplusplus

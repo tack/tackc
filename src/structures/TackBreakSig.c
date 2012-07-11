@@ -15,19 +15,19 @@ uint8_t* tackBreakSigGetSignature(uint8_t* breakSig) {
 
 TACK_RETVAL tackBreakSigGetKeyFingerprint(uint8_t* breakSig, 
                                           char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
-                                          TackHashFunc func)
+                                          TackCryptoFuncs* crypto)
 {
-    return tackGetKeyFingerprint(tackBreakSigGetPublicKey(breakSig), output, func);
+    return tackGetKeyFingerprint(tackBreakSigGetPublicKey(breakSig), output, crypto);
 }
 
 
 #define TACK_BREAKSIG_TAG "tack_break_sig"
 #define TACK_BREAKSIG_TAG_LENGTH 14
 
-TACK_RETVAL tackBreakSigVerifySignature(uint8_t* breakSig, TackVerifyFunc func)
+TACK_RETVAL tackBreakSigVerifySignature(uint8_t* breakSig, TackCryptoFuncs* crypto)
 {
-    return func(tackBreakSigGetPublicKey(breakSig),
-                tackBreakSigGetSignature(breakSig), 
-                (uint8_t*)TACK_BREAKSIG_TAG, 
-                TACK_BREAKSIG_TAG_LENGTH);
+    return crypto->verify(tackBreakSigGetPublicKey(breakSig),
+                          tackBreakSigGetSignature(breakSig), 
+                          (uint8_t*)TACK_BREAKSIG_TAG, 
+                          TACK_BREAKSIG_TAG_LENGTH);
 }

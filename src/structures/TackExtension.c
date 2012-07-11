@@ -52,12 +52,12 @@ TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
     uint16_t breakSigsLen = 0;
     uint8_t activationFlag = 0;
     
-    // Check 1-byte tack length
+    /* Check 1-byte tack length */
     tackLen = *tackExt;
     if (tackLen != 0 && tackLen != TACK_LENGTH)
         return TACK_ERR_BAD_TACK_LENGTH;
     
-    // Check tack
+    /* Check tack */
     tack = tackExtensionGetTack(tackExt);
     if (tack) {
         retval = tackTackSyntaxCheck(tack);
@@ -65,7 +65,7 @@ TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
             return retval;
     }
     
-    // Check 2-byte break sigs length
+    /* Check 2-byte break sigs length */
     p = tackExtensionPostTack(tackExt);
     breakSigsLen = ptou16(p);
     if (breakSigsLen % TACK_BREAKSIG_LENGTH != 0)
@@ -73,14 +73,14 @@ TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
     if (breakSigsLen / TACK_BREAKSIG_LENGTH > TACK_BREAKSIGS_MAXCOUNT)
         return TACK_ERR_BAD_BREAKSIGS_LENGTH;
     
-    // Nothing to check for break sigs
+    /* Nothing to check for break sigs */
     
-    // Check activation flag
+    /* Check activation flag */
     activationFlag = tackExtensionGetActivationFlag(tackExt);
     if (activationFlag > 1)
         return TACK_ERR_BAD_ACTIVATION_FLAG;
     
-    // Check length
+    /* Check length */
     if (tackExt + tackExtLen != tackExtensionPostBreakSigs(tackExt)+1)
         return TACK_ERR_BAD_TACKEXT_LENGTH;
     
@@ -90,79 +90,154 @@ TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
 TACK_RETVAL tackExtensionProcess(uint8_t* tackExt, uint32_t tackExtLen,
                                  uint8_t keyHash[TACK_HASH_LENGTH],
                                  uint32_t currentTime,
-                                 void* krArg,
-                                 TackGetKeyRecordFunc getKrFunc,
-                                 TackUpdateKeyRecordFunc updateKrFunc,
-                                 TackDeleteKeyRecordFunc deleteKrFunc,
-                                 TackHashFunc hashFunc, 
-                                 TackVerifyFunc verifyFunc)
+                                 uint8_t doPinActivation,
+                                 TackStoreFuncs* store,
+                                 TackCryptoFuncs* crypto)
 {
     uint8_t* tack = NULL;
     TACK_RETVAL retval = TACK_ERR;  
-    char keyFingerprintBuf[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
+    TackPinStruct pinStruct;
+    TackPinStruct* pin = NULL;
+    char tackKeyFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
+    char breakKeyFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
     uint8_t krMinGeneration = 0;
     uint8_t foundKeyRecord = 0;
     uint8_t tackMinGeneration = 0;
     uint8_t* breakSig = NULL;
-    uint8_t count=0;
+    uint8_t count = 0;
+    uint8_t tackMatchesBreakSig = 0;
+    uint8_t tackMatchesPin = 0;
+
+    /* This function has five sequential steps:
+       (0) Syntax-checking and initialize variables 
+       (1) Process the tack (verify and update minGeneration if needed)
+       (2) Process the break sigs (delete key records if needed)
+       (3) Pin activation (if requested)
+       (4) Determine the status of the connection       
+     */
+
+    /* (0) */
 
     /* Check basic TACK_Extension syntax */
     if ((retval = tackExtensionSyntaxCheck(tackExt, tackExtLen)) != TACK_OK)
         return retval;
 
-    /* Convert keyHash -> keyFingerprint */ 
-    if ((retval=tackGetKeyFingerprintFromHash(keyHash, keyFingerprintBuf)) != TACK_OK)
+    /* Get the relevant pin, if any */
+    if ((retval=store->getPin(store->arg, store->argHostName, &pinStruct)) < TACK_OK)
+        return retval;
+    /* Set "pin" to point to the relevant pin, or NULL */
+    if (retval == TACK_OK)
+        pin = &pinStruct;
+
+    /* Get the tack and tackKeyFingerprint, if any */
+    tack = tackExtensionGetTack(tackExt); 
+    if ((retval=tackTackGetKeyFingerprint(tack, tackKeyFingerprint, crypto)) != TACK_OK)
         return retval;
 
-    /* Lookup keyFingerprint -> keyRecord's minGeneration */
-    if ((retval=getKrFunc(krArg, keyFingerprintBuf, &krMinGeneration)) < TACK_OK)
-        return retval;
-    if (retval == TACK_OK) // could be TACK_OK_NOT_FOUND
-        foundKeyRecord = 1;
-   
-    // Process the tack if present
-    tack = tackExtensionGetTack(tackExt);
+    /* Determine whether tack matches pin */
+    if (pin && tack && (strcmp(tackKeyFingerprint, pin->keyFingerprint)==0))
+        tackMatchesPin = 1;
+
+
+    /* (1) Process the tack if present */
     if (tack) {
 
-        // Verify the tack's target_hash, signature, expiration, generation
+        /* Lookup minGeneration based on tackKeyFingerprint */
+        if ((retval=store->getKeyRecord(store->arg, tackKeyFingerprint, 
+                                        &krMinGeneration)) < TACK_OK)
+            return retval;
+        if (retval == TACK_OK) /* else TACK_OK_NOT_FOUND */
+            foundKeyRecord = 1;
+
+        /* Verify all tack fields, check for minGeneration update */
         tackMinGeneration = krMinGeneration;
-        retval = tackTackProcess(tack, keyHash,
-                            &tackMinGeneration,
-                            currentTime,
-                            verifyFunc);
+        retval = tackTackProcess(tack, keyHash, &tackMinGeneration, currentTime, crypto);
         if (retval != TACK_OK)
             return retval;
 
-        // If minGeneration was incremented, set the keyRecord's value
+        /* If minGeneration was updated, set the keyRecord's value */
         if (foundKeyRecord && tackMinGeneration > krMinGeneration) {
-            retval=updateKrFunc(krArg, keyFingerprintBuf, tackMinGeneration);
+            retval = store->updateKeyRecord(store->arg, tackKeyFingerprint, 
+                                            tackMinGeneration);
             if (retval != TACK_OK)
                 return retval;
         }
     }
 
-    // Process the break signatures if present
-    for (count=0; count < tackExtensionGetNumBreakSigs(tackExt); count++) {
+    /* (2) Process the break signatures if present */
+    for (count = 0; count < tackExtensionGetNumBreakSigs(tackExt); count++) {
         
-        // Get the fingerprint for each break sig
+        /* Get the fingerprint for each break sig */
         breakSig = tackExtensionGetBreakSig(tackExt, count);
-        tackBreakSigGetKeyFingerprint(breakSig, keyFingerprintBuf, hashFunc);
+        tackBreakSigGetKeyFingerprint(breakSig, breakKeyFingerprint, crypto);
 
-        // If there's no matching key record, skip to next break sig
-        if ((retval = getKrFunc(krArg, keyFingerprintBuf, &krMinGeneration)) < TACK_OK)
-            return retval;
-        if (retval == TACK_OK_NOT_FOUND)
-            continue;
+        /* Check for the special case where a break sig applies to its
+           own TACK key.  In this case, pin activation will refuse to 
+           create a new inactive pin for the key. */
+        if (tack && strcmp(tackKeyFingerprint, breakKeyFingerprint)==0)
+            tackMatchesBreakSig = 1;
 
-        // If there's a matching key record, verify the break sig
-        retval=tackBreakSigVerifySignature(breakSig, verifyFunc);
-        if (retval != TACK_OK)
+        /* Check if there's a matching key record in the key store */
+        if ((retval = store->getKeyRecord(store->arg, breakKeyFingerprint, 
+                                        &krMinGeneration)) < TACK_OK)
             return retval;
-        
-        // If verified, delete the key record
-        if ((retval=deleteKrFunc(krArg, keyFingerprintBuf)) != TACK_OK)
-            return retval;
+
+        /* If there's a matching key record, verify the break sig */
+        if (retval == TACK_OK) {
+            retval=tackBreakSigVerifySignature(breakSig, crypto);
+            if (retval != TACK_OK)
+                return retval;
+            
+            /* If verified, delete the key record */
+            if ((retval=store->deleteKeyRecord(store->arg, 
+                                               breakKeyFingerprint)) != TACK_OK)
+                return retval;
+        }
     }
 
-    return TACK_OK;
+    /* (3) Pin activation */
+    if (doPinActivation) {
+
+        /* The first step in pin activation is to delete a relevant but inactive
+           pin unless there is a tack and the pin references the tack's key */
+        if (pin && (pin->activePeriodEnd <= currentTime) && !tackMatchesPin) {
+            if ((retval=store->deletePin(store->arg, store->argHostName)) != TACK_OK)
+                return retval;
+            pin = NULL;
+            tackMatchesPin = 0;
+        }
+        if (tack && tackExtensionGetActivationFlag(tackExt)) {
+            if (pin) {
+                /* If there is a relevant pin referencing the tack's key, the name
+                   record's "active period end" SHALL be set using the below formula: */
+                if (tackMatchesPin) {
+                    pin->activePeriodEnd = currentTime + (currentTime - pin->initialTime);
+                    retval = store->setPin(store->arg, store->argHostName, pin);
+                    if (retval != TACK_OK)
+                        return retval;
+                }
+            }
+            else if (!tackMatchesBreakSig)  {
+                /* If there is no relevant pin, and the tack's key is not equal to any
+                   break signature's key, a new pin SHALL be created: */
+                pinStruct.minGeneration = tackTackGetMinGeneration(tack);
+                strcpy(pinStruct.keyFingerprint, tackKeyFingerprint);
+                pinStruct.initialTime = currentTime;
+                pinStruct.activePeriodEnd = 0;
+                retval = store->setPin(store->arg, store->argHostName, &pinStruct);
+                if (retval != TACK_OK)
+                    return retval;
+            }
+        }
+    }
+
+    /* (4) Determine the final result: */
+    /* If there's a relevant active pin... */
+    if (pin && pin->activePeriodEnd > currentTime) {
+        if (tackMatchesPin)
+            return TACK_OK_ACCEPTED;
+        else
+            return TACK_OK_REJECTED;
+    }
+    return TACK_OK_UNPINNED;
 }

@@ -22,8 +22,8 @@ uint8_t* tackBreakSigGetSignature(uint8_t* breakSig);
 
 TACK_RETVAL tackBreakSigGetKeyFingerprint(uint8_t* breakSig, 
                                           char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
-                                          TackHashFunc func);
-TACK_RETVAL tackBreakSigVerifySignature(uint8_t* breakSig, TackVerifyFunc func);
+                                          TackCryptoFuncs* crypto);
+TACK_RETVAL tackBreakSigVerifySignature(uint8_t* breakSig, TackCryptoFuncs* crypto);
 
 
 #ifdef __cplusplus

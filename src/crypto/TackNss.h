@@ -15,6 +15,10 @@ TACK_RETVAL tackNssVerifyFunc(uint8_t publicKey[TACK_PUBKEY_LENGTH],
 TACK_RETVAL tackNssHashFunc(uint8_t* input, uint32_t inputLen, 
                                 uint8_t output[TACK_HASH_LENGTH]);
 
+/* Global crypto funcs structure for convenient parameter passing */
+extern TackCryptoFuncs tackNssStruct;
+extern TackCryptoFuncs* tackNss;
+
 #ifdef __cplusplus
 }
 #endif
