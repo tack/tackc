@@ -25,6 +25,7 @@ uint8_t  tackExtensionGetActivationFlag(uint8_t* tackExt);
 
 TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 
+/* Main entry point for client processing */
 TACK_RETVAL tackExtensionProcess(uint8_t* tackExt, uint32_t tackExtLen,
                                  uint8_t keyHash[TACK_HASH_LENGTH],
                                  uint32_t currentTime,
