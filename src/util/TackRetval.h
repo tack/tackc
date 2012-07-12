@@ -45,6 +45,8 @@ const char* tackRetvalString(TACK_RETVAL error);
 #define TACK_ERR_REVOKED_GENERATION             -0x00005002
 #define TACK_ERR_EXPIRED_EXPIRATION             -0x00005003
 
+#define TACK_ERR_MISSING_KEY_RECORD             -0x00006001
+
 #ifdef __cplusplus
 }
 #endif

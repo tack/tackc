@@ -17,15 +17,21 @@ extern "C" {
 /* The following callbacks are used by tackExtensionProcess() to implement
    client processing */
 
-/* Lookup a key's minGeneration (and existence) */
+/* Lookup a key's minGeneration (and existence) 
+   Returns TACK_OK, TACK_OK_NOT_FOUND, or some error
+*/
 typedef TACK_RETVAL (*TackGetKeyRecordFunc)(void* arg, char* keyFingerprint, 
                                             uint8_t* minGeneration);
 
-/* Update a key's minGeneration */
+/* Update a key's minGeneration 
+   If the key record does not exist, return TACK_OK_NOT_FOUND
+*/
 typedef TACK_RETVAL (*TackUpdateKeyRecordFunc)(void* arg, char* keyFingerprint, 
                                                uint8_t minGeneration);
 
-/* Delete a key as a result of break signature */
+/* Delete a key as a result of break signature 
+   If the key record does not exist, return TACK_OK_NOT_FOUND
+*/
 typedef TACK_RETVAL (*TackDeleteKeyRecordFunc)(void* arg, char* keyFingerprint);
 
 
@@ -37,17 +43,25 @@ typedef struct {
     uint32_t activePeriodEnd;
 } TackPinStruct;
 
-/* Get the relevant pin */
+/* Get the relevant pin 
+   If the name record does not exist, return TACK_OK_NOT_FOUND
+   If the name record has no key record, return TACK_ERR_MISSING_KEY_RECORD
+   (which indicates a corrupted store)
+*/
 typedef TACK_RETVAL (*TackGetPinFunc)(void* arg, void* argHostName, 
                                       TackPinStruct* pin);
 
-/* Set the relevant pin's activePeriodEnd, or create a new pin */
-/* Only used by pin activation */
+/* Creates a new name record, or overwrites any existing one
+   Reuses an existing key record, or creates a new one
+   Only used by pin activation */
 typedef TACK_RETVAL (*TackSetPinFunc)(void* arg, void* argHostName, 
                                       TackPinStruct* pin);
 
-/* Delete a relevant but inactive pin */
-/* Only used by pin activation */
+/* Delete a relevant but inactive pin
+   If the name record does not exist, return TACK_OK_NOT_FOUND
+   Only used by pin activation 
+   May or MAY NOT delete a key record that has become unreferenced
+*/
 typedef TACK_RETVAL (*TackDeletePinFunc)(void* arg, void* argHostName);
 
 

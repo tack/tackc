@@ -14,9 +14,9 @@ TACK_RETVAL TackStoreDefault::getKeyRecord(std::string keyFingerprint,
 TACK_RETVAL TackStoreDefault::updateKeyRecord(std::string keyFingerprint, 
                                               KeyRecord keyRecord)
 {
-    KeyRecord tempKeyRecord;
-    if (getKeyRecord(keyFingerprint, tempKeyRecord) != TACK_OK)
-        return TACK_ERR_ASSERTION;
+    std::map<std::string, KeyRecord>::iterator i = keyRecords.find(keyFingerprint);
+    if (i == keyRecords.end())
+        return TACK_OK_NOT_FOUND;
     keyRecords[keyFingerprint] = keyRecord;
     return TACK_OK;
 }
@@ -27,21 +27,22 @@ TACK_RETVAL TackStoreDefault::deleteKeyRecord(std::string keyFingerprint)
     std::map<std::string, TackStore::KeyRecord>::iterator ki;
     ki = keyRecords.find(keyFingerprint);
     if (ki != keyRecords.end()) {
-        keyRecords.erase(ki);
         
         // Delete all nameRecords referring to the keyRecord
-        // Requires iterating through all nameRecords
+        // Iterates through all nameRecords - O(N)
         std::map<std::string, TackStore::NameRecord>::iterator ni;
         for (ni=nameRecords.begin(); ni != nameRecords.end();) {
             if (ni->second.keyFingerprint == keyFingerprint)
                 nameRecords.erase(ni++);
             else
-                ++ni;
+                ni++;
         }
+        
+        // Delete the keyRecord
+        keyRecords.erase(ki);
         return TACK_OK;
     }
-    else
-        return TACK_OK_NOT_FOUND;
+    return TACK_OK_NOT_FOUND;
 }
 
 TACK_RETVAL TackStoreDefault::getPin(std::string hostName, 
@@ -55,8 +56,10 @@ TACK_RETVAL TackStoreDefault::getPin(std::string hostName,
     nameRecord = i->second;
     
     // Get keyRecord
-    if (getKeyRecord(nameRecord.keyFingerprint, keyRecord) != TACK_OK)
-        return TACK_ERR_ASSERTION;
+    if (getKeyRecord(nameRecord.keyFingerprint, keyRecord) != TACK_OK) {
+        // Store is corrupted! - there should always be a key record per name record
+        return TACK_ERR_MISSING_KEY_RECORD;
+    }
     
     return TACK_OK;
 }

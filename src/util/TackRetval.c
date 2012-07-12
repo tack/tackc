@@ -27,6 +27,7 @@ const char* tackRetvalString(TACK_RETVAL retval)
     case TACK_ERR_MISMATCHED_TARGET_HASH: return "MISMATCHED TARGET HASH";
     case TACK_ERR_REVOKED_GENERATION: return "REVOKED GENERATION";
     case TACK_ERR_EXPIRED_EXPIRATION: return "EXPIRED EXPIRATION";
+    case TACK_ERR_MISSING_KEY_RECORD: return "MISSING KEY RECORD";
     default: return "uknown error?!";
     }
 }	

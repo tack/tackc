@@ -190,8 +190,11 @@ TACK_RETVAL tackExtensionProcessTack(uint8_t* tack,
     if (foundKeyRecord && tackMinGeneration > krMinGeneration) {
         retval = store->updateKeyRecord(store->arg, tackFingerprint, 
                                         tackMinGeneration);
-        if (retval != TACK_OK)
+        if (retval < TACK_OK)
             return retval;
+
+        /* Ignore TACK_OK_NOT_FOUND in case the key was deleted out from 
+           under us (e.g. due to multithreading) */
     }
     
     return TACK_OK;
@@ -227,8 +230,11 @@ TACK_RETVAL tackExtensionProcessBreakSigs(uint8_t* tackExt,
             
             /* If verified, delete the key record */
             if ((retval=store->deleteKeyRecord(store->arg, 
-                                               breakKeyFingerprint)) != TACK_OK)
+                                               breakKeyFingerprint)) < TACK_OK)
                 return retval;
+
+            /* Ignore TACK_OK_NOT_FOUND in case the key was deleted out from 
+               under us (e.g. due to multithreading) */
         }
     }
     return TACK_OK;
@@ -273,32 +279,39 @@ TACK_RETVAL tackExtensionProcessPinActivation(uint8_t* tackExt,
     /* The first step in pin activation is to delete a relevant but inactive
        pin unless there is a tack and the pin references the tack's key */
     if (pin && (pin->activePeriodEnd <= currentTime) && !tackMatchesPin) {
-        if ((retval=store->deletePin(store->arg, store->argHostName)) != TACK_OK)
+        if ((retval=store->deletePin(store->arg, store->argHostName)) < TACK_OK)
             return retval;
         pin = NULL;
+
+        /* Ignore TACK_OK_NOT_FOUND in case the pin was deleted out from 
+           under us (e.g. due to multithreading) */
     }
-    if (tack && tackExtensionGetActivationFlag(tackExt)) {
-        if (pin) {
-            /* If there is a relevant pin referencing the tack's key, the name
-               record's "active period end" SHALL be set using the below formula: */
-            if (tackMatchesPin) {
-                pin->activePeriodEnd = currentTime + (currentTime - pin->initialTime);
-                retval = store->setPin(store->arg, store->argHostName, pin);
-                if (retval != TACK_OK)
-                    return retval;
-            }
-        }
-        else if (!tackMatchesBreakSig)  {
-            /* If there is no relevant pin, and the tack's key is not equal to any
-               break signature's key, a new pin SHALL be created: */
-            pinStruct.minGeneration = tackTackGetMinGeneration(tack);
-            strcpy(pinStruct.keyFingerprint, tackFingerprint);
-            pinStruct.initialTime = currentTime;
-            pinStruct.activePeriodEnd = 0;
-            retval = store->setPin(store->arg, store->argHostName, &pinStruct);
+
+    /* If there is no tack, or if the activation flag is disabled, then this 
+       completes the algorithm.  Otherwise, the following steps are executed:*/
+    if (!tack || (tackExtensionGetActivationFlag(tackExt) == 0))
+        return TACK_OK;
+
+    if (pin) {
+        /* If there is a relevant pin referencing the tack's key, the name
+           record's "active period end" SHALL be set using the below formula: */
+        if (tackMatchesPin) {
+            pin->activePeriodEnd = currentTime + (currentTime - pin->initialTime);
+            retval = store->setPin(store->arg, store->argHostName, pin);
             if (retval != TACK_OK)
                 return retval;
         }
+    }
+    else if (!tackMatchesBreakSig)  {
+        /* If there is no relevant pin, and the tack's key is not equal to any
+           break signature's key, a new pin SHALL be created: */
+        pinStruct.minGeneration = tackTackGetMinGeneration(tack);
+        strcpy(pinStruct.keyFingerprint, tackFingerprint);
+        pinStruct.initialTime = currentTime;
+        pinStruct.activePeriodEnd = 0;
+        retval = store->setPin(store->arg, store->argHostName, &pinStruct);
+        if (retval != TACK_OK)
+            return retval;
     }
     return TACK_OK;
 }

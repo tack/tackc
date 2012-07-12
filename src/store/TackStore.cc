@@ -55,9 +55,8 @@ TACK_RETVAL tackStoreGetPin(void* arg, void* argHostName, TackPinStruct* pin)
         pin->minGeneration = keyRecord.minGeneration;
         pin->initialTime = nameRecord.initialTime;
         pin->activePeriodEnd = nameRecord.activePeriodEnd;
-        return TACK_OK;
     }
-    return TACK_OK_NOT_FOUND;
+    return retval;
 }
 
 TACK_RETVAL tackStoreSetPin(void* arg, void* argHostName, TackPinStruct* pin)
