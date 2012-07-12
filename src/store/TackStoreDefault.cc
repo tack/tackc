@@ -1,93 +1,118 @@
 
 #include "TackStoreDefault.h"
 
-TACK_RETVAL TackStoreDefault::getKeyRecord(std::string keyFingerprint, 
-                                           KeyRecord& keyRecord)
+// KeyRecord and NameRecord constructors
+
+TackStoreDefault::KeyRecord::KeyRecord():minGeneration(0){}
+
+TackStoreDefault::KeyRecord::KeyRecord(uint8_t newMinGeneration):
+    minGeneration(newMinGeneration){}
+
+TackStoreDefault::NameRecord::NameRecord(){}
+
+TackStoreDefault::NameRecord::NameRecord(std::string newKeyFingerprint,
+                                         uint32_t newInitialTime,
+                                         uint32_t newActivePeriodEnd):
+    keyFingerprint(newKeyFingerprint),
+    initialTime(newInitialTime),
+    activePeriodEnd(newActivePeriodEnd){}
+
+// TackStoreDefault methods
+
+TACK_RETVAL TackStoreDefault::getKeyRecord(std::string& keyFingerprint, 
+                                           uint8_t* minGeneration)
 {
-    std::map<std::string, KeyRecord>::iterator i = keyRecords.find(keyFingerprint);
-    if (i == keyRecords.end())
+    std::map<std::string, KeyRecord>::iterator ki = keyRecords.find(keyFingerprint);
+    if (ki == keyRecords.end())
         return TACK_OK_NOT_FOUND;
-    keyRecord = i->second;
+
+    *minGeneration = ki->second.minGeneration;
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::updateKeyRecord(std::string keyFingerprint, 
-                                              KeyRecord keyRecord)
+TACK_RETVAL TackStoreDefault::updateKeyRecord(std::string& keyFingerprint, 
+                                              uint8_t minGeneration)
 {
-    std::map<std::string, KeyRecord>::iterator i = keyRecords.find(keyFingerprint);
-    if (i == keyRecords.end())
+    std::map<std::string, KeyRecord>::iterator ki = keyRecords.find(keyFingerprint);
+    if (ki == keyRecords.end())
         return TACK_OK_NOT_FOUND;
-    keyRecords[keyFingerprint] = keyRecord;
+
+    ki->second.minGeneration = minGeneration;
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::deleteKeyRecord(std::string keyFingerprint)
+TACK_RETVAL TackStoreDefault::deleteKeyRecord(std::string& keyFingerprint)
 {
-    // Erase the entry from the keyRecords map
-    std::map<std::string, TackStore::KeyRecord>::iterator ki;
+    std::map<std::string, KeyRecord>::iterator ki = keyRecords.find(keyFingerprint);
+    if (ki == keyRecords.end())
+        return TACK_OK_NOT_FOUND;
+
+    // Delete all nameRecords referring to the keyRecord
+    // Iterates through all nameRecords - O(N)
+    std::map<std::string, NameRecord>::iterator ni;
+    for (ni=nameRecords.begin(); ni != nameRecords.end();) {
+        if (ni->second.keyFingerprint == keyFingerprint)
+            nameRecords.erase(ni++);
+        else
+            ni++;
+    }
+
+    keyRecords.erase(ki);
+    return TACK_OK;
+}
+
+TACK_RETVAL TackStoreDefault::getPin(std::string& name, TackPinStruct* pin)
+{
+    std::map<std::string, NameRecord>::iterator ni = nameRecords.find(name);
+    if (ni == nameRecords.end())
+        return TACK_OK_NOT_FOUND;
+    NameRecord& nameRecord = ni->second;
+
+    std::map<std::string, KeyRecord>::iterator ki;
+    ki = keyRecords.find(nameRecord.keyFingerprint);
+    if (ki == keyRecords.end())
+        return TACK_OK_NOT_FOUND;
+    KeyRecord& keyRecord = ki->second;
+
+    strcpy(pin->keyFingerprint, nameRecord.keyFingerprint.c_str());
+    pin->minGeneration = keyRecord.minGeneration;
+    pin->initialTime = nameRecord.initialTime;
+    pin->activePeriodEnd = nameRecord.activePeriodEnd;
+    
+    return TACK_OK;
+}
+
+TACK_RETVAL TackStoreDefault::newPin(std::string& name, TackPinStruct* pin)
+{
+    std::string keyFingerprint(pin->keyFingerprint);
+    std::map<std::string, KeyRecord>::iterator ki;
     ki = keyRecords.find(keyFingerprint);
-    if (ki != keyRecords.end()) {
-        
-        // Delete all nameRecords referring to the keyRecord
-        // Iterates through all nameRecords - O(N)
-        std::map<std::string, TackStore::NameRecord>::iterator ni;
-        for (ni=nameRecords.begin(); ni != nameRecords.end();) {
-            if (ni->second.keyFingerprint == keyFingerprint)
-                nameRecords.erase(ni++);
-            else
-                ni++;
-        }
-        
-        // Delete the keyRecord
-        keyRecords.erase(ki);
-        return TACK_OK;
-    }
-    return TACK_OK_NOT_FOUND;
-}
-
-TACK_RETVAL TackStoreDefault::getPin(std::string hostName, 
-                              KeyRecord& keyRecord, 
-                              NameRecord& nameRecord)
-{
-    // Get nameRecord
-    std::map<std::string, NameRecord>::iterator i = nameRecords.find(hostName);
-    if (i == nameRecords.end())
-        return TACK_OK_NOT_FOUND;
-    nameRecord = i->second;
+    if (ki != keyRecords.end())
+        keyRecords[keyFingerprint] = KeyRecord(pin->minGeneration); 
     
-    // Get keyRecord
-    if (getKeyRecord(nameRecord.keyFingerprint, keyRecord) != TACK_OK) {
-        // Store is corrupted! - there should always be a key record per name record
-        return TACK_ERR_MISSING_KEY_RECORD;
-    }
-    
+    NameRecord nameRecord(keyFingerprint, pin->initialTime, pin->activePeriodEnd);
+    nameRecords[name] = nameRecord;
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::setPin(std::string hostName, 
-                              KeyRecord keyRecord, 
-                              NameRecord nameRecord)
+TACK_RETVAL TackStoreDefault::updatePin(std::string& name, uint32_t newActivePeriodEnd)
 {
-    // If there's an existing name record, overwrite it
-    nameRecords[hostName] = nameRecord;
-    
-    // If there's no existing key record, add one
-    // If there an existing one, reuse it (ignoring the passed-in minGeneration)
-    KeyRecord tempKeyRecord;
-    TACK_RETVAL retval = TACK_ERR;
-    if ((retval=getKeyRecord(nameRecord.keyFingerprint, tempKeyRecord)) < TACK_OK)
-        return retval;
-    if (retval == TACK_OK_NOT_FOUND)
-        keyRecords[nameRecord.keyFingerprint] = keyRecord;
-    
+    std::map<std::string, NameRecord>::iterator ni = nameRecords.find(name);
+    if (ni == nameRecords.end())
+        return TACK_OK_NOT_FOUND;
+
+    ni->second.activePeriodEnd = newActivePeriodEnd;
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::deletePin(std::string hostName)
+TACK_RETVAL TackStoreDefault::deletePin(std::string& name)
 {
-    std::map<std::string, NameRecord>::iterator i = nameRecords.find(hostName);
+    std::map<std::string, NameRecord>::iterator i = nameRecords.find(name);
     if (i == nameRecords.end())
         return TACK_OK_NOT_FOUND;
-    nameRecords.erase(i);    
+
+    nameRecords.erase(i);
+
+    // Doesn't clean up any dangling key records    
     return TACK_OK; 
 }

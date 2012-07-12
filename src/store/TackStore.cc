@@ -4,100 +4,56 @@
 
 // C Callbacks
 
-TACK_RETVAL tackStoreGetKeyRecord(void* arg, char* keyFingerprintBuf, 
+TACK_RETVAL tackStoreGetKeyRecord(void* arg, char* keyFingerprint, 
                                   uint8_t* minGeneration)
 {
-    TACK_RETVAL retval = TACK_ERR;
     TackStore* store = (TackStore*)arg;
-    std::string keyFingerprint(keyFingerprintBuf);
-    TackStore::KeyRecord keyRecord;
-
-    if ((retval=store->getKeyRecord(keyFingerprint, keyRecord)) != TACK_OK)
-        return retval;
-    *minGeneration = keyRecord.minGeneration;
-    return TACK_OK;
+    std::string fingerprint(keyFingerprint);
+    return store->getKeyRecord(fingerprint, minGeneration);
 }
 
-TACK_RETVAL tackStoreUpdateKeyRecord(void* arg, char* keyFingerprintBuf, 
+TACK_RETVAL tackStoreUpdateKeyRecord(void* arg, char* keyFingerprint, 
                                      uint8_t minGeneration)
 {
     TackStore* store = (TackStore*)arg;
-    std::string keyFingerprint(keyFingerprintBuf);
-    TackStore::KeyRecord keyRecord(minGeneration);
-
-    return store->updateKeyRecord(keyFingerprint, keyRecord);
+    std::string fingerprint(keyFingerprint);
+    return store->updateKeyRecord(fingerprint, minGeneration);
 }
 
-TACK_RETVAL tackStoreDeleteKeyRecord(void* arg, char* keyFingerprintBuf)
+TACK_RETVAL tackStoreDeleteKeyRecord(void* arg, char* keyFingerprint)
 {
     TackStore* store = (TackStore*)arg;
-    std::string keyFingerprint(keyFingerprintBuf);
-
-    return store->deleteKeyRecord(keyFingerprint);
+    std::string fingerprint(keyFingerprint);
+    return store->deleteKeyRecord(fingerprint);
 }
 
-TACK_RETVAL tackStoreGetPin(void* arg, void* argHostName, TackPinStruct* pin)
-{
-    TACK_RETVAL retval = TACK_ERR;
-    TackStore::KeyRecord keyRecord;
-    TackStore::NameRecord nameRecord;
-    TackStore* store = (TackStore*)arg;
-    std::string* hostName = (std::string*)argHostName;
-
-    /* See if there's a relevant pin */
-    if ((retval=store->getPin(*hostName, keyRecord, nameRecord)) < TACK_OK)
-        return retval;
-
-    /* If there's a relevant pin, populate the structure, else leave it zeroed */
-    memset(pin, 0, sizeof(TackPinStruct));
-    if (retval == TACK_OK) {
-        strcpy(pin->keyFingerprint, nameRecord.keyFingerprint.c_str());
-        pin->minGeneration = keyRecord.minGeneration;
-        pin->initialTime = nameRecord.initialTime;
-        pin->activePeriodEnd = nameRecord.activePeriodEnd;
-    }
-    return retval;
-}
-
-TACK_RETVAL tackStoreSetPin(void* arg, void* argHostName, TackPinStruct* pin)
-{
-    TackStore::KeyRecord keyRecord;
-    TackStore::NameRecord nameRecord;
-    TackStore* store = (TackStore*)arg;
-    std::string* hostName = (std::string*)argHostName;
-
-    keyRecord = TackStore::KeyRecord(pin->minGeneration);
-    nameRecord = TackStore::NameRecord(pin->keyFingerprint, pin->initialTime, 
-                                       pin->activePeriodEnd);
-    return store->setPin(*hostName, keyRecord, nameRecord);    
-}
-
-TACK_RETVAL tackStoreDeletePin(void* arg, void* argHostName)
+TACK_RETVAL tackStoreGetPin(void* arg, void* argName, TackPinStruct* pin)
 {
     TackStore* store = (TackStore*)arg;
-    std::string* hostName = (std::string*)argHostName;
-
-    return store->deletePin(*hostName);    
+    std::string* name = (std::string*)argName;
+    return store->getPin(*name, pin);
 }
 
+TACK_RETVAL tackStoreNewPin(void* arg, void* argName, TackPinStruct* pin)
+{
+    TackStore* store = (TackStore*)arg;
+    std::string* name = (std::string*)argName;
+    return store->newPin(*name, pin);
+}
 
-// KeyRecord and NameRecord constructors
+TACK_RETVAL tackStoreUpdatePin(void* arg, void* argName, uint32_t newActivePeriodEnd)
+{
+    TackStore* store = (TackStore*)arg;
+    std::string* name = (std::string*)argName;
+    return store->updatePin(*name, newActivePeriodEnd);    
+}
 
-TackStore::KeyRecord::KeyRecord():minGeneration(0)
-{}
-
-TackStore::KeyRecord::KeyRecord(uint8_t newMinGeneration):minGeneration(newMinGeneration)
-{}
-
-TackStore::NameRecord::NameRecord()
-{}
-
-TackStore::NameRecord::NameRecord(std::string newKeyFingerprint,
-                      uint32_t newInitialTime,
-                      uint32_t newActivePeriodEnd):keyFingerprint(newKeyFingerprint),
-                                                   initialTime(newInitialTime),
-                                                   activePeriodEnd(newActivePeriodEnd)
-{}
+TACK_RETVAL tackStoreDeletePin(void* arg, void* argName)
+{
+    TackStore* store = (TackStore*)arg;
+    std::string* name = (std::string*)argName;
+    return store->deletePin(*name);    
+}
 
 TACK_RETVAL TackStore::process(uint8_t* tackExt, uint32_t tackExtLen,
                                std::string hostName,
@@ -118,15 +74,16 @@ TACK_RETVAL TackStore::process(uint8_t* tackExt, uint32_t tackExtLen,
                                 &store, crypto);
 }
 
-TACK_RETVAL TackStore::getStoreFuncs(TackStoreFuncs* store, std::string* hostName)
+TACK_RETVAL TackStore::getStoreFuncs(TackStoreFuncs* store, std::string* name)
 {
     store->arg = this;
-    store->argHostName = hostName;
+    store->argName = name;
     store->getKeyRecord = tackStoreGetKeyRecord;
     store->updateKeyRecord = tackStoreUpdateKeyRecord;
     store->deleteKeyRecord = tackStoreDeleteKeyRecord;
     store->getPin = tackStoreGetPin;
-    store->setPin = tackStoreSetPin;
+    store->newPin = tackStoreNewPin;
+    store->updatePin = tackStoreUpdatePin;
     store->deletePin = tackStoreDeletePin;
     return TACK_OK;
 }

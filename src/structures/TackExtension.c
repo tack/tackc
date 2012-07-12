@@ -279,7 +279,7 @@ TACK_RETVAL tackExtensionProcessPinActivation(uint8_t* tackExt,
     /* The first step in pin activation is to delete a relevant but inactive
        pin unless there is a tack and the pin references the tack's key */
     if (pin && (pin->activePeriodEnd <= currentTime) && !tackMatchesPin) {
-        if ((retval=store->deletePin(store->arg, store->argHostName)) < TACK_OK)
+        if ((retval=store->deletePin(store->arg, store->argName)) < TACK_OK)
             return retval;
         pin = NULL;
 
@@ -296,8 +296,8 @@ TACK_RETVAL tackExtensionProcessPinActivation(uint8_t* tackExt,
         /* If there is a relevant pin referencing the tack's key, the name
            record's "active period end" SHALL be set using the below formula: */
         if (tackMatchesPin) {
-            pin->activePeriodEnd = currentTime + (currentTime - pin->initialTime);
-            retval = store->setPin(store->arg, store->argHostName, pin);
+            retval = store->updatePin(store->arg, store->argName, 
+                                      currentTime + (currentTime - pin->initialTime));
             if (retval != TACK_OK)
                 return retval;
         }
@@ -309,7 +309,7 @@ TACK_RETVAL tackExtensionProcessPinActivation(uint8_t* tackExt,
         strcpy(pinStruct.keyFingerprint, tackFingerprint);
         pinStruct.initialTime = currentTime;
         pinStruct.activePeriodEnd = 0;
-        retval = store->setPin(store->arg, store->argHostName, &pinStruct);
+        retval = store->newPin(store->arg, store->argName, &pinStruct);
         if (retval != TACK_OK)
             return retval;
     }
@@ -355,7 +355,7 @@ TACK_RETVAL tackExtensionProcessGetTackAndPin(uint8_t* tackExt, uint8_t** tack,
     TACK_RETVAL retval = TACK_ERR;
 
     /* Get the relevant pin, if any */
-    if ((retval=store->getPin(store->arg, store->argHostName, pinStruct)) < TACK_OK)
+    if ((retval=store->getPin(store->arg, store->argName, pinStruct)) < TACK_OK)
         return retval;
     /* Set "pin" to point to the relevant pin, or NULL */
     if (retval == TACK_OK)

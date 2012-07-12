@@ -48,32 +48,34 @@ typedef struct {
    If the name record has no key record, return TACK_ERR_MISSING_KEY_RECORD
    (which indicates a corrupted store)
 */
-typedef TACK_RETVAL (*TackGetPinFunc)(void* arg, void* argHostName, 
+typedef TACK_RETVAL (*TackGetPinFunc)(void* arg, void* argName, 
                                       TackPinStruct* pin);
 
-/* Creates a new name record, or overwrites any existing one
-   Reuses an existing key record, or creates a new one
-   Only used by pin activation */
-typedef TACK_RETVAL (*TackSetPinFunc)(void* arg, void* argHostName, 
-                                      TackPinStruct* pin);
+typedef TACK_RETVAL (*TackNewPinFunc)(void* arg, void* argName, 
+                                       TackPinStruct* pin);
+
+typedef TACK_RETVAL (*TackUpdatePinFunc)(void* arg, void* argName, 
+                                         uint32_t newActivePeriodEnd);
+
 
 /* Delete a relevant but inactive pin
    If the name record does not exist, return TACK_OK_NOT_FOUND
    Only used by pin activation 
    May or MAY NOT delete a key record that has become unreferenced
 */
-typedef TACK_RETVAL (*TackDeletePinFunc)(void* arg, void* argHostName);
+typedef TACK_RETVAL (*TackDeletePinFunc)(void* arg, void* argName);
 
 
 /* Package all the callbacks, for convenient parameter passing */
 typedef struct {
     void* arg;
-    void* argHostName;
+    void* argName;
     TackGetKeyRecordFunc getKeyRecord;
     TackUpdateKeyRecordFunc updateKeyRecord;
     TackDeleteKeyRecordFunc deleteKeyRecord;
     TackGetPinFunc getPin;
-    TackSetPinFunc setPin; /* Only needed for pin activation */
+    TackNewPinFunc newPin; /* Only needed for pin activation */
+    TackUpdatePinFunc updatePin; /* Only needed for pin activation */
     TackDeletePinFunc deletePin; /* Only needed for pin activation */
 } TackStoreFuncs;
 

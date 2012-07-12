@@ -11,21 +11,40 @@
 #include "TackStore.h"
 
 class TackStoreDefault : public TackStore {
+
 public:
-
-    virtual TACK_RETVAL getKeyRecord(std::string keyFingerprint, KeyRecord& keyRecord);
-    virtual TACK_RETVAL updateKeyRecord(std::string keyFingerprint, KeyRecord keyRecord);
-    virtual TACK_RETVAL deleteKeyRecord(std::string keyFingerprint);
-
-    virtual TACK_RETVAL getPin(std::string hostName, 
-                               KeyRecord& keyRecord, NameRecord& nameRecord);    
-    virtual TACK_RETVAL setPin(std::string hostName, 
-                               KeyRecord keyRecord, NameRecord nameRecord);  
-    virtual TACK_RETVAL deletePin(std::string hostName);
+    virtual TACK_RETVAL getKeyRecord(std::string& keyFingerprint, uint8_t* minGeneration);
+    virtual TACK_RETVAL updateKeyRecord(std::string& keyFingerprint, uint8_t minGeneration);
+    virtual TACK_RETVAL deleteKeyRecord(std::string& keyFingerprint);
+    
+    virtual TACK_RETVAL getPin(std::string& name, TackPinStruct* pin);
+    virtual TACK_RETVAL newPin(std::string& name, TackPinStruct* pin);  
+    virtual TACK_RETVAL updatePin(std::string& name, uint32_t newActivePeriodEnd);  
+    virtual TACK_RETVAL deletePin(std::string& name);
     
 private:
+    class KeyRecord {
+    public:
+        KeyRecord();
+        KeyRecord(uint8_t newMinGeneration);
+
+        uint8_t minGeneration;
+    };
     
-    // Maps hostnames to name records
+    class NameRecord {
+    public:
+        NameRecord();
+        NameRecord(std::string newKeyFingerprint,
+                   uint32_t newInitialTime,
+                   uint32_t newActivePeriodEnd);
+
+        std::string keyFingerprint;
+        uint32_t initialTime;
+        uint32_t activePeriodEnd;
+        uint8_t krTime;
+    };
+    
+    // Maps names to name records
     std::map<std::string, NameRecord> nameRecords;
     
     // Maps key fingerprints to key records
