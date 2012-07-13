@@ -40,7 +40,7 @@ endif
 
 ifdef TACKC_CPP
 COMPILER = g++
-HEADERS += src/store/TackStore.h src/store/TackStoreDefault.h
+HEADERS += src/store/TackStoreFuncs.h src/store/TackStore.h src/store/TackStoreDefault.h
 SRCS += src/store/TackStore.cc src/store/TackStoreDefault.cc
 DEFINES += -DTACKC_CPP
 endif

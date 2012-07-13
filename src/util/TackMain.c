@@ -80,6 +80,7 @@ TACK_RETVAL test(int argc, char* argv[])
     printf("NSS VERIFY: %s\n", tackRetvalString(retval));
 #endif
 #ifdef TACKC_CPP
+ 
     /*
     TackStore::KeyRecord kr1, kr2;
     kr1.minGeneration = 0;

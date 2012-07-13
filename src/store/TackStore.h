@@ -29,7 +29,6 @@ TACK_RETVAL tackStoreDeletePin(void* arg, void* argName);
 
 class TackStore {
 public:
-
     /* Main entry point for processing a TACK_Extension */
     TACK_RETVAL process(uint8_t* tackExt, uint32_t tackExtLen,
                         std::string name,

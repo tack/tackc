@@ -13,6 +13,14 @@
 class TackStoreDefault : public TackStore {
 
 public:
+    /* Main entry point for processing a TACK_Extension */
+    TACK_RETVAL process(uint8_t* tackExt, uint32_t tackExtLen,
+                        std::string name,
+                        uint8_t keyHash[TACK_HASH_LENGTH],
+                        uint32_t currentTime,
+                        uint8_t doPinActivation,
+                        TackCryptoFuncs* crypto);
+
     virtual TACK_RETVAL getKeyRecord(std::string& keyFingerprint, uint8_t* minGeneration);
     virtual TACK_RETVAL updateKeyRecord(std::string& keyFingerprint, uint8_t minGeneration);
     virtual TACK_RETVAL deleteKeyRecord(std::string& keyFingerprint);
