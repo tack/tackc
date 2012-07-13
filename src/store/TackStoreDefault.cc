@@ -19,6 +19,11 @@ TackStoreDefault::NameRecord::NameRecord(std::string newKeyFingerprint,
 
 // TackStoreDefault methods
 
+// These don't do anything but Chromium wants them:
+TackStoreDefault::TackStoreDefault(){}
+TackStoreDefault::~TackStoreDefault(){}
+
+
 TACK_RETVAL TackStoreDefault::getKeyRecord(std::string& keyFingerprint, 
                                            uint8_t* minGeneration)
 {

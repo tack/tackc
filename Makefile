@@ -20,7 +20,7 @@ SRCS = src/structures/Tack.c \
 
 DEFINES = 
 INCLUDEDIRS = -I/opt/local/include -Isrc/structures -Isrc/util -Isrc/crypto -Isrc/store \
-	-Isrc/processing
+	-Isrc/processing -Isrc
 LIBDIRS = -L/opt/local/lib
 LIBS = 
 COMPILER = gcc

@@ -51,7 +51,7 @@ TACK_RETVAL tackProcess(uint8_t* tackExt, uint32_t tackExtLen,
     /* If there's a TACK Extension, do: */
     if (tackExt) {
         
-        /* Check basic extension syntax */
+        /* Check extension syntax */
         if ((retval = tackExtensionSyntaxCheck(tackExt, tackExtLen)) != TACK_OK)
             return retval;
         

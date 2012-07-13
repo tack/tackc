@@ -11,8 +11,8 @@ extern "C" {
 #endif
 
 #include "TackRetval.h"
-#include "TackCryptoFuncs.h"
 #include "TackStoreFuncs.h"
+#include "TackCryptoFuncs.h"
 
 /* Main entry point for client processing */
 TACK_RETVAL tackProcess(uint8_t* tackExt, uint32_t tackExtLen,

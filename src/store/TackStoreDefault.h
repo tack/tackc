@@ -10,10 +10,16 @@
 
 #include "TackStore.h"
 
+// For Chromium
+#include "base/compiler_specific.h"
+
 class TackStoreDefault : public TackStore {
 
 public:
-    /* Main entry point for processing a TACK_Extension */
+    TackStoreDefault();
+    ~TackStoreDefault();
+
+    /* Main entry point for client processing */
     TACK_RETVAL process(uint8_t* tackExt, uint32_t tackExtLen,
                         std::string name,
                         uint8_t keyHash[TACK_HASH_LENGTH],
@@ -21,14 +27,17 @@ public:
                         uint8_t doPinActivation,
                         TackCryptoFuncs* crypto);
 
-    virtual TACK_RETVAL getKeyRecord(std::string& keyFingerprint, uint8_t* minGeneration);
-    virtual TACK_RETVAL updateKeyRecord(std::string& keyFingerprint, uint8_t minGeneration);
-    virtual TACK_RETVAL deleteKeyRecord(std::string& keyFingerprint);
+    virtual TACK_RETVAL getKeyRecord(std::string& keyFingerprint,
+                                     uint8_t* minGeneration) OVERRIDE;
+    virtual TACK_RETVAL updateKeyRecord(std::string& keyFingerprint, 
+                                        uint8_t minGeneration) OVERRIDE;
+    virtual TACK_RETVAL deleteKeyRecord(std::string& keyFingerprint) OVERRIDE;
     
-    virtual TACK_RETVAL getPin(std::string& name, TackPinStruct* pin);
-    virtual TACK_RETVAL newPin(std::string& name, TackPinStruct* pin);  
-    virtual TACK_RETVAL updatePin(std::string& name, uint32_t newActivePeriodEnd);  
-    virtual TACK_RETVAL deletePin(std::string& name);
+    virtual TACK_RETVAL getPin(std::string& name, TackPinStruct* pin) OVERRIDE;
+    virtual TACK_RETVAL newPin(std::string& name, TackPinStruct* pin) OVERRIDE;  
+    virtual TACK_RETVAL updatePin(std::string& name, 
+                                  uint32_t newActivePeriodEnd) OVERRIDE;  
+    virtual TACK_RETVAL deletePin(std::string& name) OVERRIDE;
     
 private:
     class KeyRecord {
