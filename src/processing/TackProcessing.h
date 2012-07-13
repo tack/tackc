@@ -14,8 +14,9 @@ extern "C" {
 #include "TackStoreFuncs.h"
 #include "TackCryptoFuncs.h"
 
-/* Main entry point for client processing */
-TACK_RETVAL tackProcess(uint8_t* tackExt, uint32_t tackExtLen,
+/* Main entry point for client processing (in C) */
+TACK_RETVAL tackProcess(void* name, 
+                        uint8_t* tackExt, uint32_t tackExtLen,
                         uint8_t keyHash[TACK_HASH_LENGTH],
                         uint32_t currentTime,
                         uint8_t doPinActivation,

@@ -27,36 +27,36 @@ TACK_RETVAL tackStoreDeleteKeyRecord(void* arg, char* keyFingerprint)
     return store->deleteKeyRecord(fingerprint);
 }
 
-TACK_RETVAL tackStoreGetPin(void* arg, void* argName, TackPinStruct* pin)
+TACK_RETVAL tackStoreGetPin(void* arg, void* name, TackPinStruct* pin)
 {
     TackStore* store = (TackStore*)arg;
-    std::string* name = (std::string*)argName;
-    return store->getPin(*name, pin);
+    std::string* nameStr = (std::string*)name;
+    return store->getPin(*nameStr, pin);
 }
 
-TACK_RETVAL tackStoreNewPin(void* arg, void* argName, TackPinStruct* pin)
+TACK_RETVAL tackStoreNewPin(void* arg, void* name, TackPinStruct* pin)
 {
     TackStore* store = (TackStore*)arg;
-    std::string* name = (std::string*)argName;
-    return store->newPin(*name, pin);
+    std::string* nameStr = (std::string*)name;
+    return store->newPin(*nameStr, pin);
 }
 
-TACK_RETVAL tackStoreUpdatePin(void* arg, void* argName, uint32_t newActivePeriodEnd)
+TACK_RETVAL tackStoreUpdatePin(void* arg, void* name, uint32_t newActivePeriodEnd)
 {
     TackStore* store = (TackStore*)arg;
-    std::string* name = (std::string*)argName;
-    return store->updatePin(*name, newActivePeriodEnd);    
+    std::string* nameStr = (std::string*)name;
+    return store->updatePin(*nameStr, newActivePeriodEnd);    
 }
 
-TACK_RETVAL tackStoreDeletePin(void* arg, void* argName)
+TACK_RETVAL tackStoreDeletePin(void* arg, void* name)
 {
     TackStore* store = (TackStore*)arg;
-    std::string* name = (std::string*)argName;
-    return store->deletePin(*name);    
+    std::string* nameStr = (std::string*)name;
+    return store->deletePin(*nameStr);    
 }
 
-TACK_RETVAL TackStore::process(uint8_t* tackExt, uint32_t tackExtLen,
-                               std::string hostName,
+TACK_RETVAL TackStore::process(std::string name,
+                               uint8_t* tackExt, uint32_t tackExtLen,
                                uint8_t keyHash[TACK_HASH_LENGTH],
                                uint32_t currentTime,
                                uint8_t doPinActivation,
@@ -66,18 +66,17 @@ TACK_RETVAL TackStore::process(uint8_t* tackExt, uint32_t tackExtLen,
     TackStoreFuncs store;
 
     /* Prepare the C structure containing store callbacks */
-    if ((retval=getStoreFuncs(&store, &hostName)) != TACK_OK)
+    if ((retval=getStoreFuncs(&store)) != TACK_OK)
         return retval;
 
     /* Execute client processing */
-    return tackProcess(tackExt, tackExtLen, keyHash, currentTime, doPinActivation,
+    return tackProcess(&name, tackExt, tackExtLen, keyHash, currentTime, doPinActivation,
                        &store, crypto);
 }
 
-TACK_RETVAL TackStore::getStoreFuncs(TackStoreFuncs* store, std::string* name)
+TACK_RETVAL TackStore::getStoreFuncs(TackStoreFuncs* store)
 {
     store->arg = this;
-    store->argName = name;
     store->getKeyRecord = tackStoreGetKeyRecord;
     store->updateKeyRecord = tackStoreUpdateKeyRecord;
     store->deleteKeyRecord = tackStoreDeleteKeyRecord;

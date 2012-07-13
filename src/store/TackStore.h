@@ -29,9 +29,9 @@ TACK_RETVAL tackStoreDeletePin(void* arg, void* argName);
 
 class TackStore {
 public:
-    /* Main entry point for processing a TACK_Extension */
-    TACK_RETVAL process(uint8_t* tackExt, uint32_t tackExtLen,
-                        std::string name,
+    /* Main entry point for client processing (in C++) */
+    TACK_RETVAL process(std::string name,
+                        uint8_t* tackExt, uint32_t tackExtLen,
                         uint8_t keyHash[TACK_HASH_LENGTH],
                         uint32_t currentTime,
                         uint8_t doPinActivation,
@@ -50,7 +50,7 @@ public:
     virtual TACK_RETVAL deletePin(std::string& name) = 0;
 
 private:
-    TACK_RETVAL getStoreFuncs(TackStoreFuncs* store, std::string* hostName);
+    TACK_RETVAL getStoreFuncs(TackStoreFuncs* store);
 };
 
 #endif

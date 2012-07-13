@@ -92,7 +92,7 @@ TACK_RETVAL TackStoreDefault::newPin(std::string& name, TackPinStruct* pin)
     std::string keyFingerprint(pin->keyFingerprint);
     std::map<std::string, KeyRecord>::iterator ki;
     ki = keyRecords.find(keyFingerprint);
-    if (ki != keyRecords.end())
+    if (ki == keyRecords.end())
         keyRecords[keyFingerprint] = KeyRecord(pin->minGeneration); 
     
     NameRecord nameRecord(keyFingerprint, pin->initialTime, pin->activePeriodEnd);
@@ -112,12 +112,30 @@ TACK_RETVAL TackStoreDefault::updatePin(std::string& name, uint32_t newActivePer
 
 TACK_RETVAL TackStoreDefault::deletePin(std::string& name)
 {
-    std::map<std::string, NameRecord>::iterator i = nameRecords.find(name);
-    if (i == nameRecords.end())
+    std::map<std::string, NameRecord>::iterator ni = nameRecords.find(name);
+    if (ni == nameRecords.end())
         return TACK_OK_NOT_FOUND;
 
-    nameRecords.erase(i);
+    nameRecords.erase(ni);
 
     // Doesn't clean up any dangling key records    
     return TACK_OK; 
+}
+
+std::string TackStoreDefault::getStringDump()
+{   
+    std::string result;
+
+    result += std::string("Name Records:\n");
+    std::map<std::string, NameRecord>::iterator ni = nameRecords.begin();
+    for (; ni != nameRecords.end(); ni++) {
+        char nextLine[1000];
+        sprintf(nextLine, "%s %s initial=%d end=%d\n", 
+                ni->first.c_str(), 
+                ni->second.keyFingerprint.c_str(),
+                ni->second.initialTime,
+                ni->second.activePeriodEnd);
+        result += std::string(nextLine);
+    }
+    return result;
 }

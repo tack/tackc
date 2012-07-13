@@ -20,8 +20,8 @@ public:
     ~TackStoreDefault();
 
     /* Main entry point for client processing
-    TACK_RETVAL process(uint8_t* tackExt, uint32_t tackExtLen,
-                        std::string name,
+    TACK_RETVAL process(std::string name, 
+                        uint8_t* tackExt, uint32_t tackExtLen, 
                         uint8_t keyHash[TACK_HASH_LENGTH],
                         uint32_t currentTime,
                         uint8_t doPinActivation,
@@ -39,6 +39,8 @@ public:
     virtual TACK_RETVAL updatePin(std::string& name, 
                                   uint32_t newActivePeriodEnd) OVERRIDE;  
     virtual TACK_RETVAL deletePin(std::string& name) OVERRIDE;
+
+    std::string getStringDump();
     
 private:
     class KeyRecord {
@@ -59,7 +61,6 @@ private:
         std::string keyFingerprint;
         uint32_t initialTime;
         uint32_t activePeriodEnd;
-        uint8_t krTime;
     };
     
     // Maps names to name records

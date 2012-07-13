@@ -57,29 +57,75 @@ TACK_RETVAL test(int argc, char* argv[])
     if (nbytes == sizeof(inbuf)) {
 		exitError("Input file too big");
  	}
-        
-    uint8_t* tack = inbuf;	
-    TACK_RETVAL retval;
-    if ((retval = tackTackSyntaxCheck(tack))<0) {
-        printf("ERROR INIT'ING TACK: %s\n", tackRetvalString(retval));
-    	return TACK_ERR;
-    }
 
-#ifdef TACKC_OPENSSL		
- 	char fingerprintO[30];
-    tackTackGetKeyFingerprint(tack, fingerprintO, tackOpenSSL);
-    printf("OPENSSL FINGERPRINT: %s\n", fingerprintO);
-  	retval = tackTackVerifySignature(tack, tackOpenSSL);
-    printf("OPENSSL VERIFY: %s\n", tackRetvalString(retval));      
+    TackCryptoFuncs* crypto = NULL;
+#ifdef TACKC_OPENSSL
+    crypto = tackOpenSSL;
 #endif
 #ifdef TACKC_NSS
- 	char fingerprintN[30];
-    tackTackGetKeyFingerprint(tack, fingerprintN, tackNss);
-    printf("NSS FINGERPRINT: %s\n", fingerprintN);  
-	retval = tackTackVerifySignature(tack, tackNss);
-    printf("NSS VERIFY: %s\n", tackRetvalString(retval));
+    crypto = tackNss;
 #endif
+
 #ifdef TACKC_CPP
+
+    uint8_t* tackExt = inbuf;
+    uint32_t tackExtLen = nbytes;
+    
+    TackStoreDefault store;
+    
+    uint32_t currentTime = 123;
+
+    uint8_t* tack = NULL;
+    uint8_t* targetHash = NULL;
+    tack = tackExtensionGetTack(tackExt);
+    if (tack) {
+        targetHash = tackTackGetTargetHash(tack);
+    }
+    TACK_RETVAL retval = store.process("alpha.com", tackExt, tackExtLen, 
+                                       targetHash, 
+                                       currentTime, 
+                                       1, 
+                                       tackOpenSSL);
+    printf("retval = %s\n", tackRetvalString(retval));
+
+
+    retval = store.process("alpha.com", tackExt, tackExtLen, 
+                           targetHash, 
+                           currentTime+100, 
+                           1, 
+                           tackOpenSSL);
+    printf("retval = %s\n", tackRetvalString(retval));
+    
+    retval = store.process("alpha.com", tackExt, tackExtLen, 
+                           targetHash, 
+                           currentTime+101, 
+                           1, 
+                           tackOpenSSL);
+    printf("retval = %s\n", tackRetvalString(retval));
+
+    retval = store.process("alpha.com", tackExt, tackExtLen, 
+                                       targetHash, 
+                                       currentTime+1000, 
+                                       1, 
+                                       tackOpenSSL);
+    printf("retval = %s\n", tackRetvalString(retval));
+
+    retval = store.process("alpha.com", NULL, tackExtLen, 
+                                       targetHash, 
+                                       currentTime+1001, 
+                                       1, 
+                                       tackOpenSSL);
+    printf("retval = %s\n", tackRetvalString(retval));
+
+    retval = store.process("alpha.com", tackExt, tackExtLen, 
+                                       targetHash, 
+                                       currentTime+1002, 
+                                       1, 
+                                       tackOpenSSL);
+    printf("retval = %s\n", tackRetvalString(retval));
+
+
+    printf("store dump = \n%s\n", store.getStringDump().c_str());
  
     /*
     TackStore::KeyRecord kr1, kr2;

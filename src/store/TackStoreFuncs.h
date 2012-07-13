@@ -48,13 +48,13 @@ typedef struct {
    If the name record has no key record, return TACK_ERR_MISSING_KEY_RECORD
    (which indicates a corrupted store)
 */
-typedef TACK_RETVAL (*TackGetPinFunc)(void* arg, void* argName, 
+typedef TACK_RETVAL (*TackGetPinFunc)(void* arg, void* name, 
                                       TackPinStruct* pin);
 
-typedef TACK_RETVAL (*TackNewPinFunc)(void* arg, void* argName, 
+typedef TACK_RETVAL (*TackNewPinFunc)(void* arg, void* name, 
                                        TackPinStruct* pin);
 
-typedef TACK_RETVAL (*TackUpdatePinFunc)(void* arg, void* argName, 
+typedef TACK_RETVAL (*TackUpdatePinFunc)(void* arg, void* name, 
                                          uint32_t newActivePeriodEnd);
 
 
@@ -63,13 +63,12 @@ typedef TACK_RETVAL (*TackUpdatePinFunc)(void* arg, void* argName,
    Only used by pin activation 
    May or MAY NOT delete a key record that has become unreferenced
 */
-typedef TACK_RETVAL (*TackDeletePinFunc)(void* arg, void* argName);
+typedef TACK_RETVAL (*TackDeletePinFunc)(void* arg, void* name);
 
 
 /* Package all the callbacks, for convenient parameter passing */
 typedef struct {
     void* arg;
-    void* argName;
     TackGetKeyRecordFunc getKeyRecord;
     TackUpdateKeyRecordFunc updateKeyRecord;
     TackDeleteKeyRecordFunc deleteKeyRecord;
