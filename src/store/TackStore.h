@@ -49,6 +49,8 @@ public:
     virtual TACK_RETVAL updatePin(std::string& name, uint32_t newActivePeriodEnd) = 0;  
     virtual TACK_RETVAL deletePin(std::string& name) = 0;
 
+    virtual std::string getStringDump() = 0;
+
 private:
     TACK_RETVAL getStoreFuncs(TackStoreFuncs* store);
 };

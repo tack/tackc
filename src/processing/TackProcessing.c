@@ -75,7 +75,7 @@ TACK_RETVAL tackProcess(void* name,
         }
     }
 
-    /* Determine the final result */
+    /* Determine the result */
     result = tackProcessResult(name, tackExt, currentTime, store, crypto);
     
     /* Do pin activation if requested */

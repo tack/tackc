@@ -40,7 +40,7 @@ public:
                                   uint32_t newActivePeriodEnd) OVERRIDE;  
     virtual TACK_RETVAL deletePin(std::string& name) OVERRIDE;
 
-    std::string getStringDump();
+    virtual std::string getStringDump() OVERRIDE;
     
 private:
     class KeyRecord {
