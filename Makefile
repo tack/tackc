@@ -6,7 +6,8 @@ HEADERS = src/structures/Tack.h \
 	src/util/TackUtil.h \
 	src/util/TackFingerprints.h \
 	src/crypto/TackCryptoFuncs.h \
-	src/store/TackKeyRecordFuncs.h
+	src/store/TackStoreFuncs.h \
+	src/processing/TackProcessing.h
 
 SRCS = src/structures/Tack.c \
 	src/structures/TackBreakSig.c \
@@ -14,10 +15,12 @@ SRCS = src/structures/Tack.c \
 	src/util/TackRetval.c \
 	src/util/TackUtil.c \
 	src/util/TackFingerprints.c \
-	src/util/TackMain.c
+	src/util/TackMain.c \
+	src/processing/TackProcessing.c
 
 DEFINES = 
-INCLUDEDIRS = -I/opt/local/include -Isrc/structures -Isrc/util -Isrc/crypto -Isrc/store
+INCLUDEDIRS = -I/opt/local/include -Isrc/structures -Isrc/util -Isrc/crypto -Isrc/store \
+	-Isrc/processing
 LIBDIRS = -L/opt/local/lib
 LIBS = 
 COMPILER = gcc
@@ -40,7 +43,7 @@ endif
 
 ifdef TACKC_CPP
 COMPILER = g++
-HEADERS += src/store/TackStoreFuncs.h src/store/TackStore.h src/store/TackStoreDefault.h
+HEADERS += src/store/TackStore.h src/store/TackStoreDefault.h
 SRCS += src/store/TackStore.cc src/store/TackStoreDefault.cc
 DEFINES += -DTACKC_CPP
 endif

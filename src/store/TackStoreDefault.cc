@@ -71,7 +71,7 @@ TACK_RETVAL TackStoreDefault::getPin(std::string& name, TackPinStruct* pin)
     std::map<std::string, KeyRecord>::iterator ki;
     ki = keyRecords.find(nameRecord.keyFingerprint);
     if (ki == keyRecords.end())
-        return TACK_OK_NOT_FOUND;
+        return TACK_ERR_CORRUPTED_STORE;
     KeyRecord& keyRecord = ki->second;
 
     strcpy(pin->keyFingerprint, nameRecord.keyFingerprint.c_str());

@@ -1,6 +1,6 @@
 
 #include "TackStore.h"
-#include "TackExtension.h"
+#include "TackProcessing.h"
 
 // C Callbacks
 
@@ -70,8 +70,8 @@ TACK_RETVAL TackStore::process(uint8_t* tackExt, uint32_t tackExtLen,
         return retval;
 
     /* Execute client processing */
-    return tackExtensionProcess(tackExt, tackExtLen, keyHash, currentTime, doPinActivation,
-                                &store, crypto);
+    return tackProcess(tackExt, tackExtLen, keyHash, currentTime, doPinActivation,
+                       &store, crypto);
 }
 
 TACK_RETVAL TackStore::getStoreFuncs(TackStoreFuncs* store, std::string* name)
