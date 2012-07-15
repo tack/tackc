@@ -124,14 +124,15 @@ TACK_RETVAL TackStoreDefault::deletePin(std::string& name)
 
 std::string TackStoreDefault::getStringDump()
 {   
-    std::string result;
+    std::string result("");
 
     result += std::string("Name Records:\n");
     std::map<std::string, NameRecord>::iterator ni = nameRecords.begin();
     for (; ni != nameRecords.end(); ni++) {
         char nextLine[1000];
-        sprintf(nextLine, "%s %s initial=%d end=%d\n", 
+        sprintf(nextLine, "%s %d %s initial=%u end=%u\n", 
                 ni->first.c_str(), 
+                (uint32_t)ni->first.size(),
                 ni->second.keyFingerprint.c_str(),
                 ni->second.initialTime,
                 ni->second.endTime);
