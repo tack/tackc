@@ -41,11 +41,11 @@ TACK_RETVAL tackStoreNewPin(void* arg, void* name, TackPinStruct* pin)
     return store->newPin(*nameStr, pin);
 }
 
-TACK_RETVAL tackStoreUpdatePin(void* arg, void* name, uint32_t newActivePeriodEnd)
+TACK_RETVAL tackStoreUpdatePin(void* arg, void* name, uint32_t newEndTime)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
-    return store->updatePin(*nameStr, newActivePeriodEnd);    
+    return store->updatePin(*nameStr, newEndTime);    
 }
 
 TACK_RETVAL tackStoreDeletePin(void* arg, void* name)

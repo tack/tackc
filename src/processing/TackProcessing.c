@@ -172,8 +172,6 @@ TACK_RETVAL tackProcessBreakSigs(uint8_t* tackExt,
     return TACK_OK;
 }
 
-#include <stdio.h>
-
 TACK_RETVAL tackProcessPinActivation(void* name, 
                                      uint8_t* tackExt,
                                      uint32_t currentTime,
@@ -213,7 +211,7 @@ TACK_RETVAL tackProcessPinActivation(void* name,
     
     /* The first step in pin activation is to delete a relevant but inactive
        pin unless there is a tack and the pin references the tack's key */
-    if (pin && (pin->activePeriodEnd <= currentTime) && !tackMatchesPin) {
+    if (pin && (pin->endTime <= currentTime) && !tackMatchesPin) {
         if ((retval=store->deletePin(store->arg, name)) < TACK_OK)
             return retval;
         pin = NULL;
@@ -244,7 +242,7 @@ TACK_RETVAL tackProcessPinActivation(void* name,
         pinStruct.minGeneration = tackTackGetMinGeneration(tack);
         strcpy(pinStruct.keyFingerprint, tackFingerprint);
         pinStruct.initialTime = currentTime;
-        pinStruct.activePeriodEnd = 0;
+        pinStruct.endTime = 0;
         retval = store->newPin(store->arg, name, &pinStruct);
         if (retval != TACK_OK)
             return retval;
@@ -272,7 +270,7 @@ TACK_RETVAL tackProcessResult(void* name, uint8_t* tackExt, uint32_t currentTime
         return retval;
 
     /* If there's a relevant active pin... */
-    if (pin && pin->activePeriodEnd > currentTime) {
+    if (pin && pin->endTime > currentTime) {
         if (tackMatchesPin)
             return TACK_OK_ACCEPTED;
         else

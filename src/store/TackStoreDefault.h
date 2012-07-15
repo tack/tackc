@@ -37,7 +37,7 @@ public:
     virtual TACK_RETVAL getPin(std::string& name, TackPinStruct* pin) OVERRIDE;
     virtual TACK_RETVAL newPin(std::string& name, TackPinStruct* pin) OVERRIDE;  
     virtual TACK_RETVAL updatePin(std::string& name, 
-                                  uint32_t newActivePeriodEnd) OVERRIDE;  
+                                  uint32_t newEndTime) OVERRIDE;  
     virtual TACK_RETVAL deletePin(std::string& name) OVERRIDE;
 
     virtual std::string getStringDump() OVERRIDE;
@@ -56,11 +56,11 @@ private:
         NameRecord();
         NameRecord(std::string newKeyFingerprint,
                    uint32_t newInitialTime,
-                   uint32_t newActivePeriodEnd);
+                   uint32_t newEndTime);
 
         std::string keyFingerprint;
         uint32_t initialTime;
-        uint32_t activePeriodEnd;
+        uint32_t endTime;
     };
     
     // Maps names to name records

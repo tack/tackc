@@ -14,6 +14,14 @@ extern "C" {
 #include "TackRetval.h"
 #include "TackFingerprints.h"
 
+/* Used to fetch the relevant pin (if any) */
+typedef struct {
+    char keyFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
+    uint8_t minGeneration;
+    uint32_t initialTime;
+    uint32_t endTime;
+} TackPinStruct;
+
 /* The following callbacks are used by tackExtensionProcess() to implement
    client processing */
 
@@ -34,15 +42,6 @@ typedef TACK_RETVAL (*TackUpdateKeyRecordFunc)(void* arg, char* keyFingerprint,
 */
 typedef TACK_RETVAL (*TackDeleteKeyRecordFunc)(void* arg, char* keyFingerprint);
 
-
-/* Used to fetch the relevant pin (if any) */
-typedef struct {
-    char keyFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-    uint8_t minGeneration;
-    uint32_t initialTime;
-    uint32_t activePeriodEnd;
-} TackPinStruct;
-
 /* Get the relevant pin 
    If the name record does not exist, return TACK_OK_NOT_FOUND
    If the name record has no key record, return TACK_ERR_MISSING_KEY_RECORD
@@ -55,7 +54,7 @@ typedef TACK_RETVAL (*TackNewPinFunc)(void* arg, void* name,
                                        TackPinStruct* pin);
 
 typedef TACK_RETVAL (*TackUpdatePinFunc)(void* arg, void* name, 
-                                         uint32_t newActivePeriodEnd);
+                                         uint32_t newEndTime);
 
 
 /* Delete a relevant but inactive pin

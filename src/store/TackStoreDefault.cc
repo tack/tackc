@@ -12,10 +12,10 @@ TackStoreDefault::NameRecord::NameRecord(){}
 
 TackStoreDefault::NameRecord::NameRecord(std::string newKeyFingerprint,
                                          uint32_t newInitialTime,
-                                         uint32_t newActivePeriodEnd):
+                                         uint32_t newEndTime):
     keyFingerprint(newKeyFingerprint),
     initialTime(newInitialTime),
-    activePeriodEnd(newActivePeriodEnd){}
+    endTime(newEndTime){}
 
 // TackStoreDefault methods
 
@@ -82,7 +82,7 @@ TACK_RETVAL TackStoreDefault::getPin(std::string& name, TackPinStruct* pin)
     strcpy(pin->keyFingerprint, nameRecord.keyFingerprint.c_str());
     pin->minGeneration = keyRecord.minGeneration;
     pin->initialTime = nameRecord.initialTime;
-    pin->activePeriodEnd = nameRecord.activePeriodEnd;
+    pin->endTime = nameRecord.endTime;
     
     return TACK_OK;
 }
@@ -95,18 +95,18 @@ TACK_RETVAL TackStoreDefault::newPin(std::string& name, TackPinStruct* pin)
     if (ki == keyRecords.end())
         keyRecords[keyFingerprint] = KeyRecord(pin->minGeneration); 
     
-    NameRecord nameRecord(keyFingerprint, pin->initialTime, pin->activePeriodEnd);
+    NameRecord nameRecord(keyFingerprint, pin->initialTime, pin->endTime);
     nameRecords[name] = nameRecord;
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::updatePin(std::string& name, uint32_t newActivePeriodEnd)
+TACK_RETVAL TackStoreDefault::updatePin(std::string& name, uint32_t newEndTime)
 {
     std::map<std::string, NameRecord>::iterator ni = nameRecords.find(name);
     if (ni == nameRecords.end())
         return TACK_OK_NOT_FOUND;
 
-    ni->second.activePeriodEnd = newActivePeriodEnd;
+    ni->second.endTime = newEndTime;
     return TACK_OK;
 }
 
@@ -134,7 +134,7 @@ std::string TackStoreDefault::getStringDump()
                 ni->first.c_str(), 
                 ni->second.keyFingerprint.c_str(),
                 ni->second.initialTime,
-                ni->second.activePeriodEnd);
+                ni->second.endTime);
         result += std::string(nextLine);
     }
     return result;
