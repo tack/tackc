@@ -10,49 +10,48 @@
 
 #include <map>
 #include <string>
+#include "TackProcessing.h"
 #include "TackCryptoFuncs.h"
-#include "TackStoreFuncs.h"
 #include "TackRetval.h"
-
-/* C callbacks for use with tackExtensionProcess */
-TACK_RETVAL tackStoreGetKeyRecord(void* arg, char* keyFingerprint, 
-                                  uint8_t* minGeneration);
-TACK_RETVAL tackStoreUpdateKeyRecord(void* arg, char* keyFingerprint, 
-                                     uint8_t minGeneration);
-TACK_RETVAL tackStoreDeleteKeyRecord(void* arg, char* keyFingerprint);
-
-TACK_RETVAL tackStoreGetPin(void* arg, void* argName, TackPinStruct* pin);
-TACK_RETVAL tackStoreNewPin(void* arg, void* argName, TackPinStruct* pin);
-TACK_RETVAL tackStoreUpdatePin(void* arg, void* argName, uint32_t newActivePeriodEnd);
-TACK_RETVAL tackStoreDeletePin(void* arg, void* argName);
-
 
 class TackStore {
 public:
-    /* Main entry point for client processing (in C++) */
-    TACK_RETVAL process(std::string name,
-                        uint8_t* tackExt, uint32_t tackExtLen,
-                        uint8_t keyHash[TACK_HASH_LENGTH],
-                        uint32_t currentTime,
-                        uint8_t doPinActivation,
-                        TackCryptoFuncs* crypto);
+    TackStore();
+    // Configure the store's crypto functions
+    void setCryptoFuncs(TackCryptoFuncs* newCrypto);
+    TackCryptoFuncs* getCryptoFuncs();
+
+    // Configure an associated revocation store for storing
+    // keyRecord updates (use "this" to store locally)
+    void setRevocationStore(TackStore* newRevocationStore);
+    bool getRevocationStore();
+
+    // Enable pin activation for this store
+    void setPinActivation(bool newPinActivation);
+    bool getPinActivation();
+
+    /* Main entry point for client processing */
+    TACK_RETVAL process(TackProcessingContext* ctx,
+                        std::string name,
+                        uint32_t currentTime);
 
     /* Define the below functions in a subclass */
-    virtual TACK_RETVAL getKeyRecord(std::string& keyFingerprint, 
+    virtual TACK_RETVAL getMinGeneration(std::string& keyFingerprint, 
                                      uint8_t* minGeneration) = 0;
-    virtual TACK_RETVAL updateKeyRecord(std::string& keyFingerprint, 
+    virtual TACK_RETVAL setMinGeneration(std::string& keyFingerprint, 
                                         uint8_t minGeneration) = 0;
-    virtual TACK_RETVAL deleteKeyRecord(std::string& keyFingerprint) = 0;
     
-    virtual TACK_RETVAL getPin(std::string& name, TackPinStruct* pin) = 0;
-    virtual TACK_RETVAL newPin(std::string& name, TackPinStruct* pin) = 0;  
-    virtual TACK_RETVAL updatePin(std::string& name, uint32_t newActivePeriodEnd) = 0;  
+    virtual TACK_RETVAL getPin(std::string& name, TackPin* pin) = 0;
+    virtual TACK_RETVAL newPin(std::string& name, TackPin* pin) = 0;  
+    virtual TACK_RETVAL updatePin(std::string& name, uint32_t newEndTime) = 0;  
     virtual TACK_RETVAL deletePin(std::string& name) = 0;
 
     virtual std::string getStringDump() = 0;
 
 private:
-    TACK_RETVAL getStoreFuncs(TackStoreFuncs* store);
+    TackCryptoFuncs* crypto;
+    TackStore* revocationStore;
+    bool pinActivation;
 };
 
 #endif

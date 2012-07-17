@@ -19,23 +19,13 @@ public:
     TackStoreDefault();
     ~TackStoreDefault();
 
-    /* Main entry point for client processing
-    TACK_RETVAL process(std::string name, 
-                        uint8_t* tackExt, uint32_t tackExtLen, 
-                        uint8_t keyHash[TACK_HASH_LENGTH],
-                        uint32_t currentTime,
-                        uint8_t doPinActivation,
-                        TackCryptoFuncs* crypto);
-    */
-
-    virtual TACK_RETVAL getKeyRecord(std::string& keyFingerprint,
-                                     uint8_t* minGeneration) OVERRIDE;
-    virtual TACK_RETVAL updateKeyRecord(std::string& keyFingerprint, 
-                                        uint8_t minGeneration) OVERRIDE;
-    virtual TACK_RETVAL deleteKeyRecord(std::string& keyFingerprint) OVERRIDE;
+    virtual TACK_RETVAL getMinGeneration(std::string& keyFingerprint,
+                                         uint8_t* minGeneration) OVERRIDE;
+    virtual TACK_RETVAL setMinGeneration(std::string& keyFingerprint, 
+                                         uint8_t minGeneration) OVERRIDE;
     
-    virtual TACK_RETVAL getPin(std::string& name, TackPinStruct* pin) OVERRIDE;
-    virtual TACK_RETVAL newPin(std::string& name, TackPinStruct* pin) OVERRIDE;  
+    virtual TACK_RETVAL getPin(std::string& name, TackPin* pin) OVERRIDE;
+    virtual TACK_RETVAL newPin(std::string& name, TackPin* pin) OVERRIDE;  
     virtual TACK_RETVAL updatePin(std::string& name, 
                                   uint32_t newEndTime) OVERRIDE;  
     virtual TACK_RETVAL deletePin(std::string& name) OVERRIDE;
@@ -43,31 +33,12 @@ public:
     virtual std::string getStringDump() OVERRIDE;
     
 private:
-    class KeyRecord {
-    public:
-        KeyRecord();
-        KeyRecord(uint8_t newMinGeneration);
-
-        uint8_t minGeneration;
-    };
     
-    class NameRecord {
-    public:
-        NameRecord();
-        NameRecord(std::string newKeyFingerprint,
-                   uint32_t newInitialTime,
-                   uint32_t newEndTime);
-
-        std::string keyFingerprint;
-        uint32_t initialTime;
-        uint32_t endTime;
-    };
+    // Maps names to name records (but ignore TackPin.minGeneration)
+    std::map<std::string, TackPin> nameRecords;
     
-    // Maps names to name records
-    std::map<std::string, NameRecord> nameRecords;
-    
-    // Maps key fingerprints to key records
-    std::map<std::string, KeyRecord> keyRecords;
+    // Maps key fingerprints to minGenerations
+    std::map<std::string, uint8_t> keyRecords;
 };
 
 #endif

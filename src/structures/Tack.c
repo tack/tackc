@@ -55,33 +55,3 @@ TACK_RETVAL tackTackVerifySignature(uint8_t* tack, TackCryptoFuncs* crypto)
                           tackTackGetSignature(tack), 
                           signedData, TACK_SIGDATA_LENGTH);
 }
-
-
-TACK_RETVAL tackTackProcess(uint8_t* tack,
-                            uint8_t keyHash[TACK_HASH_LENGTH],
-                            uint8_t* minGeneration,
-                            uint32_t currentTime,
-                            TackCryptoFuncs* crypto)
-{
-    TACK_RETVAL retval = TACK_ERR;
-
-    /* Check generation, expiration, target_hash */
-    if (tackTackGetGeneration(tack) < *minGeneration)
-        return TACK_ERR_REVOKED_GENERATION;
-
-    if (tackTackGetExpiration(tack) < currentTime)
-        return TACK_ERR_EXPIRED_EXPIRATION;
-
-    if (memcmp(tackTackGetTargetHash(tack), keyHash, TACK_HASH_LENGTH) != 0)
-        return TACK_ERR_MISMATCHED_TARGET_HASH;
-
-    /* Verify signature (implicitly checks public_key) */
-    if ((retval=tackTackVerifySignature(tack, crypto)) != TACK_OK)
-        return retval;
-    
-    /* Update min_generation if tack's value is larger */
-    if (tackTackGetMinGeneration(tack) > *minGeneration)
-        *minGeneration = tackTackGetMinGeneration(tack);
-
-    return TACK_OK;
-}

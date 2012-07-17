@@ -12,7 +12,6 @@ extern "C" {
 
 #include "TackRetval.h"
 #include "TackCryptoFuncs.h"
-#include "TackStoreFuncs.h"
 #include "Tack.h"
 #include "TackBreakSig.h"
 

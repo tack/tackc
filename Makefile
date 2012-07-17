@@ -6,7 +6,6 @@ HEADERS = src/structures/Tack.h \
 	src/util/TackUtil.h \
 	src/util/TackFingerprints.h \
 	src/crypto/TackCryptoFuncs.h \
-	src/store/TackStoreFuncs.h \
 	src/processing/TackProcessing.h
 
 SRCS = src/structures/Tack.c \

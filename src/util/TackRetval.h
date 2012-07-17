@@ -24,6 +24,10 @@ const char* tackRetvalString(TACK_RETVAL error);
 #define TACK_OK_REJECTED                         0x00001002
 #define TACK_OK_UNPINNED                         0x00001003
 
+#define TACK_OK_DELETE_PIN                       0x00002001
+#define TACK_OK_UPDATE_PIN                       0x00002002
+#define TACK_OK_NEW_PIN                          0x00002003
+
 /* Error values are less than TACK_OK */
 
 #define TACK_ERR                                -0x00000001

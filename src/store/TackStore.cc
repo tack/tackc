@@ -1,90 +1,81 @@
+/* Authors: 
+ *   Trevor Perrin
+ *
+ * See the LICENSE file for legal information regarding use of this file.
+ */
 
 #include "TackStore.h"
 #include "TackProcessing.h"
 
-// C Callbacks
+void TackStore::setCryptoFuncs(TackCryptoFuncs* newCrypto){crypto=newCrypto;}
+TackCryptoFuncs* TackStore::getCryptoFuncs(){return crypto;}
 
-TACK_RETVAL tackStoreGetKeyRecord(void* arg, char* keyFingerprint, 
-                                  uint8_t* minGeneration)
-{
-    TackStore* store = (TackStore*)arg;
-    std::string fingerprint(keyFingerprint);
-    return store->getKeyRecord(fingerprint, minGeneration);
+void TackStore::setRevocationStore(TackStore* newRevocationStore) {
+    revocationStore = newRevocationStore;
 }
+bool TackStore::getRevocationStore(){return revocationStore;}
 
-TACK_RETVAL tackStoreUpdateKeyRecord(void* arg, char* keyFingerprint, 
-                                     uint8_t minGeneration)
+void TackStore::setPinActivation(bool newPinActivation){pinActivation=newPinActivation;}
+bool TackStore::getPinActivation(){return pinActivation;}
+
+TackStore::TackStore():crypto(NULL),revocationStore(NULL),pinActivation(false){}
+
+
+TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
+                               std::string name,
+                               uint32_t currentTime)
 {
-    TackStore* store = (TackStore*)arg;
-    std::string fingerprint(keyFingerprint);
-    return store->updateKeyRecord(fingerprint, minGeneration);
-}
+    TACK_RETVAL retval = TACK_ERR, resultRetval = TACK_ERR;
 
-TACK_RETVAL tackStoreDeleteKeyRecord(void* arg, char* keyFingerprint)
-{
-    TackStore* store = (TackStore*)arg;
-    std::string fingerprint(keyFingerprint);
-    return store->deleteKeyRecord(fingerprint);
-}
+    TackPin pinStruct;
+    TackPin* pin = NULL;
+    uint8_t minGeneration = 0;
+    TackPin pinOut;
+    TACK_RETVAL activationRetval = TACK_ERR;
+    uint8_t minGenerationOut = 0;
+    std::string tackFingerprint;
 
-TACK_RETVAL tackStoreGetPin(void* arg, void* name, TackPinStruct* pin)
-{
-    TackStore* store = (TackStore*)arg;
-    std::string* nameStr = (std::string*)name;
-    return store->getPin(*nameStr, pin);
-}
-
-TACK_RETVAL tackStoreNewPin(void* arg, void* name, TackPinStruct* pin)
-{
-    TackStore* store = (TackStore*)arg;
-    std::string* nameStr = (std::string*)name;
-    return store->newPin(*nameStr, pin);
-}
-
-TACK_RETVAL tackStoreUpdatePin(void* arg, void* name, uint32_t newEndTime)
-{
-    TackStore* store = (TackStore*)arg;
-    std::string* nameStr = (std::string*)name;
-    return store->updatePin(*nameStr, newEndTime);    
-}
-
-TACK_RETVAL tackStoreDeletePin(void* arg, void* name)
-{
-    TackStore* store = (TackStore*)arg;
-    std::string* nameStr = (std::string*)name;
-    return store->deletePin(*nameStr);    
-}
-
-TACK_RETVAL TackStore::process(std::string name,
-                               uint8_t* tackExt, uint32_t tackExtLen,
-                               uint8_t keyHash[TACK_HASH_LENGTH],
-                               uint32_t currentTime,
-                               uint8_t doPinActivation,
-                               TackCryptoFuncs* crypto)
-{
-    TACK_RETVAL retval = TACK_ERR;
-    TackStoreFuncs store;
-
-    /* Prepare the C structure containing store callbacks */
-    if ((retval=getStoreFuncs(&store)) != TACK_OK)
+    /* Get the relevant pin, if any */
+    if ((retval=getPin(name, &pinStruct)) < TACK_OK)
         return retval;
+    if (retval == TACK_OK)
+        pin = &pinStruct;
 
-    /* Execute client processing */
-    return tackProcess(&name, tackExt, tackExtLen, keyHash, currentTime, doPinActivation,
-                       &store, crypto);
+    /* Get the key's stored minGeneration, if any */
+    if (ctx->tack) {
+        tackFingerprint = std::string(ctx->tackFingerprint);
+        if ((retval=getMinGeneration(tackFingerprint, &minGeneration)) < TACK_OK)
+            return retval;
+    }
+
+    /* Process everything */
+    if ((retval=tackProcessStore(ctx, currentTime, pin, minGeneration, 
+                                 &activationRetval, &pinOut, &minGenerationOut, 
+                                 crypto)) < TACK_OK)
+        return retval;
+    resultRetval = retval;
+
+    // Handle any revocation
+    if (revocationStore && minGenerationOut > minGeneration) {
+        revocationStore->setMinGeneration(tackFingerprint, minGenerationOut);
+    }
+    // Handle pin activation results
+    if (pinActivation) {
+        // If a new pin was created (perhaps replacing an old one)
+        if (activationRetval == TACK_OK_NEW_PIN) {
+            if ((retval=newPin(name, &pinOut)) != TACK_OK)
+                return retval;
+        }
+        // Or if a pin's activation period (endTime) was extended
+        else if (activationRetval == TACK_OK_UPDATE_PIN) {
+            if ((retval=updatePin(name, pinOut.endTime)) != TACK_OK)
+                return retval;
+        }
+        // Or if an inactive pin was deleted
+        else if (activationRetval == TACK_OK_DELETE_PIN) {
+            if ((retval=deletePin(name)) != TACK_OK)
+                return retval;
+        }
+    }
+    return resultRetval;
 }
-
-TACK_RETVAL TackStore::getStoreFuncs(TackStoreFuncs* store)
-{
-    store->arg = this;
-    store->getKeyRecord = tackStoreGetKeyRecord;
-    store->updateKeyRecord = tackStoreUpdateKeyRecord;
-    store->deleteKeyRecord = tackStoreDeleteKeyRecord;
-    store->getPin = tackStoreGetPin;
-    store->newPin = tackStoreNewPin;
-    store->updatePin = tackStoreUpdatePin;
-    store->deletePin = tackStoreDeletePin;
-    return TACK_OK;
-}
-
-

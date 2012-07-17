@@ -14,6 +14,9 @@ const char* tackRetvalString(TACK_RETVAL retval)
     case TACK_OK_ACCEPTED: return "OK ACCEPTED";
     case TACK_OK_REJECTED: return "OK REJECTED";
     case TACK_OK_UNPINNED: return "OK UNPINNED";
+    case TACK_OK_DELETE_PIN: return "OK DELETE PIN";
+    case TACK_OK_UPDATE_PIN: return "OK UPDATE PIN";
+    case TACK_OK_NEW_PIN: return "OK NEW PIN";
     case TACK_ERR: return "GENERIC ERROR";
     case TACK_ERR_BAD_GENERATION: return "BAD GENERATION";
     case TACK_ERR_BAD_ACTIVATION_FLAG: return "BAD ACTIVATION FLAG";

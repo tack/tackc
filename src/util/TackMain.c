@@ -10,6 +10,7 @@
 #include "TackRetval.h"
 #include "TackExtension.h"
 #include "TackFingerprints.h"
+#include "TackProcessing.h"
 
 #ifdef TACKC_OPENSSL
 #include "TackOpenSSL.h"
@@ -72,6 +73,9 @@ TACK_RETVAL test(int argc, char* argv[])
     uint32_t tackExtLen = nbytes;
     
     TackStoreDefault store;
+    store.setRevocationStore(&store);
+    store.setCryptoFuncs(tackOpenSSL);
+    store.setPinActivation(true);
     
     uint32_t currentTime = 123;
 
@@ -81,47 +85,34 @@ TACK_RETVAL test(int argc, char* argv[])
     if (tack) {
         targetHash = tackTackGetTargetHash(tack);
     }
-    TACK_RETVAL retval = store.process("alpha.com", tackExt, tackExtLen, 
-                                       targetHash, 
-                                       currentTime, 
-                                       1, 
-                                       tackOpenSSL);
-    printf("retval = %s\n", tackRetvalString(retval));
-
-
-    retval = store.process("alpha.com", tackExt, tackExtLen, 
-                           targetHash, 
-                           currentTime+100, 
-                           1, 
-                           tackOpenSSL);
-    printf("retval = %s\n", tackRetvalString(retval));
     
-    retval = store.process("alpha.com", tackExt, tackExtLen, 
-                           targetHash, 
-                           currentTime+101, 
-                           1, 
-                           tackOpenSSL);
+    TackProcessingContext ctx;
+    TACK_RETVAL retval = tackProcessWellFormed(tackExt, tackExtLen, targetHash,
+                                   currentTime, &ctx, tackOpenSSL);
+    printf("Well formed retval = %s\n", tackRetvalString(retval));
+
+    retval = store.process(&ctx, "alpha.com",
+                           currentTime);
     printf("retval = %s\n", tackRetvalString(retval));
 
-    retval = store.process("alpha.com", tackExt, tackExtLen, 
-                                       targetHash, 
-                                       currentTime+1000, 
-                                       1, 
-                                       tackOpenSSL);
+    retval = store.process(&ctx, "alpha.com",
+                                       currentTime+100);
     printf("retval = %s\n", tackRetvalString(retval));
 
-    retval = store.process("alpha.com", NULL, tackExtLen, 
-                                       targetHash, 
-                                       currentTime+1001, 
-                                       1, 
-                                       tackOpenSSL);
+    retval = store.process(&ctx, "alpha.com",
+                                       currentTime+101);
     printf("retval = %s\n", tackRetvalString(retval));
 
-    retval = store.process("alpha.com", tackExt, tackExtLen, 
-                                       targetHash, 
-                                       currentTime+1002, 
-                                       1, 
-                                       tackOpenSSL);
+    retval = store.process(&ctx, "alpha.com",
+                                       currentTime+1000);
+    printf("retval = %s\n", tackRetvalString(retval));
+
+    retval = store.process(&ctx, "alpha.com",
+                                       currentTime+1001);
+    printf("retval = %s\n", tackRetvalString(retval));
+
+    retval = store.process(&ctx, "alpha.com",
+                                       currentTime+1002);
     printf("retval = %s\n", tackRetvalString(retval));
 
 
