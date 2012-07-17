@@ -7,23 +7,20 @@
 #include "TackStore.h"
 #include "TackProcessing.h"
 
-void TackStore::setCryptoFuncs(TackCryptoFuncs* newCrypto){crypto=newCrypto;}
-TackCryptoFuncs* TackStore::getCryptoFuncs(){return crypto;}
+void TackStore::setCryptoFuncs(TackCryptoFuncs* newCrypto) {crypto=newCrypto;}
+TackCryptoFuncs* TackStore::getCryptoFuncs() {return crypto;}
 
 void TackStore::setRevocationStore(TackStore* newRevocationStore) {
-    revocationStore = newRevocationStore;
-}
-bool TackStore::getRevocationStore(){return revocationStore;}
+    revocationStore = newRevocationStore;}
+bool TackStore::getRevocationStore() {return revocationStore;}
 
-void TackStore::setPinActivation(bool newPinActivation){pinActivation=newPinActivation;}
-bool TackStore::getPinActivation(){return pinActivation;}
-
-TackStore::TackStore():crypto(NULL),revocationStore(NULL),pinActivation(false){}
+TackStore::TackStore():crypto(NULL),revocationStore(this) {}
 
 
 TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                                std::string name,
-                               uint32_t currentTime)
+                               uint32_t currentTime,
+                               bool doPinActivation)
 {
     TACK_RETVAL retval = TACK_ERR, resultRetval = TACK_ERR;
 
@@ -60,7 +57,7 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
         revocationStore->setMinGeneration(tackFingerprint, minGenerationOut);
     }
     // Handle pin activation results
-    if (pinActivation) {
+    if (doPinActivation) {
         // If a new pin was created (perhaps replacing an old one)
         if (activationRetval == TACK_OK_NEW_PIN) {
             if ((retval=newPin(name, &pinOut)) != TACK_OK)

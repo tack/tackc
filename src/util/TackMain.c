@@ -73,9 +73,7 @@ TACK_RETVAL test(int argc, char* argv[])
     uint32_t tackExtLen = nbytes;
     
     TackStoreDefault store;
-    store.setRevocationStore(&store);
     store.setCryptoFuncs(tackOpenSSL);
-    store.setPinActivation(true);
     
     uint32_t currentTime = 123;
 
@@ -92,27 +90,27 @@ TACK_RETVAL test(int argc, char* argv[])
     printf("Well formed retval = %s\n", tackRetvalString(retval));
 
     retval = store.process(&ctx, "alpha.com",
-                           currentTime);
+                           currentTime, true);
     printf("retval = %s\n", tackRetvalString(retval));
 
     retval = store.process(&ctx, "alpha.com",
-                                       currentTime+100);
+                           currentTime+100, true);
     printf("retval = %s\n", tackRetvalString(retval));
 
     retval = store.process(&ctx, "alpha.com",
-                                       currentTime+101);
+                           currentTime+101, true);
     printf("retval = %s\n", tackRetvalString(retval));
 
     retval = store.process(&ctx, "alpha.com",
-                                       currentTime+1000);
+                           currentTime+1000, true);
     printf("retval = %s\n", tackRetvalString(retval));
 
     retval = store.process(&ctx, "alpha.com",
-                                       currentTime+1001);
+                           currentTime+1001, true);
     printf("retval = %s\n", tackRetvalString(retval));
 
     retval = store.process(&ctx, "alpha.com",
-                                       currentTime+1002);
+                           currentTime+1002, true);
     printf("retval = %s\n", tackRetvalString(retval));
 
 

@@ -22,18 +22,15 @@ public:
     TackCryptoFuncs* getCryptoFuncs();
 
     // Configure an associated revocation store for storing
-    // keyRecord updates (use "this" to store locally)
+    // keyRecord updates (defaults to "this", can be set to NULL)
     void setRevocationStore(TackStore* newRevocationStore);
     bool getRevocationStore();
-
-    // Enable pin activation for this store
-    void setPinActivation(bool newPinActivation);
-    bool getPinActivation();
 
     /* Main entry point for client processing */
     TACK_RETVAL process(TackProcessingContext* ctx,
                         std::string name,
-                        uint32_t currentTime);
+                        uint32_t currentTime,
+                        bool doPinActivation);
 
     /* Define the below functions in a subclass */
     virtual TACK_RETVAL getMinGeneration(std::string& keyFingerprint, 
@@ -51,7 +48,6 @@ public:
 private:
     TackCryptoFuncs* crypto;
     TackStore* revocationStore;
-    bool pinActivation;
 };
 
 #endif
