@@ -11,6 +11,7 @@
 #include "TackExtension.h"
 #include "TackFingerprints.h"
 #include "TackProcessing.h"
+#include "TackUtil.h"
 
 #ifdef TACKC_OPENSSL
 #include "TackOpenSSL.h"
@@ -69,8 +70,15 @@ TACK_RETVAL test(int argc, char* argv[])
 
 #ifdef TACKC_CPP
 
-    uint8_t* tackExt = inbuf;
-    uint32_t tackExtLen = nbytes;
+    TACK_RETVAL retval;
+
+    uint8_t outbuf[2048];
+    uint32_t outbufLen;
+    char label[] ="TACK EXTENSION";
+    retval=tackDePem(label, inbuf, nbytes, outbuf, &outbufLen);
+
+    uint8_t* tackExt = outbuf;
+    uint32_t tackExtLen = outbufLen;
     
     TackStoreDefault store;
     store.setCryptoFuncs(tackOpenSSL);
@@ -85,7 +93,7 @@ TACK_RETVAL test(int argc, char* argv[])
     }
     
     TackProcessingContext ctx;
-    TACK_RETVAL retval = tackProcessWellFormed(tackExt, tackExtLen, targetHash,
+    retval = tackProcessWellFormed(tackExt, tackExtLen, targetHash,
                                    currentTime, &ctx, tackOpenSSL);
     printf("Well formed retval = %s\n", tackRetvalString(retval));
 

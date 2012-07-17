@@ -22,7 +22,7 @@ public:
     TackCryptoFuncs* getCryptoFuncs();
 
     // Configure an associated revocation store for storing
-    // keyRecord updates (defaults to "this", can be set to NULL)
+    // minGeneration updates (defaults to "this", can be set to NULL)
     void setRevocationStore(TackStore* newRevocationStore);
     bool getRevocationStore();
 
