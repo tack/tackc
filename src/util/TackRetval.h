@@ -51,6 +51,9 @@ const char* tackRetvalString(TACK_RETVAL error);
 
 #define TACK_ERR_CORRUPTED_STORE                -0x00006001
 
+#define TACK_ERR_BAD_PEM                        -0x00007001
+#define TACK_ERR_BAD_BASE64                     -0x00007002
+
 #ifdef __cplusplus
 }
 #endif

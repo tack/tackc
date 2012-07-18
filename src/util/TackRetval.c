@@ -31,6 +31,8 @@ const char* tackRetvalString(TACK_RETVAL retval)
     case TACK_ERR_REVOKED_GENERATION: return "REVOKED GENERATION";
     case TACK_ERR_EXPIRED_EXPIRATION: return "EXPIRED EXPIRATION";
     case TACK_ERR_CORRUPTED_STORE: return "CORRUPTED STORE";
+    case TACK_ERR_BAD_PEM: return "BAD PEM";
+    case TACK_ERR_BAD_BASE64: return "BAD BASE64";
     default: return "uknown error?!";
     }
 }	

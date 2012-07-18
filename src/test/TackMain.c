@@ -12,6 +12,7 @@
 #include "TackFingerprints.h"
 #include "TackProcessing.h"
 #include "TackUtil.h"
+#include "TackTest.h"
 
 #ifdef TACKC_OPENSSL
 #include "TackOpenSSL.h"
@@ -72,6 +73,10 @@ TACK_RETVAL test(int argc, char* argv[])
 
     TACK_RETVAL retval;
 
+    retval=tackTestProcessInit();
+    printf("TEST INIT = %s\n", tackRetvalString(retval));
+    return retval;
+
     uint8_t outbuf[2048];
     uint32_t outbufLen;
     char label[] ="TACK EXTENSION";
@@ -87,6 +92,7 @@ TACK_RETVAL test(int argc, char* argv[])
 
     uint8_t* tack = NULL;
     uint8_t* targetHash = NULL;
+
     tack = tackExtensionGetTack(tackExt);
     if (tack) {
         targetHash = tackTackGetTargetHash(tack);

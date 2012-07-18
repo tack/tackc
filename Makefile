@@ -6,7 +6,8 @@ HEADERS = src/structures/Tack.h \
 	src/util/TackUtil.h \
 	src/util/TackFingerprints.h \
 	src/crypto/TackCryptoFuncs.h \
-	src/processing/TackProcessing.h
+	src/processing/TackProcessing.h \
+	src/test/TackTest.h
 
 SRCS = src/structures/Tack.c \
 	src/structures/TackBreakSig.c \
@@ -14,8 +15,9 @@ SRCS = src/structures/Tack.c \
 	src/util/TackRetval.c \
 	src/util/TackUtil.c \
 	src/util/TackFingerprints.c \
-	src/util/TackMain.c \
-	src/processing/TackProcessing.c
+	src/processing/TackProcessing.c \
+	src/test/TackMain.c \
+	src/test/TackTestProcessing.c
 
 DEFINES = 
 INCLUDEDIRS = -I/opt/local/include -Isrc/structures -Isrc/util -Isrc/crypto -Isrc/store \

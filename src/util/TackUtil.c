@@ -64,20 +64,20 @@ TACK_RETVAL tackBase64Decode(uint8_t* in, uint32_t inLen,
     uint32_t count;
     uint8_t* outStart = out;
  
-    for (count=0; count < inLen; count++) {
-        if (base64Digits[*in] == 99) {return TACK_ERR;}
+    for (count=0; count*4 < inLen; count++) {
+        if (base64Digits[*in] == 99) {return TACK_ERR_BAD_BASE64;}
         while (base64Digits[*in] == 98) in++; /* CR or LF */
         a = base64Digits[*in++];
 
-        if (base64Digits[*in] == 99) {return TACK_ERR;}
+        if (base64Digits[*in] == 99) {return TACK_ERR_BAD_BASE64;}
         while (base64Digits[*in] == 98) in++; /* CR or LF */
         b = base64Digits[*in++];
 
-        if (base64Digits[*in] == 99) {return TACK_ERR;}
+        if (base64Digits[*in] == 99) {return TACK_ERR_BAD_BASE64;}
         while (base64Digits[*in] == 98) in++; /* CR or LF */
         c = base64Digits[*in++];
 
-        if (base64Digits[*in] == 99) {return TACK_ERR;}
+        if (base64Digits[*in] == 99) {return TACK_ERR_BAD_BASE64;}
         while (base64Digits[*in] == 98) in++; /* CR or LF */
         d = base64Digits[*in++];
 
@@ -102,7 +102,7 @@ TACK_RETVAL tackDePem(char* label, uint8_t* in, uint32_t inLen,
     uint32_t startLen = 0;
     char endLabel[256];
     uint32_t endLen = 0;
-    int32_t startIndex=-1, endIndex=-1;
+    int32_t startIndex=0;
 
     if (strlen(label) > 100)
         return TACK_ERR;
@@ -114,18 +114,20 @@ TACK_RETVAL tackDePem(char* label, uint8_t* in, uint32_t inLen,
 
     for (count=0; count < inLen - startLen; count++) {
         if (memcmp((in + count), startLabel, startLen) == 0)
-            startIndex = count;
+            break;
     }
-    if (startIndex == -1)
-        return TACK_ERR_BAD_GENERATION;
-    startIndex += startLen;
+    if (count == inLen - startLen) {
+        return TACK_ERR_BAD_PEM;
+    }
+    startIndex = count + startLen;
     
-    for (count=0; count < inLen - (endLen + startIndex); count++) {
+    for (count=0; count < inLen - (endLen + startIndex) + 1; count++) {
         if (memcmp((in + startIndex + count), endLabel, endLen) == 0)
-            endIndex = count;
+            break;
     }
-    if (endIndex == -1)
-        return TACK_ERR_BAD_PUBKEY;
+    if (count == inLen - (endLen + startIndex) + 1) {
+        return TACK_ERR_BAD_PEM;
+    }
 
-    return tackBase64Decode(in + startIndex, endIndex - startIndex, out, outLen);
+    return tackBase64Decode(in + startIndex, count, out, outLen);
 }
