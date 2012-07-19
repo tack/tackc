@@ -73,8 +73,8 @@ TACK_RETVAL test(int argc, char* argv[])
 
     TACK_RETVAL retval;
 
-    retval=tackTestProcessInit();
-    printf("TEST INIT = %s\n", tackRetvalString(retval));
+    retval=tackTestProcessWellFormed(tackOpenSSL);
+    printf("TEST WELLFORMED = %s\n", tackRetvalString(retval));
     return retval;
 
     uint8_t outbuf[2048];

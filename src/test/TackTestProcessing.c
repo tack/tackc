@@ -7,6 +7,7 @@
 #include <string.h>
 #include "TackProcessing.h"
 #include "TackExtension.h"
+#include "Tack.h"
 #include "TackUtil.h"
 #include "TackTest.h"
 
@@ -107,8 +108,120 @@ TACK_RETVAL tackTestProcessInit()
     return retval;
 }
 
-TACK_RETVAL tackTestProcessWellFormed()
-{
+#define ASSERT(x) if (!(x)) return TACK_ERR_ASSERTION;
+
+TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
+    
+    TACK_RETVAL retval;
+    TackProcessingContext ctx;
+    uint8_t* keyHash;
+    uint8_t* tack;
+    uint32_t count=0;
+    uint32_t expirationTime;
+
+    TCHECK(tackTestProcessInit());
+
+    tack = tackExtensionGetTack(tackExtET1);
+    keyHash = tackTackGetTargetHash(tack);
+
+    /* Test with NULL input */
+    TCHECK(tackProcessWellFormed(NULL, 170, keyHash, 123, &ctx, crypto));
+    ASSERT(ctx.tackExt == NULL);
+    ASSERT(ctx.tack == NULL);
+    ASSERT(strlen(ctx.tackFingerprint) == 0);
+    ASSERT(ctx.breakSigFlags == 0);
+
+    /* Test tack ext lengths (copied code for E, ET1, EB1, EB1T2 */
+    /* Test that errors are returned for a range of bad lengths */
+    TCHECK(tackProcessWellFormed(tackExtE, tackExtELen, keyHash, 123, &ctx, crypto));
+    for (count=0; count < tackExtELen+10; count++) {
+        if (count == tackExtELen) continue;
+        TCHECK_VAL(tackProcessWellFormed(tackExtE, count, keyHash, 123, &ctx, crypto),
+                   TACK_ERR_BAD_TACKEXT_LENGTH);
+    }
+
+    TCHECK(tackProcessWellFormed(tackExtET1, tackExtET1Len, keyHash, 123, &ctx, crypto));
+    for (count=0; count < tackExtET1Len+10; count++) {
+        if (count == tackExtET1Len) continue;
+        TCHECK_VAL(tackProcessWellFormed(tackExtET1, count, keyHash, 123, &ctx, crypto),
+                   TACK_ERR_BAD_TACKEXT_LENGTH);
+    }
+
+    TCHECK(tackProcessWellFormed(tackExtEB1, tackExtEB1Len, keyHash, 123, &ctx, 
+                                 crypto));
+    for (count=0; count < tackExtEB1Len+10; count++) {
+        if (count == tackExtEB1Len) continue;
+        TCHECK_VAL(tackProcessWellFormed(tackExtEB1, count, keyHash, 123, &ctx, crypto),
+                   TACK_ERR_BAD_TACKEXT_LENGTH);
+    }
+
+    TCHECK(tackProcessWellFormed(tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, &ctx, 
+                                 crypto));
+    for (count=0; count < tackExtEB1T2Len+10; count++) {
+        if (count == tackExtEB1T2Len) continue;
+        TCHECK_VAL(tackProcessWellFormed(tackExtEB1T2, count, keyHash, 123, &ctx, crypto),
+                   TACK_ERR_BAD_TACKEXT_LENGTH);
+    }
+
+    /* Test bad tacklength */
+    *tackExtET1 += 1;
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtET1, tackExtET1Len, keyHash, 123, &ctx, crypto),
+               TACK_ERR_BAD_TACK_LENGTH);
+    *tackExtET1 -= 1;
+    
+    /* Test bad breaksigs length */
+    /* Modify the low-order byte of the 2-byte length to be non-multiple of 128 */
+    tackExtEB1T2[2+TACK_LENGTH]++;
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, &ctx, crypto),
+               TACK_ERR_BAD_BREAKSIGS_LENGTH);
+    tackExtEB1T2[2+TACK_LENGTH]--;
+    /* Modify the high-order byte of the 2-byte length to be 4 (=9 break sigs)  */
+    tackExtEB1T2[1+TACK_LENGTH]=4;
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, &ctx, crypto),
+               TACK_ERR_BAD_BREAKSIGS_LENGTH);
+    tackExtEB1T2[1+TACK_LENGTH]=0;
+
+    /* Test bad activation flag */
+    tackExtET1[tackExtET1Len-1]+=1; /* 1->2 */
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtET1, tackExtET1Len, keyHash, 123, &ctx, crypto),
+               TACK_ERR_BAD_ACTIVATION_FLAG);
+    tackExtET1[tackExtET1Len-1]-=1;
+
+    /* Test bad generation (mingeneration > generation) */
+    tackExtET1[65]++;
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtET1, tackExtET1Len, keyHash, 123, &ctx, crypto),
+               TACK_ERR_BAD_GENERATION);
+    tackExtET1[65]--;
+
+    /* Test bad expiration */
+    tack = tackExtensionGetTack(tackExtET1);
+    expirationTime = tackTackGetExpiration(tack);
+
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtET1, tackExtET1Len, keyHash, expirationTime+1, &ctx, crypto),
+               TACK_ERR_EXPIRED_EXPIRATION);
+    
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtET1, tackExtET1Len, keyHash, 0xFFFFFFFF, &ctx, crypto),
+               TACK_ERR_EXPIRED_EXPIRATION);
+
+    /* Test bad targetHash */
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtET1, tackExtET1Len, keyHash+1, 123, &ctx, crypto),
+               TACK_ERR_MISMATCHED_TARGET_HASH);
+
+    /* Test bad signature */
+    tackExtET1[160]++;
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtET1, tackExtET1Len, keyHash, 123, &ctx, crypto),
+        TACK_ERR_BAD_SIGNATURE);
+    tackExtET1[160]--;
+
     return TACK_OK;
 }
 
