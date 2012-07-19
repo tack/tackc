@@ -14,6 +14,7 @@ extern "C" {
 #include "TackCryptoFuncs.h"
 
 TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto);
+TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto);
 
 #ifdef __cplusplus
 }

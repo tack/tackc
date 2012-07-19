@@ -64,13 +64,10 @@ TACK_RETVAL TackStoreDefault::updatePin(std::string& name, uint32_t newEndTime)
 
 TACK_RETVAL TackStoreDefault::deletePin(std::string& name)
 {
-    std::map<std::string, TackPin>::iterator ni = nameRecords.find(name);
-    if (ni == nameRecords.end())
-        return TACK_OK_NOT_FOUND;
-
-    nameRecords.erase(ni);
+    nameRecords.erase(name);
     return TACK_OK; 
 }
+
 
 std::string TackStoreDefault::getStringDump()
 {   

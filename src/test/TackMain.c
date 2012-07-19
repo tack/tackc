@@ -68,14 +68,17 @@ TACK_RETVAL test(int argc, char* argv[])
 #ifdef TACKC_NSS
     crypto = tackNss;
 #endif
+    
+    TACK_RETVAL retval;
+    
+    retval=tackTestProcessWellFormed(crypto);
+    printf("TEST WELLFORMED = %s\n", tackRetvalString(retval));
+    
+    retval=tackTestProcessStore(crypto);
+    printf("TEST STORE = %s\n", tackRetvalString(retval));
+
 
 #ifdef TACKC_CPP
-
-    TACK_RETVAL retval;
-
-    retval=tackTestProcessWellFormed(tackOpenSSL);
-    printf("TEST WELLFORMED = %s\n", tackRetvalString(retval));
-    return retval;
 
     uint8_t outbuf[2048];
     uint32_t outbufLen;
@@ -129,57 +132,6 @@ TACK_RETVAL test(int argc, char* argv[])
 
 
     printf("store dump = \n%s\n", store.getStringDump().c_str());
- 
-    /*
-    TackStore::KeyRecord kr1, kr2;
-    kr1.minGeneration = 0;
-    kr2.minGeneration = 7;
-    
-    TackStore::NameRecord nr1, nr2;
-    nr1.keyFingerprint = "g5p5x.ov4vi.dgsjv.wxctt.c5iul";
-    nr1.initialTime = 100;
-    nr1.activePeriodEnd = 200; 
-    
-    nr2.keyFingerprint = "quxiz.kpldu.uuedc.j5znm.7mqst";
-    nr2.initialTime = 1000;
-    nr2.activePeriodEnd = 2000;
-
-    std::string dn1 = "a.com";
-    std::string dn2 = "b.com";
-
-    TackStore::KeyRecord kr;
-    TackStore::NameRecord nr;
-    
-    TackStoreDefault store;
-
-    if (store.setPin(dn1, kr1, nr1) != TACK_OK)
-        printf("ERROR! TackStore retval a\n");
-    if (store.setPin(dn2, kr2, nr2) != TACK_OK)
-        printf("ERROR! TackStore retval b\n");
-
-    if (store.getPin(dn1, kr, nr) != TACK_OK)
-        printf("ERROR! TackStore retval c\n");
-    if (kr.minGeneration != kr1.minGeneration || nr.activePeriodEnd != nr1.activePeriodEnd)
-        printf("ERROR! TackStore 1\n");
-
-    if (store.getPin(dn2, kr, nr) != TACK_OK)
-        printf("ERROR! TackStore retval d\n");
-    if (kr.minGeneration != kr2.minGeneration || nr.activePeriodEnd != nr2.activePeriodEnd)
-        printf("ERROR! TackStore 2\n");
-
-    if (store.getKeyRecord(nr1.keyFingerprint, kr) != TACK_OK)
-        printf("ERROR! TackStore retval e\n");
-    if (kr.minGeneration != kr1.minGeneration)
-        printf("ERROR! TackStore 3\n");    
-
-    if (store.deleteKeyRecord(nr1.keyFingerprint) != TACK_OK)
-        printf("ERROR! TackStore retval f\n");
-
-    if (store.getPin(dn1, kr, nr) != TACK_OK_NOT_FOUND)
-        printf("ERROR! TackStore retval g %s\n", tackRetvalString(retval));
-
-    printf("TACK STORE OK\n");
-    */
 #endif
         return TACK_OK;
 }
