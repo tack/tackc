@@ -24,6 +24,10 @@ uint8_t  tackExtensionGetActivationFlag(uint8_t* tackExt);
 
 TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 
+/* Mostly internal helper functions, but may be useful in working with tackExts */
+uint8_t* tackExtensionPostTack(uint8_t* tackExt);
+uint8_t* tackExtensionPostBreakSigs(uint8_t* tackExt);
+
 #ifdef __cplusplus
 }
 #endif

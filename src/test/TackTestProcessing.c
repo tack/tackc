@@ -283,7 +283,7 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     ASSERT(minGenerationOut == 0);
     ASSERT(activationRetval == TACK_OK);
     
-    /* Test none -> inactive (UNPINNED) */
+    /* Test none -> new inactive (UNPINNED) */
     memset(&pinOut, 0, sizeof(TackPin));
     TCHECK_VAL(tackProcessStore(&ctxET1, currentTime, NULL, 0, 
                                 &activationRetval, &pinOut, &minGenerationOut, crypto),
@@ -296,6 +296,26 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     ASSERT(pinOut.endTime == 0);
     memcpy(&pin, &pinOut, sizeof(TackPin));
 
+    /* (prev case, but FLAG DISABLED */
+    memset(&pinOut, 0, sizeof(TackPin));
+    *tackExtensionPostBreakSigs(tackExtET1) = 0;
+    TCHECK_VAL(tackProcessStore(&ctxET1, currentTime, NULL, 0, 
+                                &activationRetval, &pinOut, &minGenerationOut, crypto),
+               TACK_OK_UNPINNED);
+    ASSERT(minGenerationOut == 0);
+    ASSERT(activationRetval == TACK_OK);
+    *tackExtensionPostBreakSigs(tackExtET1) = 1;
+
+    /* Test inactive pin -> active pin (UNPINNED), FLAG DISABLED FIRST */
+    memset(&pinOut, 0, sizeof(TackPin));
+    *tackExtensionPostBreakSigs(tackExtET1) = 0;
+    TCHECK_VAL(tackProcessStore(&ctxET1, currentTime+100, &pin, 0, 
+                                &activationRetval, &pinOut, &minGenerationOut, crypto),
+               TACK_OK_UNPINNED);
+    ASSERT(minGenerationOut == 0);
+    ASSERT(activationRetval == TACK_OK);
+    *tackExtensionPostBreakSigs(tackExtET1) = 1;
+
     /* Test inactive pin -> active pin (UNPINNED) */
     memset(&pinOut, 0, sizeof(TackPin));
     TCHECK_VAL(tackProcessStore(&ctxET1, currentTime+100, &pin, 0, 
@@ -304,6 +324,16 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     ASSERT(activationRetval == TACK_OK_UPDATE_PIN);
     ASSERT(pinOut.endTime == currentTime+200);
     pin.endTime = pinOut.endTime;
+
+    /* Test active pin -> active (ACCEPTED), FLAG DISABLED FIRST */
+    memset(&pinOut, 0, sizeof(TackPin));
+    *tackExtensionPostBreakSigs(tackExtET1) = 0;
+    TCHECK_VAL(tackProcessStore(&ctxET1, currentTime+101, &pin, 0, 
+                                &activationRetval, &pinOut, &minGenerationOut, crypto),
+               TACK_OK_ACCEPTED);
+    ASSERT(minGenerationOut == 0);
+    ASSERT(activationRetval == TACK_OK);
+    *tackExtensionPostBreakSigs(tackExtET1) = 1;
 
     /* Test active pin -> active (ACCEPTED) */
     memset(&pinOut, 0, sizeof(TackPin));
@@ -314,6 +344,18 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     ASSERT(activationRetval == TACK_OK_UPDATE_PIN);
     ASSERT(pinOut.endTime == currentTime+202);
     pin.endTime = pinOut.endTime;
+
+    /* Test active pin -> active (REJECTED, nonmatching tack), FLAG DISABLED FIRST */
+    memset(&pinOut, 0, sizeof(TackPin));
+    ctxET1.tackFingerprint[0]++; /* r to s */
+    *tackExtensionPostBreakSigs(tackExtET1) = 0;
+    TCHECK_VAL(tackProcessStore(&ctxET1, currentTime+102, &pin, 0, 
+                                &activationRetval, &pinOut, &minGenerationOut, crypto),
+               TACK_OK_REJECTED);
+    ASSERT(minGenerationOut == 0);
+    ASSERT(activationRetval == TACK_OK);
+    ctxET1.tackFingerprint[0]--; /* s back to r */
+    *tackExtensionPostBreakSigs(tackExtET1) = 1;
 
     /* Test active pin -> active (REJECTED, nonmatching tack) */
     memset(&pinOut, 0, sizeof(TackPin));
@@ -332,6 +374,16 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
                TACK_OK_REJECTED);
     ASSERT(minGenerationOut == 0);
     ASSERT(activationRetval == TACK_OK);
+
+    /* Test active pin -> active/extended (UNPINNED), FLAG DISABLED FIRST */
+    memset(&pinOut, 0, sizeof(TackPin));
+    *tackExtensionPostBreakSigs(tackExtET1) = 0;
+    TCHECK_VAL(tackProcessStore(&ctxET1, currentTime+1000, &pin, 0, 
+                                &activationRetval, &pinOut, &minGenerationOut, crypto),
+               TACK_OK_UNPINNED);
+    ASSERT(minGenerationOut == 0);
+    ASSERT(activationRetval == TACK_OK);
+    *tackExtensionPostBreakSigs(tackExtET1) = 1;
 
     /* Test active pin -> active/extended (UNPINNED) */
     memset(&pinOut, 0, sizeof(TackPin));
@@ -367,6 +419,18 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     ASSERT(minGenerationOut == 0);
     ASSERT(activationRetval == TACK_OK_DELETE_PIN);
 
+    /* Test inactive -> deleted (because nonmatching tack) FLAG DISABLED FIRST */
+    memset(&pinOut, 0, sizeof(TackPin));
+    ctxET1.tackFingerprint[0]++; /* r to s */
+    *tackExtensionPostBreakSigs(tackExtET1) = 0;
+    TCHECK_VAL(tackProcessStore(&ctxET1, currentTime+10000, &pin, 0, 
+                                &activationRetval, &pinOut, &minGenerationOut, crypto),
+               TACK_OK_UNPINNED);
+    ASSERT(minGenerationOut == 0);
+    ASSERT(activationRetval == TACK_OK_DELETE_PIN);
+    ctxET1.tackFingerprint[0]--; /* r to s */
+    *tackExtensionPostBreakSigs(tackExtET1) = 1;
+
     /* Test inactive -> new/different pin (because nonmatching tack) */
     memset(&pinOut, 0, sizeof(TackPin));
     ctxET1.tackFingerprint[0]++; /* r to s */
@@ -379,6 +443,7 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     ASSERT(pinOut.minGeneration == 0);
     ASSERT(pinOut.initialTime == currentTime+10000);
     ASSERT(pinOut.endTime == 0);
+    ctxET1.tackFingerprint[0]--; /* r to s */
 
     /* OK rewinding back in time, recall that pin is active to currentTime+2002*/
     /* Let's try some break sigs! */
@@ -435,9 +500,9 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     ASSERT(pinOut.initialTime == currentTime+100000);
     ASSERT(pinOut.endTime == 0);
 
-    /* TBD: minGen testing */
+    /* TBD: more complex break sigs */
 
-    /* TBD: activation flag testing */
+    /* TBD: minGen testing */
 
     return TACK_OK;
 }

@@ -9,14 +9,14 @@
 #include "TackExtension.h"
 
 /* The following two functions calculate offsets into the tackExt */
-static uint8_t* tackExtensionPostTack(uint8_t* tackExt) {
+uint8_t* tackExtensionPostTack(uint8_t* tackExt) {
     if (*tackExt == TACK_LENGTH)
         return tackExt + 1 + TACK_LENGTH;
     else	
         return tackExt + 1;
 }
 
-static uint8_t* tackExtensionPostBreakSigs(uint8_t* tackExt) {
+uint8_t* tackExtensionPostBreakSigs(uint8_t* tackExt) {
     uint8_t* p = tackExtensionPostTack(tackExt);
     return p + 2 + ptou16(p);
 }
