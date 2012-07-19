@@ -69,6 +69,52 @@ Breaks key fingerprint  = rnx3y.35xdl.hssy4.bop3v.zifgu
 activation_flag = enabled
  */
 
+char EBmaxT2pem[] = "\
+-----BEGIN TACK EXTENSION-----\
+poiEksHxiHr4JEozYQW7Ah3x3Kkha/maSELeIEtHUs0SO/8pgKxeE+llsYNqDbb+\
+U5u3Garg9Ed+os0fh3cYVSIAAAHJGVMytktmcnogY+QGbzuVjLCq7ldqXs79lTOZ\
+u4h0cx2Vh1AVAkK48O1W03iKa3xENSWIKFyY+Ai3WW9JIZGr/EMfxwFG8z9EAvEr\
+VFVKGuJySQs6vUqRtKjBYG8F/1KaNs0EANTsGt8EToRTmpeuY7DhgdMQSuvj2KTY\
+vSUQj/2AnfDN9ms33d3TRmvctMhRpOopdTKyIRRsYuYUHQVLyrhHl91jbtxPo6z0\
+ADTJHllWC+9hwIh4JkD8AAiVFxTeL9mM9HcuSWCzyXHjJ7F37BQUiJjhfF87qQ90\
+nsp2iE3Wq051Q+K1Wl6K4cC6/1T1hfkv/2HiupMdFRAmpiTVGwceHDFhvz6nILFD\
+PjtnwEoKdFS3tVSfhDHxeU88i9lrRbs/Us2hpio5Yav8wb5etxZE+cdqzgQQvKSS\
++Q3NmmkJujVa0NIatdBBDcwcLp0vK1aw8fCmVAd6lgop0kCw+7iN92dS7WJ37akd\
+cC7LRmyOiaUII4Ij2tgWL/siCIQR8zv65nDioBpeGokWHHDX6ZbU45Ixps0vLmny\
+YRAJnUP1iDG9wFkU0t8200ErXq6vARdPWKc+vGc32Ba2252yuVAPgvuJDHui7Nlz\
+wgt4W1WAS2nVRkbh6LYfkqA/IkuebjqfIl9zBfsoM7prCjWwgzfaJP0OI+anu2Em\
+j42bcwrWR+O75fRoMGhlSNkembL7a9uJfHnJHFRSn3harIae/SZzVB8U1SK8uIKm\
+BZuJHSqLmthrJf1LZXKukdDgX6vBdmCrtjiCtps5AGpjju6HpKlrgM9JY6F/r06O\
+j9BLf7pXmzfAZ/TwBFCksmsstnJzYso8s64MtjnrWcMAbkmA7xIBeytMLIpLx+0C\
+/uDbXF1AeVNr/ytfJdQfTgWEJ173yJPliTC+iWfT9xaCKmkUVt09CSk2hQUq5F5A\
+qXKm1KxSLdkTSqsSFb8varMzXYX8HopjwqrSfX9uQ8y7a7e+fSSDf4fEo//ld5aa\
+15s5wuhAEO4Ar9dSRuTkCZzXmz49lwY8epbcRd9vb7/R4YcXnS/6ARC+Cdi7OLtn\
+4GaOXwGKU+dw6fZ7XEluuTA09Bwpy5UO/zzmuPZLJqfMoVYR+WC4m+bQ1Ri2Adgw\
+4rVRSee+hiRQSBx28ZBDvQkqbLo/sByj6U5t0QzEuJnJLWnEtBL4hWhcg2Q+gjRP\
+nwy/kyyVXyQ5EcxzONv6Ekzi7J8H9gxZrt0sAjnYTJU6vwM2DBec6l1argyxZ+io\
+jhFWcTus5hdX8/EZxGMpayEC5f6xLEyRO7k6fm2GzrM35CwwHjOAO92dBfSjzJz2\
+GMm1GBynjPZWOSPsOoDJJVYw4Ag0q9mAu01Wcy3nRWwb5tXRKK3rXRnpm/1AuL35\
+Dbd1ZN7Qk1YVbHxGxrwKaGkJnoAtq6Y/yC/1d/CDOpLswWAHWaXt/+U9S0rsKufM\
+mQhxL+LVWbu6Iko3HST65GVwz4Rq4M3mz+FY5X+fa0UqAlPMNpds2n0B\
+-----END TACK EXTENSION-----";
+/*
+key fingerprint = vqhrw.sxivq.wyzxx.tguez.6okk2
+min_generation  = 0
+generation      = 0
+expiration      = 2026-12-16T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+Breaks key fingerprint  = rnx3y.35xdl.hssy4.bop3v.zifgu
+Breaks key fingerprint  = cx5lg.epsgt.t7et5.q7zj4.57ljd
+Breaks key fingerprint  = zwspz.mjsrj.jryrz.x6zbq.62sga
+Breaks key fingerprint  = qaalr.b77je.2g2yh.bqhe5.nd4lh
+Breaks key fingerprint  = heoey.swsc7.dvold.qndbh.vyqkv
+Breaks key fingerprint  = hlxqj.qj4jr.s53f3.ogpqx.h4hhd
+Breaks key fingerprint  = 2kskg.r6ndp.xdaxb.jdj45.dsk6h
+Breaks key fingerprint  = he4bj.stary.av3r3.ucirw.uw3np
+activation_flag = enabled
+*/
+
 uint8_t tackExtE[2048];
 uint32_t tackExtELen;
 
@@ -80,6 +126,10 @@ uint32_t tackExtEB1Len;
 
 uint8_t tackExtEB1T2[2048];
 uint32_t tackExtEB1T2Len;
+
+uint8_t tackExtEBmaxT2[2048]; /* like EB1, but w/more extraneous break sigs*/
+uint32_t tackExtEBmaxT2Len;
+
 
 #include <stdio.h>
 
@@ -105,6 +155,11 @@ TACK_RETVAL tackTestProcessInit()
 
     retval=tackDePem(label, 
                      (uint8_t*)EB1T2pem, strlen(EB1T2pem), tackExtEB1T2, &tackExtEB1T2Len);
+
+    retval=tackDePem(label, 
+                     (uint8_t*)EBmaxT2pem, strlen(EBmaxT2pem), 
+                     tackExtEBmaxT2, &tackExtEBmaxT2Len);
+
     return retval;
 }
 
@@ -242,7 +297,7 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
 TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     
     TACK_RETVAL retval;
-    TackProcessingContext ctxET1, ctxEB1, ctxEB1T2, nullCtx;
+    TackProcessingContext ctxET1, ctxEB1, ctxEB1T2, ctxEBmaxT2, nullCtx;
     uint8_t* keyHash;
     uint8_t* tack;
     uint32_t currentTime;
@@ -259,7 +314,7 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     keyHash = tackTackGetTargetHash(tack);
     tackTackGetKeyFingerprint(tack, fingerprint, crypto);
 
-    /* Prepare context for ET1, EB1, EB1T2 */
+    /* Prepare context for ET1, EB1, EB1T2, EBmaxT2 */
     TCHECK(tackProcessWellFormed(
                tackExtET1, tackExtET1Len, keyHash, 123, &ctxET1, crypto));
 
@@ -268,6 +323,9 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
 
     TCHECK(tackProcessWellFormed(
                tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, &ctxEB1T2, crypto));
+
+    TCHECK(tackProcessWellFormed(
+               tackExtEBmaxT2, tackExtEBmaxT2Len, keyHash, 123, &ctxEBmaxT2, crypto));
 
     memset(&nullCtx, 0, sizeof(TackProcessingContext));
 
@@ -500,9 +558,33 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
     ASSERT(pinOut.initialTime == currentTime+100000);
     ASSERT(pinOut.endTime == 0);
 
-    /* TBD: more complex break sigs */
+    /* OK let's try an ext with 8 break sigs! */
 
-    /* TBD: minGen testing */
+    /* Test active -> breaksig -> new inactive */
+    memset(&pinOut, 0, sizeof(TackPin));
+    TCHECK_VAL(tackProcessStore(&ctxEBmaxT2, currentTime, &pin, 0, 
+                                &activationRetval, &pinOut, &minGenerationOut, crypto),
+               TACK_OK_UNPINNED);
+    ASSERT(minGenerationOut == 0);
+    ASSERT(activationRetval == TACK_OK_NEW_PIN);
+    ASSERT(strcmp(pinOut.fingerprint, ctxEBmaxT2.tackFingerprint) == 0);
+    ASSERT(pinOut.minGeneration == 0);
+    ASSERT(pinOut.initialTime == currentTime);
+    ASSERT(pinOut.endTime == 0);
+
+    /* Test inactive -> breaksig -> new inactive */
+    memset(&pinOut, 0, sizeof(TackPin));
+    TCHECK_VAL(tackProcessStore(&ctxEBmaxT2, currentTime+100000, &pin, 0, 
+                                &activationRetval, &pinOut, &minGenerationOut, crypto),
+               TACK_OK_UNPINNED);
+    ASSERT(minGenerationOut == 0);
+    ASSERT(activationRetval == TACK_OK_NEW_PIN);
+    ASSERT(strcmp(pinOut.fingerprint, ctxEBmaxT2.tackFingerprint) == 0);
+    ASSERT(pinOut.minGeneration == 0);
+    ASSERT(pinOut.initialTime == currentTime+100000);
+    ASSERT(pinOut.endTime == 0);
+
+    /* Alright, let's try testing generation */
 
     return TACK_OK;
 }
