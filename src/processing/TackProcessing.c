@@ -42,7 +42,7 @@ TACK_RETVAL tackProcessWellFormed(uint8_t* tackExt, uint32_t tackExtLen,
     /* Check tack's expiration, target_hash, and signature (incl. public_key) */
     ctx->tack = tackExtensionGetTack(tackExt);
     if (ctx->tack) {        
-        if (tackTackGetExpiration(ctx->tack) < currentTime)
+        if (tackTackGetExpiration(ctx->tack) <= currentTime)
             return TACK_ERR_EXPIRED_EXPIRATION;
 
         if (memcmp(tackTackGetTargetHash(ctx->tack), keyHash, TACK_HASH_LENGTH) != 0)

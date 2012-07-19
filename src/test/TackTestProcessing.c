@@ -131,6 +131,13 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
     ASSERT(strlen(ctx.tackFingerprint) == 0);
     ASSERT(ctx.breakSigFlags == 0);
 
+    /* Test normal behavior */
+    TCHECK(tackProcessWellFormed(
+               tackExtET1, tackExtET1Len, keyHash, 123, &ctx, crypto));
+    ASSERT(ctx.tackExt == tackExtET1);
+    ASSERT(ctx.tack == tackExtensionGetTack(tackExtET1));
+    ASSERT(ctx.breakSigFlags == 0);
+
     /* Test tack ext lengths (copied code for E, ET1, EB1, EB1T2 */
     /* Test that errors are returned for a range of bad lengths */
     TCHECK(tackProcessWellFormed(tackExtE, tackExtELen, keyHash, 123, &ctx, crypto));
@@ -198,10 +205,17 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
                TACK_ERR_BAD_GENERATION);
     tackExtET1[65]--;
 
-    /* Test bad expiration */
+    /* Test good/bad expiration */
     tack = tackExtensionGetTack(tackExtET1);
     expirationTime = tackTackGetExpiration(tack);
 
+    TCHECK(tackProcessWellFormed(
+               tackExtET1, tackExtET1Len, keyHash, expirationTime-1, &ctx, crypto));
+    
+    TCHECK_VAL(tackProcessWellFormed(
+                   tackExtET1, tackExtET1Len, keyHash, expirationTime, &ctx, crypto),
+               TACK_ERR_EXPIRED_EXPIRATION);
+    
     TCHECK_VAL(tackProcessWellFormed(
                    tackExtET1, tackExtET1Len, keyHash, expirationTime+1, &ctx, crypto),
                TACK_ERR_EXPIRED_EXPIRATION);
@@ -222,6 +236,41 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
         TACK_ERR_BAD_SIGNATURE);
     tackExtET1[160]--;
 
+    return TACK_OK;
+}
+
+TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
+    
+    TACK_RETVAL retval;
+    TackProcessingContext ctx;
+    uint8_t* keyHash;
+    uint8_t* tack;
+    //uint32_t count=0;
+    uint32_t currentTime;
+    //uint32_t expirationTime;
+    TackPin pin, pinOut;
+    uint8_t minGeneration;
+    uint8_t minGenerationOut;
+    TACK_RETVAL activationRetval;
+
+    TCHECK(tackTestProcessInit());
+
+    tack = tackExtensionGetTack(tackExtET1);
+    keyHash = tackTackGetTargetHash(tack);
+
+    /* Test normal behavior */
+    TCHECK(tackProcessWellFormed(
+               tackExtET1, tackExtET1Len, keyHash, 123, &ctx, crypto));
+
+
+ 
+    currentTime=123;
+    minGeneration=0;
+    activationRetval = TACK_ERR;
+
+    TCHECK(tackProcessStore(&ctx, currentTime, &pin, minGeneration, 
+                            &activationRetval, &pinOut, &minGenerationOut, crypto));
+    
     return TACK_OK;
 }
 
