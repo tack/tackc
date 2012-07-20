@@ -37,7 +37,6 @@ typedef TACK_RETVAL (*TackDeleteNameRecordFunc)(void* arg, void* name);
 /* The store functions, plus a state "arg", are packaged into this struct
    for convenient parameter passing */
 typedef struct {
-    void* arg;
     TackGetMinGenerationFunc getMinGeneration;
     TackSetMinGenerationFunc setMinGeneration; /* Revocation or pin activation */
     TackGetNameRecordFunc getNameRecord;

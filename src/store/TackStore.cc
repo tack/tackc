@@ -8,15 +8,6 @@
 #include "TackProcessing.h"
 #include "TackStoreFuncs.h"
 
-void TackStore::setCryptoFuncs(TackCryptoFuncs* newCrypto) {crypto=newCrypto;}
-TackCryptoFuncs* TackStore::getCryptoFuncs() {return crypto;}
-
-void TackStore::setRevocationStore(TackStore* newRevocationStore) {
-    revocationStore = newRevocationStore;}
-bool TackStore::getRevocationStore() {return revocationStore;}
-
-TackStore::TackStore():crypto(NULL),revocationStore(this) {}
-
 // Callbacks for bridging between C functions and the C++ interface
 
 static TACK_RETVAL tackStoreGetMinGeneration(void* arg, char* keyFingerprint, 
@@ -63,20 +54,32 @@ static TACK_RETVAL tackStoreDeleteNameRecord(void* arg, void* name)
     return store->deleteNameRecord(*nameStr);    
 }
 
+// TackStore methods
+
+void TackStore::setCryptoFuncs(TackCryptoFuncs* newCrypto) {
+    crypto = newCrypto;}
+TackCryptoFuncs* TackStore::getCryptoFuncs() {return crypto;}
+
+void TackStore::setRevocationStore(TackStore* newRevocationStore) {
+    revocationStore = newRevocationStore;}
+bool TackStore::getRevocationStore() {return revocationStore;}
+
+TackStore::TackStore():crypto(NULL),revocationStore(this) {}
+
+static TackStoreFuncs storeFuncs = {
+    tackStoreGetMinGeneration,
+    tackStoreSetMinGeneration,
+    tackStoreGetNameRecord,    
+    tackStoreSetNameRecord,
+    tackStoreUpdateNameRecord,
+    tackStoreDeleteNameRecord
+};
+
 TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                                std::string name,
                                uint32_t currentTime,
                                bool doPinActivation)
 {
-
-    TackStoreFuncs store;
-    store.arg = this;
-    store.getMinGeneration = tackStoreGetMinGeneration;
-    store.setMinGeneration = tackStoreSetMinGeneration;
-    store.getNameRecord = tackStoreGetNameRecord;    
-    store.setNameRecord = tackStoreSetNameRecord;
-    store.updateNameRecord = tackStoreUpdateNameRecord;
-    store.deleteNameRecord = tackStoreDeleteNameRecord;
-
-    return tackProcessStore(ctx, &name, currentTime, doPinActivation, &store, crypto);
+    return tackProcessStore(ctx, &name, currentTime, doPinActivation, &storeFuncs, 
+                            this, revocationStore, crypto);
 }

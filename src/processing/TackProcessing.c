@@ -52,11 +52,13 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
 #include <stdio.h>
 
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
-                                void* name,
-                                uint32_t currentTime,
-                                bool doPinActivation,
-                                TackStoreFuncs* store, 
-                                TackCryptoFuncs* crypto)
+                             void* name,
+                             uint32_t currentTime,
+                             uint8_t doPinActivation,
+                             TackStoreFuncs* store, 
+                             void* storeArg, 
+                             void* revocationStoreArg,
+                             TackCryptoFuncs* crypto)
 {
 
     TACK_RETVAL retval = TACK_ERR, resultRetval = TACK_ERR;
@@ -70,14 +72,14 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     uint8_t minGenerationOut = 0;
 
     /* Get the relevant name record, if any */
-    if ((retval=store->getNameRecord(store->arg, name, &nameRecordStruct)) < TACK_OK)
+    if ((retval=store->getNameRecord(storeArg, name, &nameRecordStruct)) < TACK_OK)
         return retval;
     if (retval == TACK_OK)
         nameRecord = &nameRecordStruct;
 
     /* Get the key's minGeneration, if any */
     if (ctx->tack) {
-        if ((retval=store->getMinGeneration(store->arg, ctx->tackFingerprint, 
+        if ((retval=store->getMinGeneration(storeArg, ctx->tackFingerprint, 
                                             &minGenerationVal)) < TACK_OK)
             return retval;
         if (retval == TACK_OK)
@@ -94,7 +96,8 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
 
     /* Make store changes based on revocation */
     if (minGeneration && minGenerationOut > *minGeneration) {
-        retval=store->setMinGeneration(store->arg, ctx->tackFingerprint, minGenerationOut);
+        retval=store->setMinGeneration(revocationStoreArg, ctx->tackFingerprint, 
+                                       minGenerationOut);
         if (retval != TACK_OK)
             return retval;
     }
@@ -104,23 +107,23 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
         /* If a new pin was created (perhaps replacing an old one) */
         if (activationRetval == TACK_OK_NEW_PIN) {
             /* Set key record before name record */
-            retval=store->setMinGeneration(store->arg, ctx->tackFingerprint, 
+            retval=store->setMinGeneration(storeArg, ctx->tackFingerprint, 
                                            minGenerationOut);
             if (retval != TACK_OK)
                 return retval;
-            retval=store->setNameRecord(store->arg, name, &nameRecordOut);
+            retval=store->setNameRecord(storeArg, name, &nameRecordOut);
             if (retval != TACK_OK)
                 return retval;
         }
         /* Or if a pin's activation period (endTime) was extended */
         else if (activationRetval == TACK_OK_UPDATE_PIN) {
-            retval=store->updateNameRecord(store->arg, name, nameRecordOut.endTime);
+            retval=store->updateNameRecord(storeArg, name, nameRecordOut.endTime);
             if (retval != TACK_OK)
                 return retval;
         }
         /* Or if an inactive pin was deleted */
         else if (activationRetval == TACK_OK_DELETE_PIN) {
-            retval=store->deleteNameRecord(store->arg, name);
+            retval=store->deleteNameRecord(storeArg, name);
             if (retval != TACK_OK)
                 return retval;
         }
