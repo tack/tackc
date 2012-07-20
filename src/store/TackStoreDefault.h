@@ -26,7 +26,7 @@ public:
     
     virtual TACK_RETVAL getNameRecord(std::string& name, 
                                       TackNameRecord* nameRecord) OVERRIDE;
-    virtual TACK_RETVAL newNameRecord(std::string& name, 
+    virtual TACK_RETVAL setNameRecord(std::string& name, 
                                       TackNameRecord* nameRecord) OVERRIDE;  
     virtual TACK_RETVAL updateNameRecord(std::string& name, 
                                   uint32_t newEndTime) OVERRIDE;  

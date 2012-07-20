@@ -12,8 +12,12 @@ extern "C" {
 
 #include "TackRetval.h"
 #include "TackCryptoFuncs.h"
+#include "TackStoreFuncs.h"
 #include "TackFingerprints.h"
 
+
+/* This struct stores processing state between tackProcessWellFormed() and 
+   tackProcessStore(), and between tackProcessStore() calls */
 typedef struct {
     uint8_t* tackExt;
     uint8_t* tack;
@@ -21,35 +25,35 @@ typedef struct {
     uint8_t breakSigFlags;
 } TackProcessingContext;
 
-typedef struct {
-    char fingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-    uint32_t initialTime;
-    uint32_t endTime;
-} TackNameRecord;
 
 /* Call once for each connection to check well-formedness and 
    initialize the context */
-TACK_RETVAL tackProcessWellFormed(uint8_t* tackExt, uint32_t tackExtLen,
+TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
+                                  uint8_t* tackExt, uint32_t tackExtLen,
                                   uint8_t keyHash[TACK_HASH_LENGTH],
                                   uint32_t currentTime,
-                                  TackProcessingContext* ctx,
                                   TackCryptoFuncs* crypto);
 
-/* After calling tackProcessWellFormed, call the below once for each store 
-   (Or use the C++ TackStore classes which wrap this) */
+/* Call once for each store, after the above well-formed check */
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
-                             uint32_t currentTime,   
-
-                             /* Input data from store: */
-                             TackNameRecord* nameRecord, /* NULL if no name record */
-                             uint8_t* minGeneration, /* NULL if no key record for tack */
-
-                             /* Output data for store: */
-                             TACK_RETVAL* activationRetval, /* OK/DELETE/UPDATE/NEW */
-                             TackNameRecord* nameRecordOut,
-                             uint8_t* minGenerationOut,
-
+                             void* name,
+                             uint32_t currentTime,
+                             bool doPinActivation,
+                             TackStoreFuncs* store, 
                              TackCryptoFuncs* crypto);
+
+/* Helper function used by tackProcessStore() 
+   Performs the core client processing logic, but uses in/out variables
+   instead of accessing the store. */
+TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
+                                   uint32_t currentTime,   
+                                   TackNameRecord* nameRecord,
+                                   uint8_t* minGeneration,
+                                   TACK_RETVAL* activationRetval,
+                                   TackNameRecord* nameRecordOut,
+                                   uint8_t* minGenerationOut,
+                                   TackCryptoFuncs* crypto);
+
 
 #ifdef __cplusplus
 }

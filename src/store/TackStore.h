@@ -39,7 +39,7 @@ public:
                                         uint8_t minGeneration) = 0;
     
     virtual TACK_RETVAL getNameRecord(std::string& name, TackNameRecord* nameRecord) = 0;
-    virtual TACK_RETVAL newNameRecord(std::string& name, TackNameRecord* nameRecord) = 0;  
+    virtual TACK_RETVAL setNameRecord(std::string& name, TackNameRecord* nameRecord) = 0;  
     virtual TACK_RETVAL updateNameRecord(std::string& name, uint32_t newEndTime) = 0;  
     virtual TACK_RETVAL deleteNameRecord(std::string& name) = 0;
 

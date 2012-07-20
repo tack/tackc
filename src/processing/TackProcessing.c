@@ -10,23 +10,10 @@
 #include "TackProcessing.h"
 #include "TackExtension.h"
 
-static TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
-                                        TackNameRecord** nameRecord,
-                                        TackCryptoFuncs* crypto);
-
-static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
-                                            uint32_t currentTime,
-                                            TackNameRecord* nameRecord, 
-                                            TackNameRecord* nameRecordOut,
-                                            uint8_t* minGenerationOut,
-                                            uint8_t tackMatchesPin,
-                                            TackCryptoFuncs* crypto);
-
-
-TACK_RETVAL tackProcessWellFormed(uint8_t* tackExt, uint32_t tackExtLen,
+TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
+                                  uint8_t* tackExt, uint32_t tackExtLen,
                                   uint8_t keyHash[TACK_HASH_LENGTH],
-                                  uint32_t currentTime,
-                                  TackProcessingContext* ctx,
+                                  uint32_t currentTime,                                  
                                   TackCryptoFuncs* crypto)
 {    
     TACK_RETVAL retval = TACK_ERR;
@@ -62,14 +49,108 @@ TACK_RETVAL tackProcessWellFormed(uint8_t* tackExt, uint32_t tackExtLen,
     return TACK_OK;
 }
 
+#include <stdio.h>
+
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
-                             uint32_t currentTime,   
-                             TackNameRecord* nameRecord,
-                             uint8_t* minGeneration,
-                             TACK_RETVAL* activationRetval,
-                             TackNameRecord* nameRecordOut,
-                             uint8_t* minGenerationOut,
-                             TackCryptoFuncs* crypto)
+                                void* name,
+                                uint32_t currentTime,
+                                bool doPinActivation,
+                                TackStoreFuncs* store, 
+                                TackCryptoFuncs* crypto)
+{
+
+    TACK_RETVAL retval = TACK_ERR, resultRetval = TACK_ERR;
+
+    TackNameRecord nameRecordStruct;
+    TackNameRecord* nameRecord = NULL;
+    uint8_t minGenerationVal = 0;
+    uint8_t* minGeneration = NULL;
+    TACK_RETVAL activationRetval = TACK_ERR;
+    TackNameRecord nameRecordOut;
+    uint8_t minGenerationOut = 0;
+
+    /* Get the relevant name record, if any */
+    if ((retval=store->getNameRecord(store->arg, name, &nameRecordStruct)) < TACK_OK)
+        return retval;
+    if (retval == TACK_OK)
+        nameRecord = &nameRecordStruct;
+
+    /* Get the key's minGeneration, if any */
+    if (ctx->tack) {
+        if ((retval=store->getMinGeneration(store->arg, ctx->tackFingerprint, 
+                                            &minGenerationVal)) < TACK_OK)
+            return retval;
+        if (retval == TACK_OK)
+            minGeneration = &minGenerationVal;
+    }
+
+    /* Client processing logic */
+    retval=tackProcessStoreHelper(ctx, currentTime, nameRecord, minGeneration, 
+                                  &activationRetval, &nameRecordOut, &minGenerationOut,
+                                  crypto);
+    if (retval < TACK_OK)
+        return retval;
+    resultRetval = retval;
+
+    /* Make store changes based on revocation */
+    if (minGeneration && minGenerationOut > *minGeneration) {
+        retval=store->setMinGeneration(store->arg, ctx->tackFingerprint, minGenerationOut);
+        if (retval != TACK_OK)
+            return retval;
+    }
+
+    /* Make store changes based on pin activation */
+    if (doPinActivation) {
+        /* If a new pin was created (perhaps replacing an old one) */
+        if (activationRetval == TACK_OK_NEW_PIN) {
+            /* Set key record before name record */
+            retval=store->setMinGeneration(store->arg, ctx->tackFingerprint, 
+                                           minGenerationOut);
+            if (retval != TACK_OK)
+                return retval;
+            retval=store->setNameRecord(store->arg, name, &nameRecordOut);
+            if (retval != TACK_OK)
+                return retval;
+        }
+        /* Or if a pin's activation period (endTime) was extended */
+        else if (activationRetval == TACK_OK_UPDATE_PIN) {
+            retval=store->updateNameRecord(store->arg, name, nameRecordOut.endTime);
+            if (retval != TACK_OK)
+                return retval;
+        }
+        /* Or if an inactive pin was deleted */
+        else if (activationRetval == TACK_OK_DELETE_PIN) {
+            retval=store->deleteNameRecord(store->arg, name);
+            if (retval != TACK_OK)
+                return retval;
+        }
+    }
+
+    return resultRetval;
+}
+
+
+/* Helper functions used by tackProcessStoreHelper() */
+static TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
+                                        TackNameRecord** nameRecord,
+                                        TackCryptoFuncs* crypto);
+
+static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
+                                            uint32_t currentTime,
+                                            TackNameRecord* nameRecord, 
+                                            TackNameRecord* nameRecordOut,
+                                            uint8_t* minGenerationOut,
+                                            uint8_t tackMatchesPin,
+                                            TackCryptoFuncs* crypto);
+
+TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
+                                   uint32_t currentTime,   
+                                   TackNameRecord* nameRecord,
+                                   uint8_t* minGeneration,
+                                   TACK_RETVAL* activationRetval,
+                                   TackNameRecord* nameRecordOut,
+                                   uint8_t* minGenerationOut,
+                                   TackCryptoFuncs* crypto)
 {
     TACK_RETVAL retval = TACK_ERR, resultRetval=TACK_ERR;  
     uint8_t tackMatchesPin = 0;

@@ -1,4 +1,3 @@
-
 #include "TackStoreDefault.h"
 
 // These don't do anything but Chromium wants them:
@@ -29,11 +28,12 @@ TACK_RETVAL TackStoreDefault::getNameRecord(std::string& name, TackNameRecord* n
     std::map<std::string, TackNameRecord>::iterator ni = nameRecords.find(name);
     if (ni == nameRecords.end())
         return TACK_OK_NOT_FOUND;
+
     *nameRecord = ni->second;
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::newNameRecord(std::string& name, TackNameRecord* nameRecord)
+TACK_RETVAL TackStoreDefault::setNameRecord(std::string& name, TackNameRecord* nameRecord)
 {
     nameRecords[name] = *nameRecord;
     return TACK_OK;
