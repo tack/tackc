@@ -4,7 +4,6 @@
  * See the LICENSE file for legal information regarding use of this file.
  */
 
-
 #include <string.h>
 #include "TackUtil.h"
 #include "TackProcessing.h"
@@ -48,8 +47,6 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
     }
     return TACK_OK;
 }
-
-#include <stdio.h>
 
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              void* name,

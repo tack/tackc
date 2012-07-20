@@ -83,3 +83,30 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
     return tackProcessStore(ctx, &name, currentTime, doPinActivation, &storeFuncs, 
                             this, revocationStore, crypto);
 }
+
+TACK_RETVAL TackStore::getPin(std::string& name, TackNameRecord* nameRecord, 
+                   uint8_t *minGeneration)
+{
+    TACK_RETVAL retval = TACK_ERR;
+    std::string fingerprint(nameRecord->fingerprint);
+    // Get name record first so we can early-exit if not found
+    // If key record exists, name record must; but reverse isn't true
+    if ((retval = getNameRecord(name, nameRecord)) != TACK_OK)
+        return retval;
+    if ((retval = getMinGeneration(fingerprint, minGeneration)) != TACK_OK)
+        return retval;
+    return TACK_OK;
+}
+
+TACK_RETVAL TackStore::setPin(std::string& name, TackNameRecord* nameRecord, 
+                              uint8_t minGeneration)
+{
+    TACK_RETVAL retval = TACK_ERR;
+    // Set key record first to leave things in consistent state if interrupted
+    std::string fingerprint(nameRecord->fingerprint);
+    if ((retval = setMinGeneration(fingerprint, minGeneration)) != TACK_OK)
+        return retval;
+    if ((retval = setNameRecord(name, nameRecord)) != TACK_OK)
+        return retval;
+    return TACK_OK;
+}

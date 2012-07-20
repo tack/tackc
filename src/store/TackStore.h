@@ -32,6 +32,11 @@ public:
                         uint32_t currentTime,
                         bool doPinActivation);
 
+    TACK_RETVAL getPin(std::string& name, TackNameRecord* nameRecord, 
+                       uint8_t *minGeneration);
+    TACK_RETVAL setPin(std::string& name, TackNameRecord* nameRecord, 
+                       uint8_t minGeneration);
+
     /* Define the below functions in a subclass */
     virtual TACK_RETVAL getMinGeneration(std::string& keyFingerprint, 
                                      uint8_t* minGeneration) = 0;
