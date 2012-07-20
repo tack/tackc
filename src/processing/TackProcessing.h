@@ -23,10 +23,9 @@ typedef struct {
 
 typedef struct {
     char fingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-    uint8_t minGeneration;    
     uint32_t initialTime;
     uint32_t endTime;
-} TackPin;
+} TackNameRecord;
 
 /* Call once for each connection to check well-formedness and 
    initialize the context */
@@ -40,13 +39,16 @@ TACK_RETVAL tackProcessWellFormed(uint8_t* tackExt, uint32_t tackExtLen,
    (Or use the C++ TackStore classes which wrap this) */
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              uint32_t currentTime,   
-                             /* Input data from store (pin/minGeneration): */
-                             TackPin* pin,
-                             uint8_t minGeneration,
-                             /* Output data for store (pin/minGeneration): */
+
+                             /* Input data from store: */
+                             TackNameRecord* nameRecord, /* NULL if no name record */
+                             uint8_t* minGeneration, /* NULL if no key record for tack */
+
+                             /* Output data for store: */
                              TACK_RETVAL* activationRetval, /* OK/DELETE/UPDATE/NEW */
-                             TackPin* pinOut,
+                             TackNameRecord* nameRecordOut,
                              uint8_t* minGenerationOut,
+
                              TackCryptoFuncs* crypto);
 
 #ifdef __cplusplus

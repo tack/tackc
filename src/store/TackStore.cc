@@ -24,53 +24,60 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
 {
     TACK_RETVAL retval = TACK_ERR, resultRetval = TACK_ERR;
 
-    TackPin pinStruct;
-    TackPin* pin = NULL;
-    uint8_t minGeneration = 0;
-    TackPin pinOut;
+    TackNameRecord nameRecordStruct;
+    TackNameRecord* nameRecord = NULL;
+    uint8_t minGenerationVal = 0;
+    uint8_t* minGeneration = NULL;
     TACK_RETVAL activationRetval = TACK_ERR;
+    TackNameRecord nameRecordOut;
     uint8_t minGenerationOut = 0;
     std::string tackFingerprint;
 
-    /* Get the relevant pin, if any */
-    if ((retval=getPin(name, &pinStruct)) < TACK_OK)
+    /* Get the relevant name record, if any */
+    if ((retval=getNameRecord(name, &nameRecordStruct)) < TACK_OK)
         return retval;
     if (retval == TACK_OK)
-        pin = &pinStruct;
+        nameRecord = &nameRecordStruct;
 
-    /* Get the key's stored minGeneration, if any */
+    /* Get the key's minGeneration, if any */
     if (ctx->tack) {
         tackFingerprint = std::string(ctx->tackFingerprint);
-        if ((retval=getMinGeneration(tackFingerprint, &minGeneration)) < TACK_OK)
+        if ((retval=getMinGeneration(tackFingerprint, &minGenerationVal)) < TACK_OK)
             return retval;
+        if (retval == TACK_OK)
+            minGeneration = &minGenerationVal;
     }
 
     /* Process everything */
-    if ((retval=tackProcessStore(ctx, currentTime, pin, minGeneration, 
-                                 &activationRetval, &pinOut, &minGenerationOut, 
+    if ((retval=tackProcessStore(ctx, currentTime, nameRecord, minGeneration, 
+                                 &activationRetval, &nameRecordOut, &minGenerationOut,
                                  crypto)) < TACK_OK)
         return retval;
     resultRetval = retval;
 
     // Handle any revocation
-    if (revocationStore && minGenerationOut > minGeneration) {
-        revocationStore->setMinGeneration(tackFingerprint, minGenerationOut);
+    if (revocationStore && minGeneration && minGenerationOut > *minGeneration) {
+        if ((retval=revocationStore->setMinGeneration(tackFingerprint, 
+                                                      minGenerationOut)) != TACK_OK)
+            return retval;
     }
     // Handle pin activation results
     if (doPinActivation) {
         // If a new pin was created (perhaps replacing an old one)
         if (activationRetval == TACK_OK_NEW_PIN) {
-            if ((retval=newPin(name, &pinOut)) != TACK_OK)
+            if ((retval=newNameRecord(name, &nameRecordOut)) != TACK_OK)
+                return retval;
+            if ((retval=setMinGeneration(tackFingerprint, minGenerationOut)) != TACK_OK)
                 return retval;
         }
         // Or if a pin's activation period (endTime) was extended
         else if (activationRetval == TACK_OK_UPDATE_PIN) {
-            if ((retval=updatePin(name, pinOut.endTime)) != TACK_OK)
+            if ((retval=updateNameRecord(name, nameRecordOut.endTime)) != TACK_OK)
                 return retval;
         }
         // Or if an inactive pin was deleted
         else if (activationRetval == TACK_OK_DELETE_PIN) {
-            if ((retval=deletePin(name)) != TACK_OK)
+            if ((retval=deleteNameRecord(name)) != TACK_OK)
                 return retval;
         }
     }

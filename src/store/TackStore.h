@@ -38,10 +38,10 @@ public:
     virtual TACK_RETVAL setMinGeneration(std::string& keyFingerprint, 
                                         uint8_t minGeneration) = 0;
     
-    virtual TACK_RETVAL getPin(std::string& name, TackPin* pin) = 0;
-    virtual TACK_RETVAL newPin(std::string& name, TackPin* pin) = 0;  
-    virtual TACK_RETVAL updatePin(std::string& name, uint32_t newEndTime) = 0;  
-    virtual TACK_RETVAL deletePin(std::string& name) = 0;
+    virtual TACK_RETVAL getNameRecord(std::string& name, TackNameRecord* nameRecord) = 0;
+    virtual TACK_RETVAL newNameRecord(std::string& name, TackNameRecord* nameRecord) = 0;  
+    virtual TACK_RETVAL updateNameRecord(std::string& name, uint32_t newEndTime) = 0;  
+    virtual TACK_RETVAL deleteNameRecord(std::string& name) = 0;
 
     virtual std::string getStringDump() = 0;
 

@@ -79,7 +79,7 @@ TACK_RETVAL test(int argc, char* argv[])
 
 
 #ifdef TACKC_CPP
-
+/*
     uint8_t outbuf[2048];
     uint32_t outbufLen;
     char label[] ="TACK EXTENSION";
@@ -132,6 +132,8 @@ TACK_RETVAL test(int argc, char* argv[])
 
 
     printf("store dump = \n%s\n", store.getStringDump().c_str());
+
+*/
 #endif
         return TACK_OK;
 }

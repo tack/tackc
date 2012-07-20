@@ -24,18 +24,20 @@ public:
     virtual TACK_RETVAL setMinGeneration(std::string& keyFingerprint, 
                                          uint8_t minGeneration) OVERRIDE;
     
-    virtual TACK_RETVAL getPin(std::string& name, TackPin* pin) OVERRIDE;
-    virtual TACK_RETVAL newPin(std::string& name, TackPin* pin) OVERRIDE;  
-    virtual TACK_RETVAL updatePin(std::string& name, 
+    virtual TACK_RETVAL getNameRecord(std::string& name, 
+                                      TackNameRecord* nameRecord) OVERRIDE;
+    virtual TACK_RETVAL newNameRecord(std::string& name, 
+                                      TackNameRecord* nameRecord) OVERRIDE;  
+    virtual TACK_RETVAL updateNameRecord(std::string& name, 
                                   uint32_t newEndTime) OVERRIDE;  
-    virtual TACK_RETVAL deletePin(std::string& name) OVERRIDE;
+    virtual TACK_RETVAL deleteNameRecord(std::string& name) OVERRIDE;
 
     virtual std::string getStringDump() OVERRIDE;
     
 private:
     
-    // Maps names to name records (but ignore TackPin.minGeneration)
-    std::map<std::string, TackPin> nameRecords;
+    // Maps names to name records
+    std::map<std::string, TackNameRecord> nameRecords;
     
     // Maps key fingerprints to minGenerations
     std::map<std::string, uint8_t> keyRecords;
