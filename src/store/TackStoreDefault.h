@@ -31,8 +31,6 @@ public:
     virtual TACK_RETVAL updateNameRecord(std::string& name, 
                                   uint32_t newEndTime) OVERRIDE;  
     virtual TACK_RETVAL deleteNameRecord(std::string& name) OVERRIDE;
-
-    virtual std::string getStringDump() OVERRIDE;
     
 private:
     

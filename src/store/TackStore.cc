@@ -65,9 +65,10 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
     if (doPinActivation) {
         // If a new pin was created (perhaps replacing an old one)
         if (activationRetval == TACK_OK_NEW_PIN) {
-            if ((retval=newNameRecord(name, &nameRecordOut)) != TACK_OK)
-                return retval;
+            // Set key record before name record
             if ((retval=setMinGeneration(tackFingerprint, minGenerationOut)) != TACK_OK)
+                return retval;
+            if ((retval=newNameRecord(name, &nameRecordOut)) != TACK_OK)
                 return retval;
         }
         // Or if a pin's activation period (endTime) was extended

@@ -43,8 +43,6 @@ public:
     virtual TACK_RETVAL updateNameRecord(std::string& name, uint32_t newEndTime) = 0;  
     virtual TACK_RETVAL deleteNameRecord(std::string& name) = 0;
 
-    virtual std::string getStringDump() = 0;
-
 private:
     TackCryptoFuncs* crypto;
     TackStore* revocationStore;

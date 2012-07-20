@@ -54,23 +54,3 @@ TACK_RETVAL TackStoreDefault::deleteNameRecord(std::string& name)
     nameRecords.erase(name);
     return TACK_OK; 
 }
-
-
-std::string TackStoreDefault::getStringDump()
-{   
-    std::string result("");
-
-    result += std::string("Name Records:\n");
-    std::map<std::string, TackNameRecord>::iterator ni = nameRecords.begin();
-    for (; ni != nameRecords.end(); ni++) {
-        char nextLine[1000];
-        sprintf(nextLine, "%s %d %s initial=%u end=%u\n", 
-                ni->first.c_str(), 
-                (uint32_t)ni->first.size(),
-                ni->second.fingerprint,
-                ni->second.initialTime,
-                ni->second.endTime);
-        result += std::string(nextLine);
-    }
-    return result;
-}

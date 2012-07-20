@@ -51,7 +51,7 @@ TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
     uint8_t activationFlag = 0;
 
     /* Check 1-byte tack length */
-    /* (decrement tackLen as we process each field, ensure it reaches 0 at end) */
+    /* (decrement tackExtLen as we process each field, ensure it reaches 0 at end) */
     if (tackExtLen < 1)
         return TACK_ERR_BAD_TACKEXT_LENGTH;
     tackExtLen--;
