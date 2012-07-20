@@ -17,6 +17,10 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto);
 TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto);
 
 #ifdef __cplusplus
+TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto);
+#endif
+
+#ifdef __cplusplus
 }
 #endif
 #endif

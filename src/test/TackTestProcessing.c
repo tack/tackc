@@ -132,6 +132,23 @@ target_hash     = 32b64b66727a2063e4066f3b958cb0aa
 activation_flag = disabled
 */
 
+char ET2pem[] = "\
+-----BEGIN TACK EXTENSION-----\
+poiEksHxiHr4JEozYQW7Ah3x3Kkha/maSELeIEtHUs0SO/8pgKxeE+llsYNqDbb+\
+U5u3Garg9Ed+os0fh3cYVSIBAQHJGVMytktmcnogY+QGbzuVjLCq7ldqXs79lTOZ\
+u4h0cx2VhylLKiKxMPRLzn68nPwBBJqGfCTNyYrfhY2duyDzFTWGK7u7Ce/pJe1Y\
+rRgweAUUQHWZTT58rYAO5ZsRR6Fl8MoAAAE=\
+-----END TACK EXTENSION-----";
+/*
+key fingerprint = vqhrw.sxivq.wyzxx.tguez.6okk2
+min_generation  = 1
+generation      = 1
+expiration      = 2026-12-16T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+activation_flag = enabled
+*/
+
 uint8_t tackExtE[2048];
 uint32_t tackExtELen;
 
@@ -149,6 +166,9 @@ uint32_t tackExtEBmaxT2Len;
 
 uint8_t tackExtET1M[2048]; /* like EB1, but w/more extraneous break sigs*/
 uint32_t tackExtET1MLen;
+
+uint8_t tackExtET2[2048]; /* like EB1, but w/more extraneous break sigs*/
+uint32_t tackExtET2Len;
 
 
 #include <stdio.h>
@@ -183,6 +203,10 @@ TACK_RETVAL tackTestProcessInit()
     retval=tackDePem(label, 
                      (uint8_t*)ET1Mpem, strlen(ET1Mpem), 
                      tackExtET1M, &tackExtET1MLen);
+
+    retval=tackDePem(label, 
+                     (uint8_t*)ET2pem, strlen(ET2pem), 
+                     tackExtET2, &tackExtET2Len);
 
     return retval;
 }
@@ -639,3 +663,56 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) {
 
     return TACK_OK;
 }
+
+#ifdef __cplusplus
+
+#include "TackStoreDefault.h"
+
+TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
+{
+    TACK_RETVAL retval;
+    TackProcessingContext ctxET1, ctxET2;
+    uint8_t* keyHash;
+    uint8_t* tack;
+    uint32_t currentTime = 123;
+    TackStoreDefault store;
+
+    TCHECK(tackTestProcessInit());
+
+    tack = tackExtensionGetTack(tackExtET1);
+    keyHash = tackTackGetTargetHash(tack);
+
+    TCHECK(tackProcessWellFormed(tackExtET1, tackExtET1Len, keyHash,
+                                 currentTime, &ctxET1, crypto));
+    
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime, true), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+10, true), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+19, true), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+100, true), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+200, true), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+399, true), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+1000, false), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+1001, false), TACK_OK_UNPINNED);
+
+    TCHECK(tackProcessWellFormed(tackExtET2, tackExtET2Len, keyHash,
+                                 currentTime, &ctxET2, crypto));
+
+    TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime, true), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+10, true), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+10, true), TACK_OK_ACCEPTED);
+
+    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime, true), TACK_OK_REJECTED);
+    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime, false), TACK_OK_REJECTED);
+    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+1000, true), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+2000, true), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+2001, false), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+2001, true), TACK_OK_ACCEPTED);
+
+    TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+11, false), TACK_OK_ACCEPTED);
+
+    
+    return TACK_OK;
+}
+
+#endif
+

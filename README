@@ -14,6 +14,6 @@ files and libraries.
 
 Then run:
 
-  ./tackc test testdata/E.dat
+  ./tackc test
 
-To see if it can verify the binary TACK_Extension correctly.
+To see unit-testing results.
