@@ -23,7 +23,10 @@ static TACK_RETVAL tackStoreSetMinGeneration(void* arg, char* keyFingerprint,
 {
     TackStore* store = (TackStore*)arg;
     std::string fingerprint(keyFingerprint);
-    return store->setMinGeneration(fingerprint, minGeneration);
+    TACK_RETVAL retval = store->setMinGeneration(fingerprint, minGeneration);
+    if (retval == TACK_OK)
+        store->setDirtyFlag(true);
+    return retval;
 }
 
 static TACK_RETVAL tackStoreGetNameRecord(void* arg, void* name, TackNameRecord* nameRecord)
@@ -37,24 +40,39 @@ static TACK_RETVAL tackStoreSetNameRecord(void* arg, void* name, TackNameRecord*
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
-    return store->setNameRecord(*nameStr, nameRecord);
+    TACK_RETVAL retval = store->setNameRecord(*nameStr, nameRecord);
+    if (retval == TACK_OK)
+        store->setDirtyFlag(true);
+    return retval;
 }
 
 static TACK_RETVAL tackStoreUpdateNameRecord(void* arg, void* name, uint32_t newEndTime)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
-    return store->updateNameRecord(*nameStr, newEndTime);    
+    TACK_RETVAL retval = store->updateNameRecord(*nameStr, newEndTime);
+    if (retval == TACK_OK)
+        store->setDirtyFlag(true);
+    return retval;    
 }
 
 static TACK_RETVAL tackStoreDeleteNameRecord(void* arg, void* name)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
-    return store->deleteNameRecord(*nameStr);    
+    TACK_RETVAL retval = store->deleteNameRecord(*nameStr);    
+    if (retval == TACK_OK)
+        store->setDirtyFlag(true);
+    return retval;
 }
 
 // TackStore methods
+
+TackStore::TackStore():pinActivation_(false),crypto_(NULL),revocationStore_(this) {}
+
+void TackStore::setPinActivation(bool pinActivation) {
+    pinActivation_ = pinActivation; }
+bool TackStore::getPinActivation() {return pinActivation_;}
 
 void TackStore::setCryptoFuncs(TackCryptoFuncs* crypto) {
     crypto_ = crypto;}
@@ -64,12 +82,10 @@ void TackStore::setRevocationStore(TackStore* revocationStore) {
     revocationStore_ = revocationStore;}
 bool TackStore::getRevocationStore() {return revocationStore_;}
 
-void TackStore::setPinActivation(bool pinActivation) {
-    pinActivation_ = pinActivation; }
-bool TackStore::getPinActivation() {return pinActivation_;}
+void TackStore::setDirtyFlag(bool dirtyFlag) {
+    dirtyFlag_ = dirtyFlag;}
+bool TackStore::getDirtyFlag() {return dirtyFlag_;}
 
-
-TackStore::TackStore():pinActivation_(false),crypto_(NULL),revocationStore_(this) {}
 
 static TackStoreFuncs storeFuncs = {
     tackStoreGetMinGeneration,

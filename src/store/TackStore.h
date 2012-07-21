@@ -17,30 +17,33 @@
 class TackStore {
 public:
     TackStore();
-    // Configure the store's crypto functions
-    void setCryptoFuncs(TackCryptoFuncs* crypto);
-    TackCryptoFuncs* getCryptoFuncs();
 
-    // Configure an associated revocation store for storing
-    // minGeneration updates (defaults to "this", can be set to NULL)
-    void setRevocationStore(TackStore* revocationStore);
-    bool getRevocationStore();
-
+    // Accessors
     void setPinActivation(bool pinActivation);
     bool getPinActivation();
 
-    /* Main entry point for client processing */
+    void setCryptoFuncs(TackCryptoFuncs* crypto);
+    TackCryptoFuncs* getCryptoFuncs();
+
+    void setRevocationStore(TackStore* revocationStore);
+    bool getRevocationStore();
+
+    void setDirtyFlag(bool dirtyFlag);
+    bool getDirtyFlag();
+
+    // Main entry point for client processing
     TACK_RETVAL process(TackProcessingContext* ctx,
                         std::string name,
                         uint32_t currentTime,
                         bool invalidateOnly=false);
 
+    // Convenience functions
     TACK_RETVAL getPin(std::string& name, TackNameRecord* nameRecord, 
                        uint8_t *minGeneration);
     TACK_RETVAL setPin(std::string& name, TackNameRecord* nameRecord, 
                        uint8_t minGeneration);
 
-    /* Define the below functions in a subclass */
+    // Define the below functions in a subclass
     virtual TACK_RETVAL getMinGeneration(std::string& keyFingerprint, 
                                      uint8_t* minGeneration) = 0;
     virtual TACK_RETVAL setMinGeneration(std::string& keyFingerprint, 
@@ -55,6 +58,7 @@ private:
     bool pinActivation_;
     TackCryptoFuncs* crypto_;
     TackStore* revocationStore_;
+    bool dirtyFlag_;
 };
 
 #endif

@@ -54,3 +54,27 @@ TACK_RETVAL TackStoreDefault::deleteNameRecord(std::string& name)
     nameRecords_.erase(name);
     return TACK_OK; 
 }
+
+/*
+TACK_RETVAL TackStoreDefault::serialize(std::string& name)
+{
+    std::map<std::string, TackNameRecord>::iterator ni;
+    for (ni=nameRecords_.begin(); ni != nameRecords_.end(); ni++)  {
+        uint8_t minGeneration;
+        if ((retval=getMinGeneration(ni->second.fingerprint, &minGeneration)) != TACK_OK)
+            return retval;
+
+        char entry[1024];
+        uint32_t entryLen = 0;
+        if ((retval=tackSerializeEntry(&ni->second, minGeneration, 
+                                       entry, &entryLen)) != TACK_OK)
+            return retval;
+        
+        name += std::string(entry, entryLen);
+    }
+    std::map<std::string, uint8_t>::iterator ki;
+    for (ki=keyRecords_.begin(); ki != keyRecords_.end(); ki++)  {
+        
+    }
+}
+*/
