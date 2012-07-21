@@ -130,7 +130,7 @@ generation      = 255
 expiration      = 2026-12-16T01:55Z
 target_hash     = 32b64b66727a2063e4066f3b958cb0aa
                   ee576a5ecefd953399bb8874731d9587
-activation_flag = disabled
+activation_flag = enabled
 */
 
 char ET2pem[] = "\
@@ -165,14 +165,12 @@ uint32_t tackExtEB1T2Len;
 uint8_t tackExtEBmaxT2[2048]; /* like EB1, but w/more extraneous break sigs*/
 uint32_t tackExtEBmaxT2Len;
 
-uint8_t tackExtET1M[2048]; /* like EB1, but w/more extraneous break sigs*/
+uint8_t tackExtET1M[2048]; /* like ET1, but w/mingen=254,gen=255*/
 uint32_t tackExtET1MLen;
 
-uint8_t tackExtET2[2048]; /* like EB1, but w/more extraneous break sigs*/
+uint8_t tackExtET2[2048];
 uint32_t tackExtET2Len;
 
-
-#include <stdio.h>
 
 TACK_RETVAL tackTestProcessInit()
 {
@@ -714,8 +712,8 @@ TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+10), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+18), TACK_OK_ACCEPTED);
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+100), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+200), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+398), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+199), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+396), TACK_OK_ACCEPTED);
     store.setPinActivation(false);
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+1000), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+1001), TACK_OK_UNPINNED);
