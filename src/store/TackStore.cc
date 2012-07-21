@@ -88,11 +88,10 @@ TACK_RETVAL TackStore::getPin(std::string& name, TackNameRecord* nameRecord,
                    uint8_t *minGeneration)
 {
     TACK_RETVAL retval = TACK_ERR;
-    std::string fingerprint(nameRecord->fingerprint);
-    // Get name record first so we can early-exit if not found
-    // If key record exists, name record must; but reverse isn't true
     if ((retval = getNameRecord(name, nameRecord)) != TACK_OK)
         return retval;
+
+    std::string fingerprint(nameRecord->fingerprint);
     if ((retval = getMinGeneration(fingerprint, minGeneration)) != TACK_OK)
         return retval;
     return TACK_OK;
