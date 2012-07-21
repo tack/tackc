@@ -14,14 +14,7 @@ extern "C" {
 
 typedef int32_t TACK_RETVAL;
 
-#define TCHECK(x) \
- do { retval = x; if (retval != TACK_OK) return retval; } while (0)
-
-#define TCHECK_VAL(x,y) \
- do { retval = x; if (retval != y) return TACK_ERR_ASSERTION; } while (0)
-
 const char* tackRetvalString(TACK_RETVAL error);
-
 
 #define TACK_OK                                  0x00000000
 #define TACK_OK_NOT_FOUND                        0x00000001

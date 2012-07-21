@@ -253,6 +253,7 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                                             TackCryptoFuncs* crypto) 
 {
     TACK_RETVAL retval = TACK_OK;
+    uint32_t timeDelta = 0;
 
     /* The first step in pin activation is to delete a relevant but inactive
        pin unless there is a tack and the pin references the tack's key */
@@ -270,8 +271,15 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     if (tackMatchesPin) {
         /* If there is a relevant pin referencing the tack's key, the name
            record's "end time" SHALL be set using the below formula: */
-        nameRecordOut->endTime = currentTime + (currentTime - nameRecord->initialTime);
-        return TACK_OK_UPDATE_PIN;
+        timeDelta = (currentTime - nameRecord->initialTime);
+        if (timeDelta > 1) {
+            /* It's OK to slightly undercount the time, but NOT to overcount,
+               hence the timeDelta is decremented by one.  Additionally,
+               we don't bother updating the pin unless its endTime has been 
+               modified.*/
+            nameRecordOut->endTime = currentTime + timeDelta - 1;
+            return TACK_OK_UPDATE_PIN; /* overwriting TACK_OK */
+        }
     }
     if (!nameRecord)  {
         /* If there is no relevant pin a new pin SHALL be created: */
@@ -279,7 +287,7 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
         *minGenerationOut = tackTackGetMinGeneration(ctx->tack);
         nameRecordOut->initialTime = currentTime;
         nameRecordOut->endTime = 0;
-        return TACK_OK_NEW_PIN;
+        return TACK_OK_NEW_PIN; /* overwriting TACK_OK or TACK_OK_DELETE_PIN */
     }
     return retval;
 }
