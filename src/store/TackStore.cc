@@ -56,20 +56,20 @@ static TACK_RETVAL tackStoreDeleteNameRecord(void* arg, void* name)
 
 // TackStore methods
 
-void TackStore::setCryptoFuncs(TackCryptoFuncs* newCrypto) {
-    crypto = newCrypto;}
-TackCryptoFuncs* TackStore::getCryptoFuncs() {return crypto;}
+void TackStore::setCryptoFuncs(TackCryptoFuncs* crypto) {
+    crypto_ = crypto;}
+TackCryptoFuncs* TackStore::getCryptoFuncs() {return crypto_;}
 
-void TackStore::setRevocationStore(TackStore* newRevocationStore) {
-    revocationStore = newRevocationStore;}
-bool TackStore::getRevocationStore() {return revocationStore;}
+void TackStore::setRevocationStore(TackStore* revocationStore) {
+    revocationStore_ = revocationStore;}
+bool TackStore::getRevocationStore() {return revocationStore_;}
 
-void TackStore::setPinActivation(bool newPinActivation) {
-    pinActivation = newPinActivation; }
-bool TackStore::getPinActivation() {return pinActivation;}
+void TackStore::setPinActivation(bool pinActivation) {
+    pinActivation_ = pinActivation; }
+bool TackStore::getPinActivation() {return pinActivation_;}
 
 
-TackStore::TackStore():pinActivation(false),crypto(NULL),revocationStore(this) {}
+TackStore::TackStore():pinActivation_(false),crypto_(NULL),revocationStore_(this) {}
 
 static TackStoreFuncs storeFuncs = {
     tackStoreGetMinGeneration,
@@ -86,10 +86,10 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                                bool invalidateOnly)
 {
     return tackProcessStore(ctx, &name, currentTime, 
-                            (uint8_t)pinActivation, 
+                            (uint8_t)pinActivation_, 
                             (uint8_t)invalidateOnly, 
                             &storeFuncs, 
-                            this, revocationStore, crypto);
+                            this, revocationStore_, crypto_);
 }
 
 TACK_RETVAL TackStore::getPin(std::string& name, TackNameRecord* nameRecord, 

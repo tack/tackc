@@ -264,9 +264,7 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     /* If there is no tack, or if the activation flag is disabled, then this 
        completes the algorithm.  (OR invalidateOnly).
        Otherwise, the following steps are executed:*/
-    if (!ctx->tack || 
-        (tackExtensionGetActivationFlag(ctx->tackExt) == 0) ||
-        invalidateOnly)
+    if (!ctx->tack || (tackExtensionGetActivationFlag(ctx->tackExt) == 0) || invalidateOnly)
         return retval;
     
     if (tackMatchesPin) {

@@ -18,12 +18,12 @@ class TackStore {
 public:
     TackStore();
     // Configure the store's crypto functions
-    void setCryptoFuncs(TackCryptoFuncs* newCrypto);
+    void setCryptoFuncs(TackCryptoFuncs* crypto);
     TackCryptoFuncs* getCryptoFuncs();
 
     // Configure an associated revocation store for storing
     // minGeneration updates (defaults to "this", can be set to NULL)
-    void setRevocationStore(TackStore* newRevocationStore);
+    void setRevocationStore(TackStore* revocationStore);
     bool getRevocationStore();
 
     void setPinActivation(bool pinActivation);
@@ -52,9 +52,9 @@ public:
     virtual TACK_RETVAL deleteNameRecord(std::string& name) = 0;
 
 private:
-    bool pinActivation;
-    TackCryptoFuncs* crypto;
-    TackStore* revocationStore;
+    bool pinActivation_;
+    TackCryptoFuncs* crypto_;
+    TackStore* revocationStore_;
 };
 
 #endif

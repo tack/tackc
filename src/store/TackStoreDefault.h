@@ -35,10 +35,10 @@ public:
 private:
     
     // Maps names to name records
-    std::map<std::string, TackNameRecord> nameRecords;
+    std::map<std::string, TackNameRecord> nameRecords_;
     
     // Maps key fingerprints to minGenerations
-    std::map<std::string, uint8_t> keyRecords;
+    std::map<std::string, uint8_t> keyRecords_;
 };
 
 #endif
