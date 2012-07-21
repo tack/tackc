@@ -708,8 +708,14 @@ TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
                                  currentTime, crypto));
     
     store.setPinActivation(true);
+    store.setDirtyFlag(false);
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime), TACK_OK_UNPINNED);
+    assert(store.getDirtyFlag() == true);
+
+    store.setDirtyFlag(false);
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+10), TACK_OK_UNPINNED);
+    assert(store.getDirtyFlag() == true);
+
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+18), TACK_OK_ACCEPTED);
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+100), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+199), TACK_OK_UNPINNED);
@@ -726,7 +732,10 @@ TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
     TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+10), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+10), TACK_OK_ACCEPTED);
 
+    store.setDirtyFlag(false);
     TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime), TACK_OK_REJECTED);
+    assert(store.getDirtyFlag() == false);
+
     store.setPinActivation(false);
     TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime), TACK_OK_REJECTED);
     store.setPinActivation(true);
@@ -738,7 +747,9 @@ TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
     TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+2001), TACK_OK_ACCEPTED);
 
     store.setPinActivation(false);
+    store.setDirtyFlag(false);
     TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+11), TACK_OK_ACCEPTED);
+    assert(store.getDirtyFlag() == false);
     store.setPinActivation(true);
 
     
