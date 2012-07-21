@@ -38,7 +38,8 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              void* name,
                              uint32_t currentTime,
-                             uint8_t doPinActivation,
+                             uint8_t pinActivation,
+                             uint8_t invalidateOnly,
                              TackStoreFuncs* store, 
                              void* storeArg, 
                              void* revocationStoreArg,
@@ -54,6 +55,7 @@ TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
                                    TACK_RETVAL* activationRetval,
                                    TackNameRecord* nameRecordOut,
                                    uint8_t* minGenerationOut,
+                                   uint8_t invalidateOnly,
                                    TackCryptoFuncs* crypto);
 
 

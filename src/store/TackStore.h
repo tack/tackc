@@ -26,11 +26,14 @@ public:
     void setRevocationStore(TackStore* newRevocationStore);
     bool getRevocationStore();
 
+    void setPinActivation(bool pinActivation);
+    bool getPinActivation();
+
     /* Main entry point for client processing */
     TACK_RETVAL process(TackProcessingContext* ctx,
                         std::string name,
                         uint32_t currentTime,
-                        bool doPinActivation);
+                        bool invalidateOnly=false);
 
     TACK_RETVAL getPin(std::string& name, TackNameRecord* nameRecord, 
                        uint8_t *minGeneration);
@@ -49,6 +52,7 @@ public:
     virtual TACK_RETVAL deleteNameRecord(std::string& name) = 0;
 
 private:
+    bool pinActivation;
     TackCryptoFuncs* crypto;
     TackStore* revocationStore;
 };

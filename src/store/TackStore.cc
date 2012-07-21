@@ -64,7 +64,12 @@ void TackStore::setRevocationStore(TackStore* newRevocationStore) {
     revocationStore = newRevocationStore;}
 bool TackStore::getRevocationStore() {return revocationStore;}
 
-TackStore::TackStore():crypto(NULL),revocationStore(this) {}
+void TackStore::setPinActivation(bool newPinActivation) {
+    pinActivation = newPinActivation; }
+bool TackStore::getPinActivation() {return pinActivation;}
+
+
+TackStore::TackStore():pinActivation(false),crypto(NULL),revocationStore(this) {}
 
 static TackStoreFuncs storeFuncs = {
     tackStoreGetMinGeneration,
@@ -78,9 +83,12 @@ static TackStoreFuncs storeFuncs = {
 TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                                std::string name,
                                uint32_t currentTime,
-                               bool doPinActivation)
+                               bool invalidateOnly)
 {
-    return tackProcessStore(ctx, &name, currentTime, doPinActivation, &storeFuncs, 
+    return tackProcessStore(ctx, &name, currentTime, 
+                            (uint8_t)pinActivation, 
+                            (uint8_t)invalidateOnly, 
+                            &storeFuncs, 
                             this, revocationStore, crypto);
 }
 

@@ -51,7 +51,8 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              void* name,
                              uint32_t currentTime,
-                             uint8_t doPinActivation,
+                             uint8_t pinActivation,
+                             uint8_t invalidateOnly,
                              TackStoreFuncs* store, 
                              void* storeArg, 
                              void* revocationStoreArg,
@@ -86,7 +87,7 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     /* Client processing logic */
     retval=tackProcessStoreHelper(ctx, currentTime, nameRecord, minGeneration, 
                                   &activationRetval, &nameRecordOut, &minGenerationOut,
-                                  crypto);
+                                  invalidateOnly, crypto);
     if (retval < TACK_OK)
         return retval;
     resultRetval = retval;
@@ -100,7 +101,7 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     }
 
     /* Make store changes based on pin activation */
-    if (doPinActivation) {
+    if (pinActivation) {
         /* If a new pin was created (perhaps replacing an old one) */
         if (activationRetval == TACK_OK_NEW_PIN) {
             /* Set key record before name record */
@@ -140,6 +141,7 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                                             TackNameRecord* nameRecord, 
                                             TackNameRecord* nameRecordOut,
                                             uint8_t* minGenerationOut,
+                                            uint8_t invalidateOnly,
                                             uint8_t tackMatchesPin,
                                             TackCryptoFuncs* crypto);
 
@@ -150,6 +152,7 @@ TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
                                    TACK_RETVAL* activationRetval,
                                    TackNameRecord* nameRecordOut,
                                    uint8_t* minGenerationOut,
+                                   uint8_t invalidateOnly,
                                    TackCryptoFuncs* crypto)
 {
     TACK_RETVAL retval = TACK_ERR, resultRetval=TACK_ERR;  
@@ -198,7 +201,7 @@ TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
     /* Calculate pin activation */
     if (resultRetval != TACK_OK_REJECTED) {
         if ((retval=tackProcessPinActivation(ctx, currentTime, nameRecord, nameRecordOut,
-                                             minGenerationOut, 
+                                             minGenerationOut, invalidateOnly,
                                              tackMatchesPin, crypto)) < TACK_OK)
             return retval;
         *activationRetval = retval;    
@@ -245,6 +248,7 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                                             TackNameRecord* nameRecord, 
                                             TackNameRecord* nameRecordOut,
                                             uint8_t* minGenerationOut,
+                                            uint8_t invalidateOnly,
                                             uint8_t tackMatchesPin,
                                             TackCryptoFuncs* crypto) 
 {
@@ -258,8 +262,11 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     }
     
     /* If there is no tack, or if the activation flag is disabled, then this 
-       completes the algorithm.  Otherwise, the following steps are executed:*/
-    if (!ctx->tack || (tackExtensionGetActivationFlag(ctx->tackExt) == 0))
+       completes the algorithm.  (OR invalidateOnly).
+       Otherwise, the following steps are executed:*/
+    if (!ctx->tack || 
+        (tackExtensionGetActivationFlag(ctx->tackExt) == 0) ||
+        invalidateOnly)
         return retval;
     
     if (tackMatchesPin) {
