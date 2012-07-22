@@ -32,7 +32,7 @@ public:
                                   uint32_t newEndTime) OVERRIDE;  
     virtual TACK_RETVAL deleteNameRecord(std::string& name) OVERRIDE;
 
-private:
+//private:
     
     // Maps names to name records
     std::map<std::string, TackNameRecord> nameRecords_;
