@@ -54,7 +54,10 @@ public:
                                          name, uint32_t newEndTime) = 0;  
     virtual TACK_RETVAL deleteNameRecord(const std::string& name) = 0;
 
+    virtual TACK_RETVAL clear() = 0;
+
     virtual TACK_RETVAL serialize(char* list, uint32_t* listLen) = 0;
+
 
 private:
     bool pinActivation_;

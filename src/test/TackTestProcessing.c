@@ -757,8 +757,9 @@ TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
 
     char outTest[1024];
     uint32_t outLen = 1024;
-    store.serialize(outTest, &outLen);
-    printf("%s", outTest);
+    TACK_RETVAL retval = store.serialize(outTest, &outLen);
+    printf("%s\n", tackRetvalString(retval));
+    printf("%s\n", outTest);
 
 /*
     TackNameRecord nr;

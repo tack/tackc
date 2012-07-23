@@ -59,38 +59,68 @@ TACK_RETVAL TackStoreDefault::deleteNameRecord(const std::string& name)
     return TACK_OK; 
 }
 
+TACK_RETVAL TackStoreDefault::clear()
+{
+    nameRecords_.clear();
+    keyRecords_.clear();
+    return TACK_OK;
+}
+
+
+/* Specify the length of the buffer - will not be overwritten, but only
+   listLen-1 chars can actually be stored, due to final NULL */
 TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
 {
     std::map<std::string, TackNameRecord>::iterator ni;
     uint32_t oldListLen = 0;
     uint8_t minGeneration = 0;
-    TACK_RETVAL retval = TACK_ERR;
+    TACK_RETVAL retval = TACK_OK; /* default return */
 
-    if (*listLen < 2)
+    if (*listLen < 2) /* account for the NULL */
         return TACK_ERR_UNDERSIZED_BUFFER;
     *list++ = '{';
-    *list++ = '\n';
-    *listLen -= 2;
+    *listLen -= 1;
 
+    bool firstTime = true;
     for (ni=nameRecords_.begin(); ni != nameRecords_.end(); ni++)  {
 
         if ((retval=getMinGeneration(ni->second.fingerprint, &minGeneration)) != TACK_OK)
             return retval;
 
+        if (firstTime)
+            firstTime = false;
+        else {
+            if (*listLen < 2)
+                return TACK_ERR_UNDERSIZED_BUFFER;
+            *list++ = ',';
+            *listLen -= 1;
+        }
+
+        if (*listLen < 2)
+            return TACK_ERR_UNDERSIZED_BUFFER;
+        *list++ = '\n';
+        *listLen -= 1;
+
         oldListLen = *listLen;
-        if ((retval=tackPinListAddNameEntry(list, listLen,
-                                            ni->first.c_str(), &ni->second,
-                                            minGeneration)) != TACK_OK)
+        if ((retval=tackPinListWriteEntry(list, listLen,
+                                          ni->first.c_str(), &ni->second,
+                                          minGeneration)) != TACK_OK)
             return retval;
+
+        /* If there's no more space in the out buffer, we're going to return
+           (but use this as the retval) */
+        if (retval == TACK_OK_INCOMPLETE_WRITE)
+            break;
+
         list += (oldListLen - *listLen);
     }
 
     if (*listLen < 3)
         return TACK_ERR_UNDERSIZED_BUFFER;
-    *list++ = '}';
     *list++ = '\n';
-    *list++ = '\0';
+    *list++ = '}';
+    *list++ = 0;
     *listLen -= 2;
 
-    return TACK_OK;
+    return retval;
 }

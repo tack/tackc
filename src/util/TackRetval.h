@@ -18,6 +18,7 @@ const char* tackRetvalString(TACK_RETVAL error);
 
 #define TACK_OK                                  0x00000000
 #define TACK_OK_NOT_FOUND                        0x00000001
+#define TACK_OK_INCOMPLETE_WRITE                 0x00000002
 
 #define TACK_OK_ACCEPTED                         0x00001001
 #define TACK_OK_REJECTED                         0x00001002
@@ -54,6 +55,8 @@ const char* tackRetvalString(TACK_RETVAL error);
 #define TACK_ERR_BAD_BASE64                     -0x00007002
 
 #define TACK_ERR_UNDERSIZED_BUFFER              -0x00008001
+
+#define TACK_ERR_BAD_PINLIST_ENTRY              -0x00009001
 
 #ifdef __cplusplus
 }

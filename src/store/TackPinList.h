@@ -15,13 +15,13 @@ extern "C" {
 #include "TackStoreFuncs.h"
 
 
-TACK_RETVAL tackPinListAddNameEntry(char* list, uint32_t* listLen, 
-                                    const char* name, TackNameRecord* nameRecord, 
-                                    uint8_t minGeneration);
+TACK_RETVAL tackPinListWriteEntry(char* list, uint32_t* listLen, 
+                                  const char* name, TackNameRecord* nameRecord, 
+                                  uint8_t minGeneration);
 
-TACK_RETVAL tackPinListAddKeyEntry(char* list, uint32_t* listLen,
-                                   char* fingerprint, uint8_t minGeneration);
-
+TACK_RETVAL tackPinListParseEntry(char* list, uint32_t* listLen, 
+                                  char* name, TackNameRecord* nameRecord, 
+                                  uint8_t* minGeneration);
 
 #ifdef __cplusplus
 }
