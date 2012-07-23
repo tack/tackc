@@ -32,7 +32,7 @@ public:
                                   uint32_t newEndTime) OVERRIDE;  
     virtual TACK_RETVAL deleteNameRecord(const std::string& name) OVERRIDE;
 
-    virtual TACK_RETVAL serialize(char* list, uint32_t* listLen);
+    virtual TACK_RETVAL serialize(char* list, uint32_t* listLen) OVERRIDE;
 
 private:
     

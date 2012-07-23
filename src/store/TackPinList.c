@@ -25,7 +25,7 @@ TACK_RETVAL tackPinListAddNameEntry(char* list, uint32_t* listLen,
 TACK_RETVAL tackPinListAddKeyEntry(char* list, uint32_t* listLen,
                                    char* fingerprint, uint8_t minGeneration)
 {
-    uint32_t ret = snprintf(list, *listLen, ". %s %d", fingerprint, minGeneration);
+    uint32_t ret = snprintf(list, *listLen, "\"%s\": %d", fingerprint, minGeneration);
     if (ret >= *listLen)
         return TACK_ERR_UNDERSIZED_BUFFER;
     *listLen -= ret;
