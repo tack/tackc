@@ -42,7 +42,6 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              uint8_t invalidateOnly,
                              TackStoreFuncs* store, 
                              void* storeArg, 
-                             void* revocationStoreArg,
                              TackCryptoFuncs* crypto);
 
 /* Helper function used by tackProcessStore() 

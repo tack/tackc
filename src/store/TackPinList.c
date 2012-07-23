@@ -12,12 +12,20 @@ TACK_RETVAL tackPinListAddNameEntry(char* list, uint32_t* listLen,
                                     const char* name, TackNameRecord* nameRecord, 
                                     uint8_t minGeneration)
 {
-    uint32_t ret = snprintf(list, *listLen, 
+    char buf[1024];
+    uint32_t bufLen = sizeof(buf);
+
+    uint32_t ret = snprintf(buf, bufLen,
                             "\"%s\": [\"%s\", %u, %u, %u],\n", 
                             name, nameRecord->fingerprint,
                             nameRecord->initialTime, nameRecord->endTime, minGeneration);
+    if (ret >= bufLen)
+        return TACK_ERR_ASSERTION;
+
     if (ret >= *listLen)
         return TACK_ERR_UNDERSIZED_BUFFER;
+
+    memcpy(list, buf, ret);
     *listLen -= ret;
     return TACK_OK;
 }

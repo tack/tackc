@@ -25,9 +25,6 @@ public:
     void setCryptoFuncs(TackCryptoFuncs* crypto);
     TackCryptoFuncs* getCryptoFuncs();
 
-    void setRevocationStore(TackStore* revocationStore);
-    bool getRevocationStore();
-
     void setDirtyFlag(bool dirtyFlag);
     bool getDirtyFlag();
 
@@ -62,7 +59,6 @@ public:
 private:
     bool pinActivation_;
     TackCryptoFuncs* crypto_;
-    TackStore* revocationStore_;
     bool dirtyFlag_;
 };
 

@@ -55,7 +55,6 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              uint8_t invalidateOnly,
                              TackStoreFuncs* store, 
                              void* storeArg, 
-                             void* revocationStoreArg,
                              TackCryptoFuncs* crypto)
 {
 
@@ -94,7 +93,7 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
 
     /* Make store changes based on revocation */
     if (minGeneration && minGenerationOut > *minGeneration) {
-        retval=store->setMinGeneration(revocationStoreArg, ctx->tackFingerprint, 
+        retval=store->setMinGeneration(storeArg, ctx->tackFingerprint, 
                                        minGenerationOut);
         if (retval != TACK_OK)
             return retval;
