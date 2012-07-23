@@ -22,17 +22,23 @@ typedef struct {
 } TackNameRecord;
 
 /* Store functions used to communicate with the store */
-typedef TACK_RETVAL (*TackGetMinGenerationFunc)(void* arg, char* keyFingerprint, 
+typedef TACK_RETVAL (*TackGetMinGenerationFunc)(const void* arg, 
+                                                const char* keyFingerprint, 
                                                 uint8_t* minGeneration);
-typedef TACK_RETVAL (*TackSetMinGenerationFunc)(void* arg, char* keyFingerprint, 
+typedef TACK_RETVAL (*TackSetMinGenerationFunc)(const void* arg, 
+                                                const char* keyFingerprint, 
                                                 uint8_t minGeneration);
-typedef TACK_RETVAL (*TackGetNameRecordFunc)(void* arg, void* name, 
+typedef TACK_RETVAL (*TackGetNameRecordFunc)(const void* arg, 
+                                             const void* name, 
                                              TackNameRecord* nameRecord);
-typedef TACK_RETVAL (*TackSetNameRecordFunc)(void* arg, void* name, 
+typedef TACK_RETVAL (*TackSetNameRecordFunc)(const void* arg, 
+                                             const void* name, 
                                              TackNameRecord* nameRecord);
-typedef TACK_RETVAL (*TackUpdateNameRecordFunc)(void* arg, void* name, 
+typedef TACK_RETVAL (*TackUpdateNameRecordFunc)(const void* arg, 
+                                                const void* name, 
                                                 uint32_t newEndTime);
-typedef TACK_RETVAL (*TackDeleteNameRecordFunc)(void* arg, void* name);
+typedef TACK_RETVAL (*TackDeleteNameRecordFunc)(const void* arg, 
+                                                const void* name);
 
 /* The store functions, plus a state "arg", are packaged into this struct
    for convenient parameter passing */

@@ -6,10 +6,12 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 #include "TackProcessing.h"
 #include "TackExtension.h"
 #include "Tack.h"
 #include "TackUtil.h"
+#include "TackPinList.h"
 #include "TackTest.h"
 
 
@@ -752,7 +754,21 @@ TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
     assert(store.getDirtyFlag() == false);
     store.setPinActivation(true);
 
-    
+
+    char outTest[1024];
+    uint32_t outLen = 1024;
+    store.serialize(outTest, &outLen);
+    printf("%s", outTest);
+
+/*
+    TackNameRecord nr;
+    uint8_t mg;
+    store.getPin("a.com", &nr, &mg);
+    tackPinListAddNameEntry(outTest, &outLen, "a.com", &nr, mg);
+    printf("%s", outTest);
+*/ 
+
+ 
     return TACK_OK;
 }
 

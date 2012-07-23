@@ -36,7 +36,7 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
 
 /* Call once for each store, after the above well-formed check */
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
-                             void* name,
+                             const void* name,
                              uint32_t currentTime,
                              uint8_t pinActivation,
                              uint8_t invalidateOnly,

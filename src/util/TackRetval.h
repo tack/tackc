@@ -53,6 +53,8 @@ const char* tackRetvalString(TACK_RETVAL error);
 #define TACK_ERR_BAD_PEM                        -0x00007001
 #define TACK_ERR_BAD_BASE64                     -0x00007002
 
+#define TACK_ERR_UNDERSIZED_BUFFER              -0x00008001
+
 #ifdef __cplusplus
 }
 #endif

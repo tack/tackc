@@ -10,7 +10,7 @@
 
 // Callbacks for bridging between C functions and the C++ interface
 
-static TACK_RETVAL tackStoreGetMinGeneration(void* arg, char* keyFingerprint, 
+static TACK_RETVAL tackStoreGetMinGeneration(const void* arg, const char* keyFingerprint, 
                                              uint8_t* minGeneration)
 {
     TackStore* store = (TackStore*)arg;
@@ -18,7 +18,7 @@ static TACK_RETVAL tackStoreGetMinGeneration(void* arg, char* keyFingerprint,
     return store->getMinGeneration(fingerprint, minGeneration);
 }
 
-static TACK_RETVAL tackStoreSetMinGeneration(void* arg, char* keyFingerprint, 
+static TACK_RETVAL tackStoreSetMinGeneration(const void* arg, const char* keyFingerprint, 
                                              uint8_t minGeneration)
 {
     TackStore* store = (TackStore*)arg;
@@ -29,14 +29,16 @@ static TACK_RETVAL tackStoreSetMinGeneration(void* arg, char* keyFingerprint,
     return retval;
 }
 
-static TACK_RETVAL tackStoreGetNameRecord(void* arg, void* name, TackNameRecord* nameRecord)
+static TACK_RETVAL tackStoreGetNameRecord(const void* arg, const void* name, 
+                                          TackNameRecord* nameRecord)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
     return store->getNameRecord(*nameStr, nameRecord);
 }
 
-static TACK_RETVAL tackStoreSetNameRecord(void* arg, void* name, TackNameRecord* nameRecord)
+static TACK_RETVAL tackStoreSetNameRecord(const void* arg, const void* name, 
+                                          TackNameRecord* nameRecord)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
@@ -46,7 +48,8 @@ static TACK_RETVAL tackStoreSetNameRecord(void* arg, void* name, TackNameRecord*
     return retval;
 }
 
-static TACK_RETVAL tackStoreUpdateNameRecord(void* arg, void* name, uint32_t newEndTime)
+static TACK_RETVAL tackStoreUpdateNameRecord(const void* arg, const void* name, 
+                                             uint32_t newEndTime)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
@@ -56,7 +59,7 @@ static TACK_RETVAL tackStoreUpdateNameRecord(void* arg, void* name, uint32_t new
     return retval;    
 }
 
-static TACK_RETVAL tackStoreDeleteNameRecord(void* arg, void* name)
+static TACK_RETVAL tackStoreDeleteNameRecord(const void* arg, const void* name)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
@@ -97,7 +100,7 @@ static TackStoreFuncs storeFuncs = {
 };
 
 TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
-                               std::string name,
+                               const std::string& name,
                                uint32_t currentTime,
                                bool invalidateOnly)
 {
@@ -108,7 +111,7 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                             this, revocationStore_, crypto_);
 }
 
-TACK_RETVAL TackStore::getPin(std::string& name, TackNameRecord* nameRecord, 
+TACK_RETVAL TackStore::getPin(const std::string& name, TackNameRecord* nameRecord, 
                    uint8_t *minGeneration)
 {
     TACK_RETVAL retval = TACK_ERR;
@@ -121,7 +124,7 @@ TACK_RETVAL TackStore::getPin(std::string& name, TackNameRecord* nameRecord,
     return TACK_OK;
 }
 
-TACK_RETVAL TackStore::setPin(std::string& name, TackNameRecord* nameRecord, 
+TACK_RETVAL TackStore::setPin(const std::string& name, TackNameRecord* nameRecord, 
                               uint8_t minGeneration)
 {
     TACK_RETVAL retval = TACK_ERR;
