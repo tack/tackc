@@ -689,6 +689,7 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
     assert(nameRecordOut.endTime == currentTime + 11);
     assert(activationRetval == TACK_OK_UPDATE_PIN);
 
+
     return TACK_OK;
 }
 
@@ -698,7 +699,7 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
 
 TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
 {
-    TackProcessingContext ctxET1, ctxET2;
+    TackProcessingContext ctxET1, ctxET2, ctxET1M;
     uint8_t* keyHash;
     uint8_t* tack;
     uint32_t currentTime = 123;
@@ -711,53 +712,65 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
 
     TCHECK(tackProcessWellFormed(&ctxET1, tackExtET1, tackExtET1Len, keyHash,
                                  currentTime, crypto));
+
+    TCHECK(tackProcessWellFormed(&ctxET1M, tackExtET1M, tackExtET1MLen, keyHash,
+                                 currentTime, crypto));
     
     store.setPinActivation(true);
     store.setDirtyFlag(false);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime), TACK_OK_UNPINNED);
     assert(store.getDirtyFlag() == true);
 
     store.setDirtyFlag(false);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+10), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+10), TACK_OK_UNPINNED);
     assert(store.getDirtyFlag() == true);
 
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+18), TACK_OK_ACCEPTED);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+100), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+199), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+396), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+18), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+199), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+396), TACK_OK_ACCEPTED);
     store.setPinActivation(false);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+1000), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "a.com", currentTime+1001), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+1000), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+1001), TACK_OK_UNPINNED);
     store.setPinActivation(true);
 
     TCHECK(tackProcessWellFormed(&ctxET2, tackExtET2, tackExtET2Len, keyHash,
                                  currentTime, crypto));
 
-    TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+10), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+10), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+10), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+10), TACK_OK_ACCEPTED);
 
     store.setDirtyFlag(false);
-    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime), TACK_OK_REJECTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime), TACK_OK_REJECTED);
     assert(store.getDirtyFlag() == false);
 
     store.setPinActivation(false);
-    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime), TACK_OK_REJECTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime), TACK_OK_REJECTED);
     store.setPinActivation(true);
-    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+1000), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+2000), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+1000), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2000), TACK_OK_UNPINNED);
     store.setPinActivation(false);
-    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+2001), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2001), TACK_OK_ACCEPTED);
     store.setPinActivation(true);
-    TCHECK_VAL(store.process(&ctxET2, "a.com", currentTime+2001), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2001), TACK_OK_ACCEPTED);
 
     store.setPinActivation(false);
     store.setDirtyFlag(false);
-    TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime+11), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+11), TACK_OK_ACCEPTED);
     assert(store.getDirtyFlag() == false);
     store.setPinActivation(true);
 
-    TCHECK_VAL(store.process(&ctxET2, "third.com", currentTime), TACK_OK_UNPINNED);
+    /* Ensure there is a pin for key 0 in the store, for following minGen teset */
+    TCHECK_VAL(store.process(&ctxET1, "third.com", currentTime), TACK_OK_UNPINNED);
+
+    /* Try setting a larger minGen (254) with a name that comes before the other
+       names, to ensure that only the largest minGen is processed */
+    TCHECK_VAL(store.process(&ctxET1M, "a.com", currentTime), TACK_OK_UNPINNED);
+    store.setMinGeneration("rnx3y.35xdl.hssy4.bop3v.zifgu", 253);
+    uint8_t minGen;
+    store.getMinGeneration("rnx3y.35xdl.hssy4.bop3v.zifgu", &minGen);
+    assert(minGen == 254);
 
     // Check that serialize -> deserialize -> serialize yields same string
     TACK_RETVAL retval;
@@ -765,7 +778,7 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     uint32_t outLen = 1024;
     if ((retval = store.serialize(outTest, &outLen)) != TACK_OK)
         return retval;
-    //printf("%s", outTest);
+    printf("%s", outTest);
 
     TackStoreDefault store2;
     if ((retval = store2.deserialize(outTest, &outLen)) != TACK_OK)
@@ -776,6 +789,10 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     outLen2 = 1024;
     if ((retval = store2.serialize(outTest2, &outLen2)) != TACK_OK)
         return retval;
+
+    // Check that the largest minGen was deserialized
+    store.getMinGeneration("rnx3y.35xdl.hssy4.bop3v.zifgu", &minGen);
+    assert(minGen == 254);
 
     assert(strcmp(outTest, outTest2) == 0);
 
