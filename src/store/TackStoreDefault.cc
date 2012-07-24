@@ -20,7 +20,12 @@ TACK_RETVAL TackStoreDefault::getMinGeneration(const std::string& keyFingerprint
 TACK_RETVAL TackStoreDefault::setMinGeneration(const std::string& keyFingerprint, 
                                                uint8_t minGeneration)
 {
-    keyRecords_[keyFingerprint] = minGeneration;
+    std::map<std::string, uint8_t>::iterator ki = keyRecords_.find(keyFingerprint);
+    if (ki == keyRecords_.end())
+        keyRecords_[keyFingerprint] = minGeneration;
+    else if (minGeneration > ki->second)
+        ki->second = minGeneration;
+
     return TACK_OK;
 }
 
@@ -115,12 +120,13 @@ TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
         list += (oldListLen - *listLen);
     }
 
-    if (*listLen < 3)
+    if (*listLen < 4)
         return TACK_ERR_UNDERSIZED_BUFFER;
     *list++ = '\n';
     *list++ = '}';
+    *list++ = '\n';
     *list++ = 0;
-    *listLen -= 2;
+    *listLen -= 3;
 
     return retval;
 }
