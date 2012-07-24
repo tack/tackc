@@ -35,7 +35,7 @@ const char* tackRetvalString(TACK_RETVAL retval)
     case TACK_ERR_BAD_PEM: return "BAD PEM";
     case TACK_ERR_BAD_BASE64: return "BAD BASE64";
     case TACK_ERR_UNDERSIZED_BUFFER: return "UNDERSIZED BUFFER";
-    case TACK_ERR_BAD_PINLIST_ENTRY: return "BAD PINLIST ENTRY";
+    case TACK_ERR_BAD_PINLIST: return "BAD PINLIST";
     default: return "uknown error?!";
     }
 }	

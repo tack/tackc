@@ -693,7 +693,7 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
 
 #include "TackStoreDefault.h"
 
-TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
+TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
 {
     TackProcessingContext ctxET1, ctxET2;
     uint8_t* keyHash;
@@ -754,22 +754,28 @@ TACK_RETVAL tackTestTackStore(TackCryptoFuncs* crypto)
     assert(store.getDirtyFlag() == false);
     store.setPinActivation(true);
 
+    TCHECK_VAL(store.process(&ctxET2, "third.com", currentTime), TACK_OK_UNPINNED);
 
+    // Check that serialize -> deserialize -> serialize yields same string
+    TACK_RETVAL retval;
     char outTest[1024];
     uint32_t outLen = 1024;
-    TACK_RETVAL retval = store.serialize(outTest, &outLen);
-    printf("%s\n", tackRetvalString(retval));
-    printf("%s\n", outTest);
+    if ((retval = store.serialize(outTest, &outLen)) != TACK_OK)
+        return retval;
+    //printf("%s", outTest);
 
-/*
-    TackNameRecord nr;
-    uint8_t mg;
-    store.getPin("a.com", &nr, &mg);
-    tackPinListAddNameEntry(outTest, &outLen, "a.com", &nr, mg);
-    printf("%s", outTest);
-*/ 
+    TackStoreDefault store2;
+    if ((retval = store2.deserialize(outTest, &outLen)) != TACK_OK)
+        return retval;
 
- 
+    char outTest2[1024];
+    uint32_t outLen2 = 1024;
+    outLen2 = 1024;
+    if ((retval = store2.serialize(outTest2, &outLen2)) != TACK_OK)
+        return retval;
+
+    assert(strcmp(outTest, outTest2) == 0);
+
     return TACK_OK;
 }
 

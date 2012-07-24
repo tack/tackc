@@ -19,7 +19,7 @@ TACK_RETVAL tackPinListWriteEntry(char* list, uint32_t* listLen,
                                   const char* name, TackNameRecord* nameRecord, 
                                   uint8_t minGeneration);
 
-TACK_RETVAL tackPinListParseEntry(char* list, uint32_t* listLen, 
+TACK_RETVAL tackPinListParseEntry(const char* list, uint32_t* listLen, 
                                   char* name, TackNameRecord* nameRecord, 
                                   uint8_t* minGeneration);
 

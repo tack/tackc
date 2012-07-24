@@ -56,7 +56,7 @@ const char* tackRetvalString(TACK_RETVAL error);
 
 #define TACK_ERR_UNDERSIZED_BUFFER              -0x00008001
 
-#define TACK_ERR_BAD_PINLIST_ENTRY              -0x00009001
+#define TACK_ERR_BAD_PINLIST                    -0x00009001
 
 #ifdef __cplusplus
 }

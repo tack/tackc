@@ -58,6 +58,8 @@ public:
 
     virtual TACK_RETVAL serialize(char* list, uint32_t* listLen) = 0;
 
+    virtual TACK_RETVAL deserialize(const char* list, uint32_t* listLen) = 0;
+
 
 private:
     bool pinActivation_;

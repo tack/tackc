@@ -34,7 +34,7 @@ TACK_RETVAL tackPinListWriteEntry(char* list, uint32_t* listLen,
     return TACK_OK;
 }
 
-TACK_RETVAL tackPinListParseEntry(char* list, uint32_t* listLen, 
+TACK_RETVAL tackPinListParseEntry(const char* list, uint32_t* listLen, 
                                   char* name, TackNameRecord* nameRecord, 
                                   uint8_t* minGeneration)
 {
@@ -44,29 +44,32 @@ TACK_RETVAL tackPinListParseEntry(char* list, uint32_t* listLen,
     int ret = 0;
     char nameBuf[256];
     char fingerprintBuf[30];  // 29 char fingerprint +1 for NULL
+    int numChars;
 
     memset(nameBuf, 0, sizeof(nameBuf));
     memset(fingerprintBuf, 0, sizeof(fingerprintBuf));
     
-    ret = sscanf(list, "\"%255[^\"]\": [\"%29c\", %u, %u, %hhu]", 
+    ret = sscanf(list, "\"%255[^\"]\": [\"%29c\", %u, %u, %hhu]%n", 
                  nameBuf, fingerprintBuf, 
-                 &initialTime, &endTime, &minGen);
+                 &initialTime, &endTime, &minGen, &numChars);
     
     if (ret != 5) {
-        return TACK_ERR_BAD_PINLIST_ENTRY;
+        return TACK_ERR_BAD_PINLIST;
     }
     
-    if (strlen(nameBuf) > 255)
+    if (strlen(nameBuf) > 255) {
         return TACK_ERR_ASSERTION;
+    }
     
     if (strlen(fingerprintBuf) != 29)
-        return TACK_ERR_BAD_PINLIST_ENTRY;
+        return TACK_ERR_BAD_PINLIST;
     
     strcpy(name, nameBuf);
     strcpy(nameRecord->fingerprint, fingerprintBuf);
     nameRecord->initialTime = initialTime;
     nameRecord->endTime = endTime;
     *minGeneration = minGen;
+    *listLen -= numChars;
     
     return TACK_OK;
 }

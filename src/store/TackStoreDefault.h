@@ -34,6 +34,8 @@ public:
 
     virtual TACK_RETVAL serialize(char* list, uint32_t* listLen) OVERRIDE;
 
+    virtual TACK_RETVAL deserialize(const char* list, uint32_t* listLen) OVERRIDE;
+
     virtual TACK_RETVAL clear() OVERRIDE;
 
 private:

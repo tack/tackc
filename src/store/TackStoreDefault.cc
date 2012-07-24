@@ -124,3 +124,68 @@ TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
 
     return retval;
 }
+
+TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
+{
+    uint8_t state = 0;
+    /* 0 = Start (before '{')
+       1 = Before entry (before entry or '}')
+       2 = After entry (before ',' or '}')
+    */
+
+    TACK_RETVAL retval = TACK_ERR;
+    char name[256]; // 255-char length plus NULL
+    TackNameRecord nameRecord;
+    uint8_t minGeneration = 0;
+    uint32_t oldListLen = 0;
+
+    clear();
+
+    while (*list && *listLen) {
+        if (state == 0) { // Start
+            if (*list == ' ' || *list == '\n' || *list == '\t')
+                continue;
+            else if (*list == '{')
+                state = 1;
+            else {
+                return TACK_ERR_BAD_PINLIST;
+            }
+        }
+        else if (state == 1)  { // Before entry
+            if (*list == ' ' || *list == '\n' || *list == '\t')
+            {}
+            else if (*list == '}')
+                return TACK_OK;
+            else {
+                oldListLen = *listLen;
+                retval = tackPinListParseEntry(list, listLen,
+                                               name, &nameRecord, &minGeneration);
+                list += (oldListLen - *listLen);
+
+                if (retval != TACK_OK)
+                    return retval;
+                retval = setPin(name, &nameRecord, minGeneration);
+                if (retval != TACK_OK)
+                    return retval;
+
+                state = 2;
+                continue;
+            }
+        }
+        else if (state == 2) { // After entry
+            if (*list == ' ' || *list == '\n' || *list == '\t')
+            {}            
+            else if (*list == ',')
+                state = 1;
+            else if (*list == '}')
+                return TACK_OK;
+            else {
+                return TACK_ERR_BAD_PINLIST;
+            }
+        }
+        list++;
+        *listLen -= 1;
+    }
+    return TACK_ERR_BAD_PINLIST;
+}
+

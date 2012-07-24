@@ -62,8 +62,8 @@ TACK_RETVAL test()
     printf("TEST PROCESS STORE = %s\n", tackRetvalString(retval));
 
 #ifdef __cplusplus
-    retval=tackTestTackStore(crypto);
-    printf("TEST TACKSTORE = %s\n", tackRetvalString(retval));
+    retval=tackTestStore(crypto);
+    printf("TEST STORE = %s\n", tackRetvalString(retval));
 #endif
        return TACK_OK;
 }
