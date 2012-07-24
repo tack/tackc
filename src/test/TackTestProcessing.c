@@ -462,6 +462,17 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
     assert(nameRecordOut.endTime == currentTime+201);
     nameRecord.endTime = nameRecordOut.endTime;
 
+    /* Test active pin -> active (ACCEPTED), MAX TIME DELTA 30 DAYS */
+    // (Like previous test, but don't save the result in nameRecord)
+    memset(&nameRecordOut, 0, sizeof(TackNameRecord));
+    TCHECK_VAL(tackProcessStoreHelper(&ctxET1, currentTime+1000000, &nameRecord, 
+                                      &minGeneration, 
+                                      &activationRetval, &nameRecordOut, &minGenerationOut, 0, crypto),
+               TACK_OK_UNPINNED);
+    assert(minGenerationOut == 0);
+    assert(activationRetval == TACK_OK_UPDATE_PIN);
+    assert(nameRecordOut.endTime == currentTime+1000000 + (30*24*60));
+
     /* Test active pin -> active (REJECTED, nonmatching tack), FLAG DISABLED FIRST */
     memset(&nameRecordOut, 0, sizeof(TackNameRecord));
     ctxET1.tackFingerprint[0]++; /* r to s */
@@ -761,7 +772,7 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     assert(store.getDirtyFlag() == false);
     store.setPinActivation(true);
 
-    /* Ensure there is a pin for key 0 in the store, for following minGen teset */
+    /* Ensure there is a pin for key 0 in the store, for following minGen test */
     TCHECK_VAL(store.process(&ctxET1, "third.com", currentTime), TACK_OK_UNPINNED);
 
     /* Try setting a larger minGen (254) with a name that comes before the other
@@ -778,7 +789,7 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     uint32_t outLen = 1024;
     if ((retval = store.serialize(outTest, &outLen)) != TACK_OK)
         return retval;
-    printf("%s", outTest);
+    //printf("%s", outTest);
 
     TackStoreDefault store2;
     if ((retval = store2.deserialize(outTest, &outLen)) != TACK_OK)
