@@ -90,7 +90,7 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     retval=tackProcessStoreHelper(ctx, currentTime, nameRecord, minGeneration, 
                                   &activationRetval, &nameRecordOut, &minGenerationOut,
                                   invalidateOnly, crypto);
-    if (retval < TACK_OK)
+    if (retval <= TACK_OK) /* only allow ACCEPTED, REJECTED, or UNPINNED */
         return retval;
     resultRetval = retval;
 
@@ -106,16 +106,11 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     if (pinActivation) {
         /* If a new pin was created (perhaps replacing an old one) */
         if (activationRetval == TACK_OK_NEW_PIN) {
-            /* Set key record before name record */
-            retval=store->setMinGeneration(storeArg, ctx->tackFingerprint, 
-                                           minGenerationOut);
-            if (retval != TACK_OK)
-                return retval;
-            retval=store->setNameRecord(storeArg, name, &nameRecordOut);
+            retval=tackStoreSetPin(store, storeArg, name, &nameRecordOut, minGenerationOut);
             if (retval != TACK_OK)
                 return retval;
         }
-        /* Or if a pin's activation period (endTime) was extended */
+        /* Or if a pin's endTime was extended */
         else if (activationRetval == TACK_OK_UPDATE_PIN) {
             retval=store->updateNameRecord(storeArg, name, nameRecordOut.endTime);
             if (retval != TACK_OK)
@@ -266,7 +261,7 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     }
     
     /* If there is no tack, or if the activation flag is disabled, then this 
-       completes the algorithm.  (OR invalidateOnly).
+       completes the algorithm.  (Or if invalidateOnly).
        Otherwise, the following steps are executed:*/
     if (!ctx->tack || (tackExtensionGetActivationFlag(ctx->tackExt) == 0) || invalidateOnly)
         return retval;

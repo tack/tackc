@@ -41,7 +41,7 @@ TACK_RETVAL TackStoreDefault::getNameRecord(const std::string& name,
 }
 
 TACK_RETVAL TackStoreDefault::setNameRecord(const std::string& name, 
-                                            TackNameRecord* nameRecord)
+                                            const TackNameRecord* nameRecord)
 {
     nameRecords_[name] = *nameRecord;
     return TACK_OK;
@@ -60,7 +60,11 @@ TACK_RETVAL TackStoreDefault::updateNameRecord(const std::string& name,
 
 TACK_RETVAL TackStoreDefault::deleteNameRecord(const std::string& name)
 {
-    nameRecords_.erase(name);
+    std::map<std::string, TackNameRecord>::iterator ni = nameRecords_.find(name);
+    if (ni == nameRecords_.end())
+        return TACK_OK_NOT_FOUND;
+
+    nameRecords_.erase(ni);
     return TACK_OK; 
 }
 

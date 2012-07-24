@@ -22,7 +22,7 @@ typedef struct {
     uint8_t* tackExt;
     uint8_t* tack;
     char tackFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-    uint8_t breakSigFlags;
+    uint8_t breakSigFlags; /* Bit flags storing which break sigs have been verified */
 } TackProcessingContext;
 
 
@@ -34,7 +34,13 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
                                   uint32_t currentTime,
                                   TackCryptoFuncs* crypto);
 
-/* Call once for each store, after the above well-formed check */
+/* Call once for each store, after the above well-formed check.
+   Relies on tackProcessStoreHelper() to do client-processing logic,
+   but handles interaction with the store. 
+
+   Returns TACK_OK_ACCEPTED, TACK_OK_REJECTED, TACK_OK_UNPINNED, or error
+
+*/
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              const void* name,
                              uint32_t currentTime,

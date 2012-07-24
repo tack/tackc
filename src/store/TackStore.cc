@@ -38,14 +38,14 @@ static TACK_RETVAL tackStoreGetNameRecord(const void* arg, const void* name,
 }
 
 static TACK_RETVAL tackStoreSetNameRecord(const void* arg, const void* name, 
-                                          TackNameRecord* nameRecord)
+                                          const TackNameRecord* nameRecord)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
     TACK_RETVAL retval = store->setNameRecord(*nameStr, nameRecord);
     if (retval == TACK_OK)
         store->setDirtyFlag(true);
-    return retval;
+        return retval;
 }
 
 static TACK_RETVAL tackStoreUpdateNameRecord(const void* arg, const void* name, 
@@ -110,25 +110,11 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
 TACK_RETVAL TackStore::getPin(const std::string& name, TackNameRecord* nameRecord, 
                    uint8_t *minGeneration)
 {
-    TACK_RETVAL retval = TACK_ERR;
-    if ((retval = getNameRecord(name, nameRecord)) != TACK_OK)
-        return retval;
-
-    std::string fingerprint(nameRecord->fingerprint);
-    if ((retval = getMinGeneration(fingerprint, minGeneration)) != TACK_OK)
-        return retval;
-    return TACK_OK;
+    return tackStoreGetPin(&storeFuncs, this, &name, nameRecord, minGeneration);
 }
 
-TACK_RETVAL TackStore::setPin(const std::string& name, TackNameRecord* nameRecord, 
+TACK_RETVAL TackStore::setPin(const std::string& name, const TackNameRecord* nameRecord, 
                               uint8_t minGeneration)
 {
-    TACK_RETVAL retval = TACK_ERR;
-    // Set key record first to leave things in consistent state if interrupted
-    std::string fingerprint(nameRecord->fingerprint);
-    if ((retval = setMinGeneration(fingerprint, minGeneration)) != TACK_OK)
-        return retval;
-    if ((retval = setNameRecord(name, nameRecord)) != TACK_OK)
-        return retval;
-    return TACK_OK;
+    return tackStoreSetPin(&storeFuncs, this, &name, nameRecord, minGeneration);
 }

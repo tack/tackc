@@ -37,7 +37,7 @@ public:
     // Convenience functions
     TACK_RETVAL getPin(const std::string& name, TackNameRecord* nameRecord, 
                        uint8_t *minGeneration);
-    TACK_RETVAL setPin(const std::string& name, TackNameRecord* nameRecord, 
+    TACK_RETVAL setPin(const std::string& name, const TackNameRecord* nameRecord, 
                        uint8_t minGeneration);
 
     // Define the below functions in a subclass
@@ -49,7 +49,7 @@ public:
     virtual TACK_RETVAL getNameRecord(const std::string& name, 
                                       TackNameRecord* nameRecord) = 0;
     virtual TACK_RETVAL setNameRecord(const std::string& name, 
-                                      TackNameRecord* nameRecord) = 0;  
+                                      const TackNameRecord* nameRecord) = 0;  
     virtual TACK_RETVAL updateNameRecord(const std::string& 
                                          name, uint32_t newEndTime) = 0;  
     virtual TACK_RETVAL deleteNameRecord(const std::string& name) = 0;
