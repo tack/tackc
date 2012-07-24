@@ -68,6 +68,9 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     TackNameRecord nameRecordOut;
     uint8_t minGenerationOut = 0;
 
+    memset(&nameRecordStruct, 0, sizeof(TackNameRecord));
+    memset(&nameRecordOut, 0, sizeof(TackNameRecord));
+
     /* Get the relevant name record, if any */
     if ((retval=store->getNameRecord(storeArg, name, &nameRecordStruct)) < TACK_OK)
         return retval;
@@ -253,6 +256,7 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
 {
     TACK_RETVAL retval = TACK_OK;
     uint32_t timeDelta = 0;
+    uint32_t newEndTime = 0;
 
     /* The first step in pin activation is to delete a relevant but inactive
        pin unless there is a tack and the pin references the tack's key */
@@ -270,14 +274,22 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     if (tackMatchesPin) {
         /* If there is a relevant pin referencing the tack's key, the name
            record's "end time" SHALL be set using the below formula: */
-        timeDelta = (currentTime - nameRecord->initialTime);
+        timeDelta = currentTime - nameRecord->initialTime;
         if (timeDelta > 1) {
             /* It's OK to slightly undercount the time, but NOT to overcount,
                hence the timeDelta is decremented by one.  Additionally,
                we don't bother updating the pin unless its endTime has been 
-               modified.*/
-            nameRecordOut->endTime = currentTime + timeDelta - 1;
-            return TACK_OK_UPDATE_PIN; /* overwriting TACK_OK */
+               modified with a larger endTime (smaller ones are discarded) */
+
+            timeDelta -= 1;
+            if (timeDelta > (30 * 24 * 60))
+                timeDelta = (30 * 24 * 60);
+
+            newEndTime = currentTime + timeDelta;
+            if (newEndTime > nameRecord->endTime) {            
+                nameRecordOut->endTime = newEndTime;
+                return TACK_OK_UPDATE_PIN; /* overwriting TACK_OK */
+            }
         }
     }
     if (!nameRecord)  {

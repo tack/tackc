@@ -667,23 +667,26 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
     assert(activationRetval == TACK_OK);
 
     /* If it doesn't update minGeneration (Already 254) */
-    /* +2 time delta, so we get TACK_OK_UPDATE_PIN, unlike previous */
+    /* +5 time delta, but endTime is too far in future!! */
     memset(&nameRecordOut, 0, sizeof(TackNameRecord));
     minGeneration = 254;
+    nameRecord.endTime = currentTime + 10;
     TCHECK_VAL(tackProcessStoreHelper(&ctxET1M, currentTime+2, &nameRecord, &minGeneration, 
                               &activationRetval, &nameRecordOut, &minGenerationOut, 0, crypto),
              TACK_OK_ACCEPTED);
     assert(minGenerationOut == 0);
-    assert(activationRetval == TACK_OK_UPDATE_PIN);
+    assert(activationRetval == TACK_OK);
 
     /* If it doesn't update minGeneration (Already 255) */
-    /* +2 time delta, so we get TACK_OK_UPDATE_PIN, unlike previous */
+    /* +6 time delta, just enough for TACK_OK_UPDATE_PIN, unlike previous */
     memset(&nameRecordOut, 0, sizeof(TackNameRecord));
     minGeneration = 255;
-    TCHECK_VAL(tackProcessStoreHelper(&ctxET1M, currentTime+2, &nameRecord, &minGeneration, 
+    nameRecord.endTime = currentTime + 10;
+    TCHECK_VAL(tackProcessStoreHelper(&ctxET1M, currentTime+6, &nameRecord, &minGeneration, 
                               &activationRetval, &nameRecordOut, &minGenerationOut, 0, crypto),
              TACK_OK_ACCEPTED);
     assert(minGenerationOut == 0);
+    assert(nameRecordOut.endTime == currentTime + 11);
     assert(activationRetval == TACK_OK_UPDATE_PIN);
 
     return TACK_OK;
