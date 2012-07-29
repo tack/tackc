@@ -31,8 +31,7 @@ public:
     // Main entry point for client processing
     TACK_RETVAL process(TackProcessingContext* ctx,
                         const std::string& name,
-                        uint32_t currentTime,
-                        bool invalidateOnly=false);
+                        uint32_t currentTime);
 
     // Convenience functions
     TACK_RETVAL getPin(const std::string& name, TackNameRecord* nameRecord, 

@@ -45,7 +45,6 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              const void* name,
                              uint32_t currentTime,
                              uint8_t pinActivation,
-                             uint8_t invalidateOnly,
                              TackStoreFuncs* store, 
                              void* storeArg, 
                              TackCryptoFuncs* crypto);
@@ -60,7 +59,6 @@ TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
                                    TACK_RETVAL* activationRetval,
                                    TackNameRecord* nameRecordOut,
                                    uint8_t* minGenerationOut,
-                                   uint8_t invalidateOnly,
                                    TackCryptoFuncs* crypto);
 
 
