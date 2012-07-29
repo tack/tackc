@@ -189,7 +189,7 @@ TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
         return retval;
     *activationRetval = retval;    
 
-    /* If there's a relevant active pin, determine if it accepts the connection */
+    /* Return store status */
     if (nameRecord && nameRecord->endTime > currentTime) {
         if (tackMatchesPin)
             return TACK_OK_ACCEPTED;
@@ -243,38 +243,38 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
 {
     TACK_RETVAL retval = TACK_OK;
     uint32_t timeDelta = 0;
-    uint32_t newEndTime = 0;
 
     /* The first step in pin activation is to delete a relevant but inactive
-       pin unless there is a tack and the pin references the tack's key */
+       pin unless there is a matching tack. */
     if (nameRecord && (nameRecord->endTime <= currentTime) && !tackMatchesPin) {
         nameRecord = NULL;
         retval = TACK_OK_DELETE_PIN;
     }
     
     /* If there is no tack, or if the activation flag is disabled, then this 
-       completes the algorithm.
-       Otherwise, the following steps are executed:*/
+       completes the algorithm.  Otherwise, the following steps are executed:*/
     if (!ctx->tack || (tackExtensionGetActivationFlag(ctx->tackExt) == 0))
         return retval;
     
     if (tackMatchesPin) {
         /* If there is a relevant pin referencing the tack's key, the name
            record's "end time" SHALL be set using the below formula: */
-        timeDelta = currentTime - nameRecord->initialTime;
-        if (timeDelta > 1) {
-            /* It's OK to slightly undercount the time, but NOT to overcount,
-               hence the timeDelta is decremented by one.  Additionally,
-               we don't bother updating the pin unless its endTime has been 
-               modified with a larger endTime (smaller ones are discarded) */
 
-            timeDelta -= 1;
+        /* If current time is before initialTime, that is weird, ignore it to
+           avoid negative timeDelta in what follows. */
+        if (currentTime > nameRecord->initialTime) {
+
+            /* It's OK to undercount but not overcount the time delta,
+               so we subtract 1 minute. */
+            timeDelta = currentTime - nameRecord->initialTime - 1;
             if (timeDelta > (30 * 24 * 60))
                 timeDelta = (30 * 24 * 60);
 
-            newEndTime = currentTime + timeDelta;
-            if (newEndTime > nameRecord->endTime) {            
-                nameRecordOut->endTime = newEndTime;
+            /* If the new endTime differs from existing, update it.  Note
+               that the new endTime may be smaller if the clock has been
+               resync'd - that's desirable, to avoid mistakenly long periods. */
+            if (currentTime + timeDelta != nameRecordOut->endTime) {            
+                nameRecordOut->endTime = currentTime + timeDelta;
                 return TACK_OK_UPDATE_PIN; /* overwriting TACK_OK */
             }
         }
