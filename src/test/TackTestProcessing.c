@@ -347,6 +347,7 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
 
     return TACK_OK;
 }
+#if 0
 
 TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto) 
 {    
@@ -599,7 +600,7 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
     /* Let's try some break sigs! */
     /* Test inactive -> deleted (because no tack) */
 
-#if 0 /* break sigs no longer handled in tackProcessStoreHelper 
+/* break sigs no longer handled in tackProcessStoreHelper 
 
     /* Test active -> breaksig (no new pin) */
     memset(&nameRecordOut, 0, sizeof(TackNameRecord));
@@ -671,8 +672,6 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
     assert(nameRecordOut.initialTime == currentTime);
     assert(nameRecordOut.endTime == 0);
 
-#endif
-
     /* OK, let's try updating a new generation (m254/g255) */
 
     /* If no key record, minGenerationOut doesn't get updated */
@@ -724,6 +723,8 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
 
     return TACK_OK;
 }
+
+#endif
 
 #ifdef __cplusplus
 

@@ -49,18 +49,24 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              void* storeArg, 
                              TackCryptoFuncs* crypto);
 
-/* Helper function used by tackProcessStore() 
-   Performs the core client processing logic, but uses in/out variables
-   instead of accessing the store. */
-TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
-                                   uint32_t currentTime,   
-                                   TackNameRecord* nameRecord,
-                                   uint8_t* minGeneration,
-                                   TACK_RETVAL* activationRetval,
-                                   TackNameRecord* nameRecordOut,
-                                   uint8_t* minGenerationOut,
-                                   TackCryptoFuncs* crypto);
+/* Helper functions for tackProcessStore */
+TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
+                                 TackStoreFuncs* store, 
+                                 void* storeArg, 
+                                 TackCryptoFuncs* crypto);
+    
+TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
+                                  TackStoreFuncs* store, 
+                                  void* storeArg);
 
+TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
+                                     uint32_t currentTime,
+                                     TackNameRecord* nameRecord,
+                                     uint8_t pinIsActive,
+                                     uint8_t tackMatchesPin,
+                                     const void* name,
+                                     TackStoreFuncs* store, 
+                                     void* storeArg);
 
 #ifdef __cplusplus
 }

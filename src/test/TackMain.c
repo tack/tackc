@@ -58,8 +58,8 @@ TACK_RETVAL test()
     retval=tackTestProcessWellFormed(crypto);
     printf("TEST PROCESS WELLFORMED = %s\n", tackRetvalString(retval));
     
-    retval=tackTestProcessStore(crypto);
-    printf("TEST PROCESS STORE = %s\n", tackRetvalString(retval));
+    //retval=tackTestProcessStore(crypto);
+    //printf("TEST PROCESS STORE = %s\n", tackRetvalString(retval));
 
 #ifdef __cplusplus
     retval=tackTestStore(crypto);
