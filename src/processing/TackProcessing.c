@@ -12,8 +12,7 @@
 TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
                                   uint8_t* tackExt, uint32_t tackExtLen,
                                   uint8_t keyHash[TACK_HASH_LENGTH],
-                                  uint32_t currentTime,                                  
-                                  TackCryptoFuncs* crypto)
+                                  uint32_t currentTime, TackCryptoFuncs* crypto)
 {    
     TACK_RETVAL retval = TACK_ERR;
 
@@ -52,16 +51,13 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              const void* name,
                              uint32_t currentTime,
                              uint8_t pinActivation,
-                             TackStoreFuncs* store, 
-                             void* storeArg, 
+                             TackStoreFuncs* store, void* storeArg, 
                              TackCryptoFuncs* crypto)
 {
     TACK_RETVAL retval = TACK_ERR, resultRetval = TACK_ERR;
     TackNameRecord nameRecordStruct;
     TackNameRecord* nameRecord = NULL;
-    uint8_t pinIsActive = 0;
-    uint8_t tackMatchesPin = 0;
-    memset(&nameRecordStruct, 0, sizeof(TackNameRecord));
+    uint8_t pinIsActive = 0, tackMatchesPin = 0;
 
     /* Delete pins based on break signatures */
     if ((retval = tackProcessBreakSigs(ctx, store, storeArg, crypto)) != TACK_OK)
@@ -71,53 +67,31 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     if ((retval = tackProcessGeneration(ctx, store, storeArg)) != TACK_OK)
         return retval;
 
-    /* Get the relevant pin, if any */
-    if ((retval=store->getNameRecord(storeArg, name, &nameRecordStruct)) < TACK_OK)
+    /* Get the relevant pin.  Determine the store's status. */
+    if ((retval = tackProcessPin(ctx, &nameRecordStruct, &nameRecord, &pinIsActive, 
+                                 &tackMatchesPin, currentTime, 
+                                 name, store, storeArg)) < TACK_OK)
         return retval;
-    if (retval == TACK_OK) {
-        nameRecord = &nameRecordStruct;
-
-        /* Is pin active? */
-        if (nameRecord->endTime > currentTime)
-            pinIsActive = 1;
-
-        /* Does tack match pin? */
-        if (ctx->tack && strcmp(ctx->tackFingerprint, nameRecord->fingerprint)==0) 
-            tackMatchesPin = 1;
-    }
-
-    /* Determine the store's status */
-    if (pinIsActive) {
-        if (tackMatchesPin)
-            resultRetval = TACK_OK_ACCEPTED;
-        else
-            resultRetval = TACK_OK_REJECTED;
-    }
-    else
-        resultRetval = TACK_OK_UNPINNED;
+    resultRetval = retval;
 
     /* Perform pin activation (optional) */
-    if (pinActivation)  {
+    if (pinActivation)
         if ((retval=tackProcessPinActivation(ctx, currentTime, nameRecord, 
                                              pinIsActive, tackMatchesPin, 
                                              name, store, storeArg)) < TACK_OK)
             return retval;
-    }
-
+    
     return resultRetval;
 }
 
 TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
-                                        TackStoreFuncs* store, 
-                                        void* storeArg, 
+                                        TackStoreFuncs* store, void* storeArg, 
                                         TackCryptoFuncs* crypto) 
 {
     TACK_RETVAL retval = TACK_ERR;
-    uint8_t count = 0;
     char breakFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
     uint8_t* breakSig = NULL;
-    uint8_t minGenerationVal;
-    uint8_t mustDeleteKey = 0;
+    uint8_t minGenerationVal = 0, mustDeleteKey = 0, count = 0;
 
     /* Iterate through break sigs */
     for (count = 0; count < tackExtensionGetNumBreakSigs(ctx->tackExt); count++) {
@@ -157,13 +131,13 @@ TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
 }
 
 TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
-                                         TackStoreFuncs* store, 
-                                         void* storeArg) 
+                                  TackStoreFuncs* store, void* storeArg) 
 {
     TACK_RETVAL retval = TACK_ERR;
     uint8_t minGeneration = 0;
 
     if (ctx->tack) {
+        /* If there's a tack, check its generation against the store's min_generation */
         retval = store->getMinGeneration(storeArg, ctx->tackFingerprint, &minGeneration);
         if (retval < TACK_OK)
             return retval;        
@@ -173,6 +147,7 @@ TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
         if (tackTackGetGeneration(ctx->tack) < minGeneration)
             return TACK_ERR_REVOKED_GENERATION;
         
+        /* If the tack's min_generation is greater, update the store */
         if (tackTackGetMinGeneration(ctx->tack) > minGeneration) {
             retval = store->setMinGeneration(storeArg, ctx->tackFingerprint, 
                                              tackTackGetMinGeneration(ctx->tack));
@@ -182,7 +157,40 @@ TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
     }
     return TACK_OK;
 }   
-     
+
+TACK_RETVAL tackProcessPin(TackProcessingContext* ctx,
+                           TackNameRecord* nameRecordStruct,
+                           TackNameRecord** nameRecord,
+                           uint8_t* pinIsActive, uint8_t* tackMatchesPin, 
+                           uint32_t currentTime, const void* name,
+                           TackStoreFuncs* store, void* storeArg) 
+{
+    TACK_RETVAL retval = TACK_ERR;
+
+    /* Get the relevant pin, if any */
+    if ((retval=store->getNameRecord(storeArg, name, nameRecordStruct)) < TACK_OK)
+        return retval;
+    if (retval == TACK_OK) {
+        *nameRecord = nameRecordStruct;
+
+        /* Is pin active? */
+        if ((*nameRecord)->endTime > currentTime)
+            *pinIsActive = 1;
+
+        /* Does tack match pin? */
+        if (ctx->tack && strcmp(ctx->tackFingerprint, (*nameRecord)->fingerprint)==0) 
+            *tackMatchesPin = 1;
+    }
+
+    /* Determine the store's status */
+    if (*pinIsActive) {
+        if (*tackMatchesPin)
+            return TACK_OK_ACCEPTED;
+        else
+            return TACK_OK_REJECTED;
+    }
+    return TACK_OK_UNPINNED;
+}
 
 TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                                      uint32_t currentTime,
@@ -190,8 +198,7 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                                      uint8_t pinIsActive,
                                      uint8_t tackMatchesPin,
                                      const void* name,
-                                     TackStoreFuncs* store, 
-                                     void* storeArg) 
+                                     TackStoreFuncs* store, void* storeArg) 
 {
     TackNameRecord nameRecordNew;
     TACK_RETVAL retval = TACK_OK;
@@ -210,7 +217,7 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
        completes the algorithm.  Otherwise, the following steps are executed:*/
     if (!ctx->tack || (tackExtensionGetActivationFlag(ctx->tackExt) == 0))
         return retval;
-    
+
     if (tackMatchesPin) {
         /* If there is a relevant pin and matching tack, the name
            record's "end time" SHALL be set using the below formula: */
