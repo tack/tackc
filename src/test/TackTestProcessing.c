@@ -599,6 +599,8 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
     /* Let's try some break sigs! */
     /* Test inactive -> deleted (because no tack) */
 
+#if 0 /* break sigs no longer handled in tackProcessStoreHelper 
+
     /* Test active -> breaksig (no new pin) */
     memset(&nameRecordOut, 0, sizeof(TackNameRecord));
     TCHECK_VAL(tackProcessStoreHelper(&ctxEB1, currentTime, &nameRecord, NULL, 
@@ -668,6 +670,8 @@ TACK_RETVAL tackTestProcessStore(TackCryptoFuncs* crypto)
     assert(strcmp(nameRecordOut.fingerprint, ctxEBmaxT2.tackFingerprint) == 0);
     assert(nameRecordOut.initialTime == currentTime);
     assert(nameRecordOut.endTime == 0);
+
+#endif
 
     /* OK, let's try updating a new generation (m254/g255) */
 

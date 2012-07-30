@@ -29,6 +29,29 @@ TACK_RETVAL TackStoreDefault::setMinGeneration(const std::string& keyFingerprint
     return TACK_OK;
 }
 
+TACK_RETVAL TackStoreDefault::deleteKey(const std::string& keyFingerprint)
+{
+    std::map<std::string, uint8_t>::iterator ki = keyRecords_.find(keyFingerprint);
+    if (ki == keyRecords_.end())
+        return TACK_OK_NOT_FOUND;
+
+    std::map<std::string, TackNameRecord>::iterator ni = nameRecords_.begin();
+    std::map<std::string, TackNameRecord>::iterator ni2;
+    while (ni != nameRecords_.end()) {
+        if (ni->first == keyFingerprint) {
+            ni2 = ni;
+            ni2++;
+            nameRecords_.erase(ni);
+            ni = ni2;
+        }
+        else
+            ni++;
+    }
+
+    keyRecords_.erase(ki);
+    return TACK_OK;
+}
+
 TACK_RETVAL TackStoreDefault::getNameRecord(const std::string& name, 
                                             TackNameRecord* nameRecord)
 {

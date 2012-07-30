@@ -29,6 +29,16 @@ static TACK_RETVAL tackStoreSetMinGeneration(const void* arg, const char* keyFin
     return retval;
 }
 
+static TACK_RETVAL tackStoreDeleteKey(const void* arg, const char* keyFingerprint)
+{
+    TackStore* store = (TackStore*)arg;
+    std::string fingerprint(keyFingerprint);
+    TACK_RETVAL retval = store->deleteKey(fingerprint);
+    if (retval == TACK_OK)
+        store->setDirtyFlag(true);
+    return retval;
+}
+
 static TACK_RETVAL tackStoreGetNameRecord(const void* arg, const void* name, 
                                           TackNameRecord* nameRecord)
 {
@@ -45,7 +55,7 @@ static TACK_RETVAL tackStoreSetNameRecord(const void* arg, const void* name,
     TACK_RETVAL retval = store->setNameRecord(*nameStr, nameRecord);
     if (retval == TACK_OK)
         store->setDirtyFlag(true);
-        return retval;
+    return retval;
 }
 
 static TACK_RETVAL tackStoreUpdateNameRecord(const void* arg, const void* name, 
@@ -89,6 +99,7 @@ bool TackStore::getDirtyFlag() {return dirtyFlag_;}
 static TackStoreFuncs storeFuncs = {
     tackStoreGetMinGeneration,
     tackStoreSetMinGeneration,
+    tackStoreDeleteKey,
     tackStoreGetNameRecord,    
     tackStoreSetNameRecord,
     tackStoreUpdateNameRecord,

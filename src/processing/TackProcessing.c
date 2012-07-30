@@ -48,6 +48,11 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
     return TACK_OK;
 }
 
+static TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
+                                        TackStoreFuncs* store, 
+                                        void* storeArg, 
+                                        TackCryptoFuncs* crypto);
+
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              const void* name,
                              uint32_t currentTime,
@@ -69,6 +74,10 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
 
     memset(&nameRecordStruct, 0, sizeof(TackNameRecord));
     memset(&nameRecordOut, 0, sizeof(TackNameRecord));
+
+    /* Delete pins based on break signatures */
+    if ((retval = tackProcessBreakSigs(ctx, store, storeArg, crypto)) != TACK_OK)
+        return retval;
 
     /* Get the relevant name record, if any */
     if ((retval=store->getNameRecord(storeArg, name, &nameRecordStruct)) < TACK_OK)
@@ -128,9 +137,6 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
 
 
 /* Helper functions used by tackProcessStoreHelper() */
-static TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
-                                        TackNameRecord** nameRecord,
-                                        TackCryptoFuncs* crypto);
 
 static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                                             uint32_t currentTime,
@@ -150,47 +156,40 @@ TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
                                    TackCryptoFuncs* crypto)
 {
     TACK_RETVAL retval = TACK_ERR;  
+    uint8_t pinIsRelevant = 0;
     uint8_t tackMatchesPin = 0;
 
     /* Initialize outputs */ 
     *activationRetval = TACK_OK;
     *minGenerationOut = 0;
 
-    /* If there's a TACK Extension, do: */
-    if (ctx->tackExt) {
+    /* Is pin active? */
+    if (nameRecord && nameRecord->endTime > currentTime)
+        pinIsRelevant = 1;
 
-        /* If there is an active pin, see if it is broken by break signatures
-           If it is, mask the pin (nameRecord = NULL) */
-        if (nameRecord && nameRecord->endTime > currentTime) {
-            if ((retval = tackProcessBreakSigs(ctx, &nameRecord, crypto)) != TACK_OK)
-                return retval;
-        }
+    /* Note if tack matches pin */
+    if (nameRecord && ctx->tack)
+        if (strcmp(ctx->tackFingerprint, nameRecord->fingerprint)==0) 
+            tackMatchesPin = 1;
+
+    /* Check the tack's generation and update min_generation */
+    if (ctx->tack && minGeneration) {            
+        if (tackTackGetGeneration(ctx->tack) < *minGeneration)
+            return TACK_ERR_REVOKED_GENERATION;
         
-        /* If there's a key record and tack, do generation processing */
-        if (ctx->tack && minGeneration) {            
-            if (tackTackGetGeneration(ctx->tack) < *minGeneration)
-                return TACK_ERR_REVOKED_GENERATION;
-            
-            if (tackTackGetMinGeneration(ctx->tack) > *minGeneration)
-                *minGenerationOut = tackTackGetMinGeneration(ctx->tack);
-        }
-        
-        /* Note if tack matches pin */
-        if (nameRecord && ctx->tack) {
-            if (strcmp(ctx->tackFingerprint, nameRecord->fingerprint) == 0) 
-                tackMatchesPin = 1;
-        }
-    }
+        if (tackTackGetMinGeneration(ctx->tack) > *minGeneration)
+            *minGenerationOut = tackTackGetMinGeneration(ctx->tack);
+    }        
     
-    /* Calculate pin activation */
+    /* Perform pin activation */
     if ((retval=tackProcessPinActivation(ctx, currentTime, nameRecord, nameRecordOut,
                                          minGenerationOut, tackMatchesPin, 
                                          crypto)) < TACK_OK)
         return retval;
     *activationRetval = retval;    
 
-    /* Return store status */
-    if (nameRecord && nameRecord->endTime > currentTime) {
+    /* Determine the store's status */
+    if (pinIsRelevant) {
         if (tackMatchesPin)
             return TACK_OK_ACCEPTED;
         else
@@ -201,13 +200,16 @@ TACK_RETVAL tackProcessStoreHelper(TackProcessingContext* ctx,
 }
 
 static TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
-                                        TackNameRecord** nameRecord,
+                                        TackStoreFuncs* store, 
+                                        void* storeArg, 
                                         TackCryptoFuncs* crypto) 
 {
     TACK_RETVAL retval = TACK_ERR;
     uint8_t count = 0;
     char breakFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
     uint8_t* breakSig = NULL;
+    uint8_t minGenerationVal;
+    uint8_t mustDeleteKey = 0;
 
     /* Iterate through break sigs */
     for (count = 0; count < tackExtensionGetNumBreakSigs(ctx->tackExt); count++) {
@@ -218,16 +220,28 @@ static TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
         if (retval != TACK_OK)
             return retval;
 
-        /* If the break sig matches the pin, verify it, then clear the pin */
-        /* Use breakSigFlags to memorize which signatures have already been verified */
-        if (strcmp((*nameRecord)->fingerprint, breakFingerprint) == 0) {
-            if (ctx->breakSigFlags & (1<<count))
-                *nameRecord = NULL;
-            else if ((retval=tackBreakSigVerifySignature(breakSig, crypto)) == TACK_OK) {
-                *nameRecord = NULL;
-                ctx->breakSigFlags |= (1<<count);
-            }
+        /* Check if the store has a key for each break sig */
+        if ((retval=store->getMinGeneration(storeArg, breakFingerprint, 
+                                            &minGenerationVal)) < TACK_OK)
             return retval;
+
+        /* If it does... */
+        if (retval == TACK_OK) {
+            /* Use breakSigFlags to memorize which signatures have already been verified */
+            mustDeleteKey = 0;
+            if (ctx->breakSigFlags & (1<<count))
+                mustDeleteKey = 1;
+            else {
+                retval = tackBreakSigVerifySignature(breakSig, crypto);
+                if (retval != TACK_OK)
+                    return retval;
+                ctx->breakSigFlags |= (1<<count);
+                mustDeleteKey = 1;
+            }
+            if (mustDeleteKey) {
+                if ((retval = store->deleteKey(storeArg, breakFingerprint)) != TACK_OK)
+                    return retval;
+            }
         }
     }
     return TACK_OK;
@@ -257,7 +271,7 @@ static TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
         return retval;
     
     if (tackMatchesPin) {
-        /* If there is a relevant pin referencing the tack's key, the name
+        /* If there is a relevant pin and matching tack, the name
            record's "end time" SHALL be set using the below formula: */
 
         /* If current time is before initialTime, that is weird, ignore it to
