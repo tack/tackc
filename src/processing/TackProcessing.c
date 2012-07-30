@@ -214,15 +214,15 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     }
     
     /* If there is no tack, or if the activation flag is disabled, then this 
-       completes the algorithm.  Otherwise, the following steps are executed:*/
+       completes the algorithm. */
     if (!ctx->tack || (tackExtensionGetActivationFlag(ctx->tackExt) == 0))
         return retval;
 
     if (tackMatchesPin) {
-        /* If there is a relevant pin and matching tack, the name
-           record's "end time" SHALL be set using the below formula: */
+        /* If there is a relevant pin and matching tack, the pin's "end time"
+           SHALL be set using the below formula: */
 
-        /* If current time is before initialTime, that is weird, ignore it. */
+        /* Ignore if current time < initialTime; would cause negative time delta */
         if (currentTime > nameRecord->initialTime) {
 
             /* It's OK to undercount but not overcount the time delta, so subtract 1 */
@@ -238,7 +238,7 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
             }
         }
     }
-    if (!nameRecord)  {
+    else if (!nameRecord)  {
         /* If there is no relevant pin a new pin SHALL be created: */
         strcpy(nameRecordNew.fingerprint, ctx->tackFingerprint);
         nameRecordNew.initialTime = currentTime;
