@@ -387,6 +387,8 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     
     store.setCryptoFuncs(crypto);
     store.setPinActivation(true);
+    store.setDirtyFlagEnabled(true);
+
     store.setDirtyFlag(false);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime), TACK_OK_UNPINNED);
     assert(store.getDirtyFlag() == true);

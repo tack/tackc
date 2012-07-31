@@ -28,6 +28,9 @@ public:
     void setDirtyFlag(bool dirtyFlag);
     bool getDirtyFlag();
 
+    void setDirtyFlagEnabled(bool dirtyFlagEnabled);
+    bool getDirtyFlagEnabled();
+
     // Main entry point for client processing
     TACK_RETVAL process(TackProcessingContext* ctx,
                         const std::string& name,
@@ -66,6 +69,7 @@ private:
     bool pinActivation_;
     TackCryptoFuncs* crypto_;
     bool dirtyFlag_;
+    bool dirtyFlagEnabled_;
 };
 
 #endif

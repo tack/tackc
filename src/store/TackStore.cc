@@ -81,7 +81,8 @@ static TACK_RETVAL tackStoreDeleteNameRecord(const void* arg, const void* name)
 
 // TackStore methods
 
-TackStore::TackStore():pinActivation_(false),crypto_(NULL){}
+TackStore::TackStore() : pinActivation_(false), crypto_(NULL),
+                       dirtyFlag_(false), dirtyFlagEnabled_(false) {}
 
 void TackStore::setPinActivation(bool pinActivation) {
     pinActivation_ = pinActivation; }
@@ -92,8 +93,13 @@ void TackStore::setCryptoFuncs(TackCryptoFuncs* crypto) {
 TackCryptoFuncs* TackStore::getCryptoFuncs() {return crypto_;}
 
 void TackStore::setDirtyFlag(bool dirtyFlag) {
-    dirtyFlag_ = dirtyFlag;}
+    if (dirtyFlagEnabled_) dirtyFlag_ = dirtyFlag;}
 bool TackStore::getDirtyFlag() {return dirtyFlag_;}
+
+void TackStore::setDirtyFlagEnabled(bool dirtyFlagEnabled) {
+    dirtyFlagEnabled_ = dirtyFlagEnabled;}
+bool TackStore::getDirtyFlagEnabled() { return dirtyFlagEnabled_;}
+
 
 
 static TackStoreFuncs storeFuncs = {
