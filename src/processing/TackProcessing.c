@@ -3,7 +3,6 @@
  *
  * See the LICENSE file for legal information regarding use of this file.
  */
-
 #include <string.h>
 #include "TackUtil.h"
 #include "TackProcessing.h"
@@ -60,12 +59,14 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     uint8_t pinIsActive = 0, tackMatchesPin = 0;
 
     /* Delete pins based on break signatures */
-    if ((retval = tackProcessBreakSigs(ctx, store, storeArg, crypto)) != TACK_OK)
-        return retval;
+    if (ctx->tackExt)
+        if ((retval = tackProcessBreakSigs(ctx, store, storeArg, crypto)) != TACK_OK)
+            return retval;
 
     /* Handle the tack's generation and min_generation (if any) */
-    if ((retval = tackProcessGeneration(ctx, store, storeArg)) != TACK_OK)
-        return retval;
+    if (ctx->tack)
+        if ((retval = tackProcessGeneration(ctx, store, storeArg)) != TACK_OK)
+            return retval;
 
     /* Get the relevant pin.  Determine the store's status. */
     if ((retval = tackProcessPin(ctx, &nameRecordStruct, &nameRecord, &pinIsActive, 
