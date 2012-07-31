@@ -39,6 +39,9 @@ public:
 
     virtual TACK_RETVAL clear() OVERRIDE;
 
+    virtual uint32_t numPins() OVERRIDE;
+    virtual uint32_t numKeys() OVERRIDE;
+
 private:
     
     // Maps names to name records

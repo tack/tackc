@@ -110,6 +110,7 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                                const std::string& name,
                                uint32_t currentTime)
 {
+    if (!crypto_) return TACK_ERR_ASSERTION;
     return tackProcessStore(ctx, &name, currentTime, 
                             (uint8_t)pinActivation_, 
                             &storeFuncs, 

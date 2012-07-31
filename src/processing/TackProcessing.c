@@ -96,7 +96,6 @@ TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
 
     /* Iterate through break sigs */
     for (count = 0; count < tackExtensionGetNumBreakSigs(ctx->tackExt); count++) {
-        
         /* Get the fingerprint for each break sig */
         breakSig = tackExtensionGetBreakSig(ctx->tackExt, count);
         retval=tackBreakSigGetKeyFingerprint(breakSig, breakFingerprint, crypto);

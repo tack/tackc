@@ -38,7 +38,7 @@ TACK_RETVAL TackStoreDefault::deleteKey(const std::string& keyFingerprint)
     std::map<std::string, TackNameRecord>::iterator ni = nameRecords_.begin();
     std::map<std::string, TackNameRecord>::iterator ni2;
     while (ni != nameRecords_.end()) {
-        if (ni->first == keyFingerprint) {
+        if (ni->second.fingerprint == keyFingerprint) {
             ni2 = ni;
             ni2++;
             nameRecords_.erase(ni);
@@ -222,3 +222,12 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
     return TACK_ERR_BAD_PINLIST;
 }
 
+uint32_t TackStoreDefault::numPins()
+{
+    return nameRecords_.size();
+}
+
+uint32_t TackStoreDefault::numKeys()
+{
+    return keyRecords_.size();
+}
