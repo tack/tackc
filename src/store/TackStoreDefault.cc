@@ -175,19 +175,19 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
     clear();
 
     while (*list && *listLen) {
-        if (state == 0) { // Start
-            if (*list == ' ' || *list == '\n' || *list == '\t')
-                continue;
-            else if (*list == '{')
+
+        // Skip whitespace
+        if (*list == ' ' || *list == '\n' || *list == '\t')
+        {}
+        else if (state == 0) { // Start
+            if (*list == '{')
                 state = 1;
             else {
                 return TACK_ERR_BAD_PINLIST;
             }
         }
         else if (state == 1)  { // Before entry
-            if (*list == ' ' || *list == '\n' || *list == '\t')
-            {}
-            else if (*list == '}')
+            if (*list == '}')
                 return TACK_OK;
             else {
                 oldListLen = *listLen;
@@ -206,9 +206,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
             }
         }
         else if (state == 2) { // After entry
-            if (*list == ' ' || *list == '\n' || *list == '\t')
-            {}            
-            else if (*list == ',')
+            if (*list == ',')
                 state = 1;
             else if (*list == '}')
                 return TACK_OK;
@@ -219,6 +217,8 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
         list++;
         *listLen -= 1;
     }
+    if (state == 0)
+        return TACK_OK;
     return TACK_ERR_BAD_PINLIST;
 }
 
