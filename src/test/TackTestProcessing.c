@@ -440,10 +440,6 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     store.getMinGeneration("rnx3y.35xdl.hssy4.bop3v.zifgu", &minGen);
     assert(minGen == 254);
 
-
-    //!!! REMOVE
-    return TACK_OK;
-
     // Check that serialize -> deserialize -> serialize yields same string
     TACK_RETVAL retval;
     char outTest[1024];
@@ -463,8 +459,9 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
         return retval;
 
     // Check that the largest minGen was deserialized
-    store.getMinGeneration("rnx3y.35xdl.hssy4.bop3v.zifgu", &minGen);
+    store2.getMinGeneration("rnx3y.35xdl.hssy4.bop3v.zifgu", &minGen);
     assert(minGen == 254);
+
     assert(strcmp(outTest, outTest2) == 0);
 
     // OK new round of tests for break sigs and generations
@@ -485,7 +482,7 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     TCHECK_VAL(retval = store.process(&ctxEB1T2, "x1.com", currentTime), 
                TACK_ERR_REVOKED_GENERATION);
     assert(store.numPinned() == 1 && store.numKeys() == 1);
-    
+
     // Reset, try another break signature case, with a min_generation update (ET2)
     store.clear();
     TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime), TACK_OK_UNPINNED);

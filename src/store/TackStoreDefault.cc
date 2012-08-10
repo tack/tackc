@@ -180,6 +180,9 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
     uint32_t oldListLen = 0;
 
     clear();
+    memset(name, 0, sizeof(name));
+    memset(prevName, 0, sizeof(prevName));
+    memset(&nameRecord, 0, sizeof(TackNameRecord));
     memset(&pair, 0, sizeof(TackNameRecordPair));
 
     while (1) {
@@ -194,6 +197,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
         // Skip whitespace
         if (*list == ' ' || *list == '\n' || *list == '\t')
         {}
+
         else if (state == 0) { // Start
             if (*list == '{')
                 state = 1;
@@ -204,7 +208,6 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
 
         else if (state == 1)  { // Before entry
             if (*list == '}') {
-                state = 0;
                 break;
             }
             else {
@@ -219,14 +222,14 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
                     return retval;
 
                 /* Add name record into pair */
-                if (pair.numRecords == 0) {
+                if (pair.numRecords == 0) {                    
                     memcpy(pair.records, &nameRecord, sizeof(TackNameRecord));
                     pair.numRecords = 1;
                 }
                 else if (pair.numRecords == 1) {
                     /* Write out existing unpaired element, replace with new one */
                     if (strcmp(prevName, name) != 0) {
-                        if ((retval = setNameRecordPair(name, &pair)) != TACK_OK)
+                        if ((retval = setNameRecordPair(prevName, &pair)) != TACK_OK)
                             return retval;
                         memcpy(pair.records+0, &nameRecord, sizeof(TackNameRecord));
                     }
@@ -249,7 +252,6 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
             if (*list == ',')
                 state = 1;
             else if (*list == '}') {
-                state = 0;
                 break;
             }
             else {
@@ -260,9 +262,10 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
         *listLen -= 1;
     }
            
-    if (pair.numRecords)
+    if (pair.numRecords) {
         if ((retval = setNameRecordPair(name, &pair)) != TACK_OK)
             return retval;
+    }
 
     return TACK_OK;
 }

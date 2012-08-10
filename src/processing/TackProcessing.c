@@ -246,7 +246,7 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
 
     /* Then, add pins for unmatched tacks */
     for (count = 0; count < 1; count++) {
-        if (!tackMatchesPin[count]) {
+        if (ctx->tack && !tackMatchesPin[count]) {
             /* If there is no relevant pin a new pin SHALL be created: */
             TackNameRecord* record = pair->records + pair->numRecords;
             record->initialTime = currentTime;

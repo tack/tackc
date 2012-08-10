@@ -15,6 +15,6 @@ void tackPairDeleteRecords(TackNameRecordPair* pair, uint8_t deleteMask)
         pair->numRecords = 1;
     else if (deleteMask == 1) {
         memcpy(pair->records, pair->records+1, sizeof(TackNameRecord));
-        pair->numRecords = 1;
+        pair->numRecords--;
     }
 }
