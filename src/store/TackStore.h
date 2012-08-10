@@ -36,33 +36,24 @@ public:
                         const std::string& name,
                         uint32_t currentTime);
 
-    // Convenience functions
-    TACK_RETVAL getPin(const std::string& name, TackNameRecord* nameRecord, 
-                       uint8_t *minGeneration);
-    TACK_RETVAL setPin(const std::string& name, const TackNameRecord* nameRecord, 
-                       uint8_t minGeneration);
-
     // Define the below functions in a subclass
     virtual TACK_RETVAL getMinGeneration(const std::string& keyFingerprint, 
                                      uint8_t* minGeneration) = 0;
     virtual TACK_RETVAL setMinGeneration(const std::string& keyFingerprint, 
                                         uint8_t minGeneration) = 0;
     virtual TACK_RETVAL deleteKey(const std::string& keyFingerprint) = 0;
-    
-    virtual TACK_RETVAL getNameRecord(const std::string& name, 
-                                      TackNameRecord* nameRecord) = 0;
-    virtual TACK_RETVAL setNameRecord(const std::string& name, 
-                                      const TackNameRecord* nameRecord) = 0;  
-    virtual TACK_RETVAL updateNameRecord(const std::string& 
-                                         name, uint32_t newEndTime) = 0;  
-    virtual TACK_RETVAL deleteNameRecord(const std::string& name) = 0;
+
+    virtual TACK_RETVAL getNameRecordPair(const std::string& name, 
+                                          TackNameRecordPair* pair) = 0;
+    virtual TACK_RETVAL setNameRecordPair(const std::string& name, 
+                                          const TackNameRecordPair* pair) = 0;  
 
     virtual TACK_RETVAL serialize(char* list, uint32_t* listLen) = 0;
     virtual TACK_RETVAL deserialize(const char* list, uint32_t* listLen) = 0;
 
     virtual TACK_RETVAL clear() = 0;
 
-    virtual uint32_t numPins() = 0;
+    virtual uint32_t numPinned() = 0;
     virtual uint32_t numKeys() = 0;
 
 private:

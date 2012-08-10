@@ -59,24 +59,21 @@ TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
                                   TackStoreFuncs* store, 
                                   void* storeArg);
 
-TACK_RETVAL tackProcessPin(TackProcessingContext* ctx,
-                           TackNameRecord* nameRecordStruct,
-                           TackNameRecord** nameRecord,
-                           uint8_t* pinIsActive,
-                           uint8_t* tackMatchesPin,
-                           uint32_t currentTime,
-                           const void* name,
-                           TackStoreFuncs* store, 
-                           void* storeArg);
+TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
+                            TackNameRecordPair* pair,
+                            uint8_t pinIsActive[2], uint8_t pinMatchesTack[2], 
+                            uint8_t tackMatchesPin[2],
+                            uint32_t currentTime, const void* name,
+                            TackStoreFuncs* store, void* storeArg);
 
 TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                                      uint32_t currentTime,
-                                     TackNameRecord* nameRecord,
-                                     uint8_t pinIsActive,
-                                     uint8_t tackMatchesPin,
+                                     TackNameRecordPair* pair,
+                                     uint8_t pinIsActive[2],
+                                     uint8_t pinMatchesTack[2],
+                                     uint8_t tackMatchesPin[2],
                                      const void* name,
-                                     TackStoreFuncs* store, 
-                                     void* storeArg);
+                                     TackStoreFuncs* store, void* storeArg);
 
 #ifdef __cplusplus
 }

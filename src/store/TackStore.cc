@@ -39,41 +39,20 @@ static TACK_RETVAL tackStoreDeleteKey(const void* arg, const char* keyFingerprin
     return retval;
 }
 
-static TACK_RETVAL tackStoreGetNameRecord(const void* arg, const void* name, 
-                                          TackNameRecord* nameRecord)
+static TACK_RETVAL tackStoreGetNameRecordPair(const void* arg, const void* name, 
+                                              TackNameRecordPair* pair)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
-    return store->getNameRecord(*nameStr, nameRecord);
+    return store->getNameRecordPair(*nameStr, pair);
 }
 
-static TACK_RETVAL tackStoreSetNameRecord(const void* arg, const void* name, 
-                                          const TackNameRecord* nameRecord)
+static TACK_RETVAL tackStoreSetNameRecordPair(const void* arg, const void* name, 
+                                              const TackNameRecordPair* pair)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
-    TACK_RETVAL retval = store->setNameRecord(*nameStr, nameRecord);
-    if (retval == TACK_OK)
-        store->setDirtyFlag(true);
-    return retval;
-}
-
-static TACK_RETVAL tackStoreUpdateNameRecord(const void* arg, const void* name, 
-                                             uint32_t newEndTime)
-{
-    TackStore* store = (TackStore*)arg;
-    std::string* nameStr = (std::string*)name;
-    TACK_RETVAL retval = store->updateNameRecord(*nameStr, newEndTime);
-    if (retval == TACK_OK)
-        store->setDirtyFlag(true);
-    return retval;    
-}
-
-static TACK_RETVAL tackStoreDeleteNameRecord(const void* arg, const void* name)
-{
-    TackStore* store = (TackStore*)arg;
-    std::string* nameStr = (std::string*)name;
-    TACK_RETVAL retval = store->deleteNameRecord(*nameStr);    
+    TACK_RETVAL retval = store->setNameRecordPair(*nameStr, pair);
     if (retval == TACK_OK)
         store->setDirtyFlag(true);
     return retval;
@@ -106,10 +85,8 @@ static TackStoreFuncs storeFuncs = {
     tackStoreGetMinGeneration,
     tackStoreSetMinGeneration,
     tackStoreDeleteKey,
-    tackStoreGetNameRecord,    
-    tackStoreSetNameRecord,
-    tackStoreUpdateNameRecord,
-    tackStoreDeleteNameRecord
+    tackStoreGetNameRecordPair,
+    tackStoreSetNameRecordPair,
 };
 
 TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
@@ -121,16 +98,4 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                             (uint8_t)pinActivation_, 
                             &storeFuncs, 
                             this, crypto_);
-}
-
-TACK_RETVAL TackStore::getPin(const std::string& name, TackNameRecord* nameRecord, 
-                   uint8_t *minGeneration)
-{
-    return tackStoreGetPin(&storeFuncs, this, &name, nameRecord, minGeneration);
-}
-
-TACK_RETVAL TackStore::setPin(const std::string& name, const TackNameRecord* nameRecord, 
-                              uint8_t minGeneration)
-{
-    return tackStoreSetPin(&storeFuncs, this, &name, nameRecord, minGeneration);
 }

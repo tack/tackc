@@ -16,10 +16,16 @@ extern "C" {
 
 /* Structure used to communicate with the store functions */
 typedef struct {
-    char fingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
     uint32_t initialTime;
     uint32_t endTime;
+    char fingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
 } TackNameRecord;
+
+typedef struct {
+    uint8_t numRecords;
+    TackNameRecord records[2];
+} TackNameRecordPair;
+
 
 /* Store functions used to communicate with the store: */
 
@@ -40,24 +46,14 @@ typedef TACK_RETVAL (*TackDeleteKeyFunc)(const void* arg,
                                          const char* keyFingerprint);
 
 /* Returns TACK_OK_NOT_FOUND if no name record */
-typedef TACK_RETVAL (*TackGetNameRecordFunc)(const void* arg, 
-                                             const void* name, 
-                                             TackNameRecord* nameRecord);
-
-/* If there's an existing name record, overwrite it.  If there's no existing
-   one, create a new one. */
-typedef TACK_RETVAL (*TackSetNameRecordFunc)(const void* arg, 
-                                             const void* name, 
-                                             const TackNameRecord* nameRecord);
+typedef TACK_RETVAL (*TackGetNameRecordPairFunc)(const void* arg, 
+                                                 const void* name, 
+                                                 TackNameRecordPair* pair);
 
 /* Returns TACK_OK_NOT_FOUND if no name record */
-typedef TACK_RETVAL (*TackUpdateNameRecordFunc)(const void* arg, 
-                                                const void* name, 
-                                                uint32_t newEndTime);
-
-/* Returns TACK_OK_NOT_FOUND if no name record */
-typedef TACK_RETVAL (*TackDeleteNameRecordFunc)(const void* arg, 
-                                                const void* name);
+typedef TACK_RETVAL (*TackSetNameRecordPairFunc)(const void* arg, 
+                                                 const void* name, 
+                                                 const TackNameRecordPair* pair);
 
 /* The store functions, plus a state "arg", are packaged into this struct
    for convenient parameter passing */
@@ -65,19 +61,11 @@ typedef struct {
     TackGetMinGenerationFunc getMinGeneration;
     TackSetMinGenerationFunc setMinGeneration; /* Generations and pin activation */
     TackDeleteKeyFunc deleteKey; /* Break signatures */
-    TackGetNameRecordFunc getNameRecord;
-    TackSetNameRecordFunc setNameRecord; /* Pin activation */
-    TackUpdateNameRecordFunc updateNameRecord; /* Pin activation */
-    TackDeleteNameRecordFunc deleteNameRecord; /* Pin activation */
+    TackGetNameRecordPairFunc getNameRecordPair;
+    TackSetNameRecordPairFunc setNameRecordPair;
 } TackStoreFuncs;
 
-/* Helper functions */
-
-TACK_RETVAL tackStoreGetPin(const TackStoreFuncs* store, const void* arg, const void* name, 
-                            TackNameRecord* nameRecord, uint8_t *minGeneration);
-
-TACK_RETVAL tackStoreSetPin(const TackStoreFuncs* store, const void* arg, const void* name, 
-                            const TackNameRecord* nameRecord, uint8_t minGeneration);
+void tackPairDeleteRecords(TackNameRecordPair* pair, uint8_t deleteMask);
 
 #ifdef __cplusplus
 }
