@@ -48,7 +48,7 @@ TACK_RETVAL TackStoreDefault::deleteKey(const std::string& keyFingerprint)
         // Iterate over the pins in this pair, recording which ones to delete
         deleteMask = 0;
         TackNameRecordPair* pair = &(ni->second);
-        for (count = 0; count < pair->numRecords; count++) {
+        for (count = 0; count < pair->numPins; count++) {
             TackNameRecord* nameRecord = &(pair->records[count]);
             if (nameRecord->fingerprint == keyFingerprint)
                 deleteMask |= (1 << count);
@@ -56,7 +56,7 @@ TACK_RETVAL TackStoreDefault::deleteKey(const std::string& keyFingerprint)
         // Then delete them
         if (deleteMask) {
             tackPairDeleteRecords(pair, deleteMask);
-            if (pair->numRecords == 0)
+            if (pair->numPins == 0)
                 nameRecords_.erase(ni);        
         }
         ni = ni2;
@@ -71,7 +71,7 @@ TACK_RETVAL TackStoreDefault::getNameRecordPair(const std::string& name,
 {
     std::map<std::string, TackNameRecordPair>::iterator ni = nameRecords_.find(name);
     if (ni == nameRecords_.end()) {
-        pair->numRecords = 0;
+        pair->numPins = 0;
         return TACK_OK_NOT_FOUND;
     }
 
@@ -82,7 +82,7 @@ TACK_RETVAL TackStoreDefault::getNameRecordPair(const std::string& name,
 TACK_RETVAL TackStoreDefault::setNameRecordPair(const std::string& name, 
                                             const TackNameRecordPair* pair)
 {
-    if (pair->numRecords == 0)
+    if (pair->numPins == 0)
         nameRecords_.erase(name);
     else
         nameRecords_[name] = *pair;
@@ -116,7 +116,7 @@ TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
     for (ni=nameRecords_.begin(); ni != nameRecords_.end(); ni++)  {
 
         // Iterate through all pin pairs, then each in pin the pair...
-        for (count=0; count < ni->second.numRecords; count++) {
+        for (count=0; count < ni->second.numPins; count++) {
             TackNameRecord* nameRecord = &(ni->second.records[count]);
 
             retval=getMinGeneration(nameRecord->fingerprint, &minGeneration);
@@ -222,11 +222,11 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
                     return retval;
 
                 /* Add name record into pair */
-                if (pair.numRecords == 0) {                    
+                if (pair.numPins == 0) {                    
                     memcpy(pair.records, &nameRecord, sizeof(TackNameRecord));
-                    pair.numRecords = 1;
+                    pair.numPins = 1;
                 }
-                else if (pair.numRecords == 1) {
+                else if (pair.numPins == 1) {
                     /* Write out existing unpaired element, replace with new one */
                     if (strcmp(prevName, name) != 0) {
                         if ((retval = setNameRecordPair(prevName, &pair)) != TACK_OK)
@@ -238,7 +238,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
                         memcpy(pair.records+1, &nameRecord, sizeof(TackNameRecord));
                         if ((retval = setNameRecordPair(name, &pair)) != TACK_OK)
                             return retval;
-                        pair.numRecords = 0;
+                        pair.numPins = 0;
                     }
                 }
 
@@ -262,7 +262,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
         *listLen -= 1;
     }
            
-    if (pair.numRecords) {
+    if (pair.numPins) {
         if ((retval = setNameRecordPair(name, &pair)) != TACK_OK)
             return retval;
     }

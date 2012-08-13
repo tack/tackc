@@ -22,7 +22,7 @@ typedef struct {
 } TackNameRecord;
 
 typedef struct {
-    uint8_t numRecords;
+    uint8_t numPins;
     TackNameRecord records[2];
 } TackNameRecordPair;
 

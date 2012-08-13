@@ -235,15 +235,15 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
     /* Test with NULL input */
     TCHECK(tackProcessWellFormed(&ctx, NULL, 170, keyHash, 123, crypto));
     assert(ctx.tackExt == NULL);
-    assert(ctx.tack == NULL);
-    assert(strlen(ctx.tackFingerprint) == 0);
+    assert(ctx.tack[0] == NULL);
+    assert(strlen(ctx.tackFingerprint[0]) == 0);
     assert(ctx.breakSigFlags == 0);
 
     /* Test normal behavior */
     TCHECK(tackProcessWellFormed(&ctx, 
                tackExtET1, tackExtET1Len, keyHash, 123, crypto));
     assert(ctx.tackExt == tackExtET1);
-    assert(ctx.tack == tackExtensionGetTack(tackExtET1));
+    assert(ctx.tack[0] == tackExtensionGetTack(tackExtET1));
     assert(ctx.breakSigFlags == 0);
 
     /* Test tack ext lengths (copied code for E, ET1, EB1, EB1T2 */

@@ -20,8 +20,9 @@ extern "C" {
    tackProcessStore(), and between tackProcessStore() calls */
 typedef struct {
     uint8_t* tackExt;
-    uint8_t* tack;
-    char tackFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
+    uint8_t numTacks;
+    uint8_t* tack[2];
+    char tackFingerprint[2][TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
     uint8_t breakSigFlags; /* Bit flags storing which break sigs have been verified */
 } TackProcessingContext;
 
