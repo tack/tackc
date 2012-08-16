@@ -41,7 +41,9 @@ uint8_t tackExtensionGetActivationFlags(uint8_t* tackExt) {
     return *(tackExtensionPostBreakSigs(tackExt));
 }
 
-#include <stdio.h>
+uint8_t tackExtensionGetActivationFlag(uint8_t* tackExt, uint8_t index) {
+    return (*(tackExtensionPostBreakSigs(tackExt))) & (1 << index);
+}
 
 TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
 {

@@ -204,23 +204,26 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
         if (record->endTime > currentTime)
             pinIsActive[pinIndex] = 1;
         
-        /* Record whether pin and tacks match.  Determine connection status. */
+        /* Record whether pin and tacks match */
         for (tackIndex=0; tackIndex < ctx->numTacks; tackIndex++) {
             tack = ctx->tack[tackIndex];
             tackFingerprint = ctx->tackFingerprint[tackIndex];
 
             if (strcmp(record->fingerprint, tackFingerprint) == 0) { 
                 pinMatchesTack[pinIndex] = 1;
-                if (tackExtensionGetActivationFlags(ctx->tackExt) & (1 << tackIndex))
+                if (tackExtensionGetActivationFlag(ctx->tackExt, tackIndex))
                     pinMatchesActiveTack[pinIndex] = 1;
                 tackMatchesPin[tackIndex] = 1;
-                if (pinIsActive[pinIndex])
-                    retval = TACK_OK_ACCEPTED;
             }
         }
-        /* If there's an unmatched active pin, connection is rejected */
-        if (pinIsActive[pinIndex] && !pinMatchesTack[pinIndex])
-            return TACK_OK_REJECTED;
+
+        /* Determine connection status */
+        if (pinIsActive[pinIndex]) {
+            if (pinMatchesTack[pinIndex])
+                retval = TACK_OK_ACCEPTED;
+            else
+                return TACK_OK_REJECTED;
+        }
     }
     return retval;
 }

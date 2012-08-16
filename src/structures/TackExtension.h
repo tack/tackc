@@ -23,6 +23,7 @@ uint8_t* tackExtensionGetTack(uint8_t* tackExt, uint8_t index);
 uint8_t  tackExtensionGetNumBreakSigs(uint8_t* tackExt);
 uint8_t* tackExtensionGetBreakSig(uint8_t* tackExt, uint8_t index);
 uint8_t  tackExtensionGetActivationFlags(uint8_t* tackExt);
+uint8_t  tackExtensionGetActivationFlag(uint8_t* tackExt, uint8_t index);
 
 TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 
