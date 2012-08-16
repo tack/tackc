@@ -14,6 +14,8 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
                                   uint8_t keyHash[TACK_HASH_LENGTH],
                                   uint32_t currentTime, TackCryptoFuncs* crypto)
 {    
+    uint8_t tackIndex = 0;
+    uint8_t* tack;
     TACK_RETVAL retval = TACK_ERR;
 
     /* Clear TackProcessingContext */
@@ -28,22 +30,24 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
     ctx->tackExt = tackExt;
     
     /* Check tack's expiration, target_hash, and signature */
-    ctx->tack[0] = tackExtensionGetTack(tackExt);
-    if (ctx->tack[0]) {        
-        ctx->numTacks = 1;
-        if (tackTackGetExpiration(ctx->tack[0]) <= currentTime)
+    ctx->numTacks = tackExtensionGetNumTacks(tackExt);
+    for (tackIndex = 0; tackIndex < ctx->numTacks; tackIndex++) {
+        tack = tackExtensionGetTack(tackExt, tackIndex);
+        ctx->tack[tackIndex] = tack;
+
+        if (tackTackGetExpiration(tack) <= currentTime)
             return TACK_ERR_EXPIRED_EXPIRATION;
 
-        if (memcmp(tackTackGetTargetHash(ctx->tack[0]), keyHash, TACK_HASH_LENGTH) != 0)
+        if (memcmp(tackTackGetTargetHash(tack), keyHash, TACK_HASH_LENGTH) != 0)
             return TACK_ERR_MISMATCHED_TARGET_HASH;
         
-        if ((retval=tackTackVerifySignature(ctx->tack[0], crypto)) != TACK_OK)
+        if ((retval=tackTackVerifySignature(tack, crypto)) != TACK_OK)
             return retval;  
 
         /* Store fingerprint into context */
-        if ((retval=tackTackGetKeyFingerprint(ctx->tack[0], ctx->tackFingerprint[0], 
+        if ((retval=tackTackGetKeyFingerprint(tack, ctx->tackFingerprint[0], 
                                               crypto)) != TACK_OK)
-            return retval;             
+            return retval;
     }
     return TACK_OK;
 }
@@ -61,6 +65,7 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     /* These values are doubled for a pair of pins */
     uint8_t pinIsActive[2] = {0,0};
     uint8_t pinMatchesTack[2] = {0,0};
+    uint8_t pinMatchesActiveTack[2] = {0,0};
     /* These values are doubled for a pair of tacks */
     uint8_t tackMatchesPin[2] = {0,0};
 
@@ -76,7 +81,8 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
 
     /* Get the relevant pins.  Determine the store's status. */
     if ((retval = tackProcessPins(ctx, &pair, 
-                                  pinIsActive, pinMatchesTack, tackMatchesPin, 
+                                  pinIsActive, pinMatchesTack, pinMatchesActiveTack,
+                                  tackMatchesPin, 
                                   currentTime, name, store, storeArg)) < TACK_OK)
         return retval;
     resultRetval = retval;
@@ -84,7 +90,8 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     /* Perform pin activation (optional) */
     if (pinActivation && resultRetval != TACK_OK_REJECTED)
         if ((retval=tackProcessPinActivation(ctx, currentTime, &pair, 
-                                             pinIsActive, pinMatchesTack, tackMatchesPin,
+                                             pinIsActive, pinMatchesTack, 
+                                             pinMatchesActiveTack, tackMatchesPin,
                                              name, store, storeArg)) < TACK_OK)
             return retval;
     
@@ -115,7 +122,7 @@ TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
 
         /* If the store DOES have a key... */
         if (retval == TACK_OK) {
-            /* Use breakSigFlags to memorize which signatures have already been verified */
+            /* Use breakSigFlags to memorize which sigs have already been verified */
             mustDeleteKey = 0;
             if (ctx->breakSigFlags & (1<<count))
                 mustDeleteKey = 1;
@@ -172,7 +179,9 @@ TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
 
 TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
                             TackNameRecordPair* pair,
-                            uint8_t pinIsActive[2], uint8_t pinMatchesTack[2], 
+                            uint8_t pinIsActive[2], 
+                            uint8_t pinMatchesTack[2], 
+                            uint8_t pinMatchesActiveTack[2], 
                             uint8_t tackMatchesPin[2],
                             uint32_t currentTime, const void* name,
                             TackStoreFuncs* store, void* storeArg) 
@@ -202,14 +211,16 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
 
             if (strcmp(record->fingerprint, tackFingerprint) == 0) { 
                 pinMatchesTack[pinIndex] = 1;
+                if (tackExtensionGetActivationFlags(ctx->tackExt) & (1 << tackIndex))
+                    pinMatchesActiveTack[pinIndex] = 1;
                 tackMatchesPin[tackIndex] = 1;
-                if (pinIsActive[pinIndex] && retval != TACK_OK_REJECTED)
+                if (pinIsActive[pinIndex])
                     retval = TACK_OK_ACCEPTED;
             }
         }
         /* If there's an unmatched active pin, connection is rejected */
         if (pinIsActive[pinIndex] && !pinMatchesTack[pinIndex])
-            retval = TACK_OK_REJECTED;
+            return TACK_OK_REJECTED;
     }
     return retval;
 }
@@ -219,6 +230,7 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                                      TackNameRecordPair* pair,
                                      uint8_t pinIsActive[2],
                                      uint8_t pinMatchesTack[2],
+                                     uint8_t pinMatchesActiveTack[2],
                                      uint8_t tackMatchesPin[2],
                                      const void* name,
                                      TackStoreFuncs* store, void* storeArg) 
@@ -240,14 +252,14 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
             deleteMask |= (1 << pinIndex);
             madeChanges = 1;
         }
-        else if (tackExtensionGetActivationFlag(ctx->tackExt)) {
+        else if (pinMatchesActiveTack[pinIndex]) {
             /* If there is a relevant pin and matching tack, the pin's "end time"
                SHALL be set using the below formula: */
             
             /* Ignore if current time < initialTime; would cause negative time delta */
             if (currentTime > nameRecord->initialTime) {
                 
-                /* It's OK to undercount but not overcount the time delta, so subtract 1 */
+                /* It's OK to undercount but not overcount the delta, so subtract 1 */
                 timeDelta = currentTime - nameRecord->initialTime - 1;
                 if (timeDelta > (30 * 24 * 60))
                     timeDelta = (30 * 24 * 60);

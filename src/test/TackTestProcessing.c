@@ -17,7 +17,7 @@
 
 char Epem[] = "\
 -----BEGIN TACK EXTENSION-----\
-AAAAAQ==\
+AAAAAAE=\
 -----END TACK EXTENSION-----";
 /*
 activation_flag = enabled
@@ -25,131 +25,131 @@ activation_flag = enabled
 
 char ET1pem[] = "\
 -----BEGIN TACK EXTENSION-----\
-ptTsGt8EToRTmpeuY7DhgdMQSuvj2KTYvSUQj/2AnfDN9ms33d3TRmvctMhRpOop\
-dTKyIRRsYuYUHQVLyrhHl90AAAFZGkAytktmcnogY+QGbzuVjLCq7ldqXs79lTOZ\
-u4h0cx2Vh06geQcpV9a0Hhqgdao+ehk9CUcuA1nOreDpW9coCEcH+NHmONpNgSD9\
-NNb/e7vwUH7MNu+SCDdVhMxLJVwHJEEAAAE=\
+AKbRPZvVlyhVTrl58hQ+n8JbkxNYOS21nmcu/FA5QwFHmw/WXbAtI7TzTt3DVqaG\
+KC9DLdEjj5BNi6TMDiqP2osnAAAByRlTMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz\
+mbuIdHMdlYfVaCzrqEiJRCibqMlGZupEEupuqM8BErj0yH6e2RrH7Xz0Di7x8UFt\
+13MY5KC7nPtFa9bw1FU5gmjTPF3n4ySPAAAB\
 -----END TACK EXTENSION-----";
 /*
-key fingerprint = rnx3y.35xdl.hssy4.bop3v.zifgu
+key fingerprint = 2jgim.5jn33.3gc6r.he4gi.3mope
 min_generation  = 0
 generation      = 0
-expiration      = 2013-01-01T00:00Z
+expiration      = 2026-12-16T01:55Z
 target_hash     = 32b64b66727a2063e4066f3b958cb0aa
                   ee576a5ecefd953399bb8874731d9587
-activation_flag = enabled  
+activation_flags = first_active
  */
 
 char EB1pem[] = "\
 -----BEGIN TACK EXTENSION-----\
-AACA1Owa3wROhFOal65jsOGB0xBK6+PYpNi9JRCP/YCd8M32azfd3dNGa9y0yFGk\
-6il1MrIhFGxi5hQdBUvKuEeX3WNu3E+jrPQANMkeWVYL72HAiHgmQPwACJUXFN4v\
-2Yz0dy5JYLPJceMnsXfsFBSImOF8XzupD3SeynaITdarTnUB\
+AAAAgNE9m9WXKFVOuXnyFD6fwluTE1g5LbWeZy78UDlDAUebD9ZdsC0jtPNO3cNW\
+poYoL0Mt0SOPkE2LpMwOKo/aiyda/tMjsxDveK8d4bL1gz7VG0c+VzbqoO95Lvw1\
+hxVua2qVuZVbna4XqrsKFiHm2SV0OSynXp+z0ufSNDE0GIYRAQ==\
 -----END TACK EXTENSION-----";
 /*
-Breaks key fingerprint  = rnx3y.35xdl.hssy4.bop3v.zifgu
-activation_flag = enabled
+Breaks key fingerprint  = 2jgim.5jn33.3gc6r.he4gi.3mope
+activation_flags = first_active
  */
 
 char EB1T2pem[] = "\
 -----BEGIN TACK EXTENSION-----\
-poiEksHxiHr4JEozYQW7Ah3x3Kkha/maSELeIEtHUs0SO/8pgKxeE+llsYNqDbb+\
-U5u3Garg9Ed+os0fh3cYVSIAAAHJGVMytktmcnogY+QGbzuVjLCq7ldqXs79lTOZ\
-u4h0cx2Vh1AVAkK48O1W03iKa3xENSWIKFyY+Ai3WW9JIZGr/EMfxwFG8z9EAvEr\
-VFVKGuJySQs6vUqRtKjBYG8F/1KaNs0AgNTsGt8EToRTmpeuY7DhgdMQSuvj2KTY\
-vSUQj/2AnfDN9ms33d3TRmvctMhRpOopdTKyIRRsYuYUHQVLyrhHl91jbtxPo6z0\
-ADTJHllWC+9hwIh4JkD8AAiVFxTeL9mM9HcuSWCzyXHjJ7F37BQUiJjhfF87qQ90\
-nsp2iE3Wq051AQ==\
+AKYP/OQDx82nI/uQ5UeNf3p7cQtbEHtuP/yG6MMFzeaBoLhoYfD+7q05srz+Gujq\
+bPYN4ImuAUIlXTMAtfNVqq9aAAAByRlTMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz\
+mbuIdHMdlYcmRIue/F9nBusdnGNg+eudJUJDMuUYPLnC9oEzbWrKbecXiH/5WyX7\
+PxJfpzodEtSnxRFQyp6t/tSeRbvef8K4AIDRPZvVlyhVTrl58hQ+n8JbkxNYOS21\
+nmcu/FA5QwFHmw/WXbAtI7TzTt3DVqaGKC9DLdEjj5BNi6TMDiqP2osnWv7TI7MQ\
+73ivHeGy9YM+1RtHPlc26qDveS78NYcVbmtqlbmVW52uF6q7ChYh5tkldDksp16f\
+s9Ln0jQxNBiGEQE=\
 -----END TACK EXTENSION-----";
 /*
-key fingerprint = vqhrw.sxivq.wyzxx.tguez.6okk2
+key fingerprint = ha2gz.wki3m.jwvrz.mazmj.h6c2a
 min_generation  = 0
 generation      = 0
 expiration      = 2026-12-16T01:55Z
 target_hash     = 32b64b66727a2063e4066f3b958cb0aa
                   ee576a5ecefd953399bb8874731d9587
-Breaks key fingerprint  = rnx3y.35xdl.hssy4.bop3v.zifgu
-activation_flag = enabled
+Breaks key fingerprint  = 2jgim.5jn33.3gc6r.he4gi.3mope
+activation_flags = first_active
  */
 
 char EBmaxT2pem[] = "\
 -----BEGIN TACK EXTENSION-----\
-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\
+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\
 -----END TACK EXTENSION-----";
 /*
-key fingerprint = vqhrw.sxivq.wyzxx.tguez.6okk2
+key fingerprint = ha2gz.wki3m.jwvrz.mazmj.h6c2a
 min_generation  = 0
 generation      = 0
 expiration      = 2026-12-16T01:55Z
 target_hash     = 32b64b66727a2063e4066f3b958cb0aa
                   ee576a5ecefd953399bb8874731d9587
-Breaks key fingerprint  = rnx3y.35xdl.hssy4.bop3v.zifgu
-Breaks key fingerprint  = cx5lg.epsgt.t7et5.q7zj4.57ljd
-Breaks key fingerprint  = zwspz.mjsrj.jryrz.x6zbq.62sga
-Breaks key fingerprint  = qaalr.b77je.2g2yh.bqhe5.nd4lh
-Breaks key fingerprint  = heoey.swsc7.dvold.qndbh.vyqkv
-Breaks key fingerprint  = hlxqj.qj4jr.s53f3.ogpqx.h4hhd
-Breaks key fingerprint  = 2kskg.r6ndp.xdaxb.jdj45.dsk6h
-Breaks key fingerprint  = he4bj.stary.av3r3.ucirw.uw3np
-activation_flag = enabled
+Breaks key fingerprint  = 2jgim.5jn33.3gc6r.he4gi.3mope
+Breaks key fingerprint  = kmpvg.b723d.6aggr.da3tg.gsfur
+Breaks key fingerprint  = i3ix6.7g6fs.zbzvm.emvs8.jdn3o
+Breaks key fingerprint  = 2jgim.5jn33.3gc6r.he4gi.3mope
+Breaks key fingerprint  = kmpvg.b723d.6aggr.da3tg.gsfur
+Breaks key fingerprint  = i3ix6.7g6fs.zbzvm.emvs8.jdn3o
+Breaks key fingerprint  = 2jgim.5jn33.3gc6r.he4gi.3mope
+Breaks key fingerprint  = kmpvg.b723d.6aggr.da3tg.gsfur
+activation_flags = first_active
 */
 
 char ET1Mpem[] = "\
 -----BEGIN TACK EXTENSION-----\
-ptTsGt8EToRTmpeuY7DhgdMQSuvj2KTYvSUQj/2AnfDN9ms33d3TRmvctMhRpOop\
-dTKyIRRsYuYUHQVLyrhHl93+/wHJGVMytktmcnogY+QGbzuVjLCq7ldqXs79lTOZ\
-u4h0cx2Vh/e7IjTdRUscPDW/YTXbTYIyYJCiKXiU3Eq1QPk1wlRhlHTT7W/fm34Z\
-nxpC/WiqFu7fv0dP3px8BvJbOpvVHwsAAAE=\
+AKbRPZvVlyhVTrl58hQ+n8JbkxNYOS21nmcu/FA5QwFHmw/WXbAtI7TzTt3DVqaG\
+KC9DLdEjj5BNi6TMDiqP2osn/v8ByRlTMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz\
+mbuIdHMdlYffhjg/WkdSX7fvRdP4xNl1XDwY1L98zvuLPMGE5FDWSgAdaf5247xs\
+jReyKKZNySSpuoGOdol7AUlYyNhVvq2KAAAB\
 -----END TACK EXTENSION-----";
 /*
-key fingerprint = rnx3y.35xdl.hssy4.bop3v.zifgu
+key fingerprint = 2jgim.5jn33.3gc6r.he4gi.3mope
 min_generation  = 254
 generation      = 255
 expiration      = 2026-12-16T01:55Z
 target_hash     = 32b64b66727a2063e4066f3b958cb0aa
                   ee576a5ecefd953399bb8874731d9587
-activation_flag = enabled
+activation_flags = first_active
 */
 
 char ET2pem[] = "\
 -----BEGIN TACK EXTENSION-----\
-poiEksHxiHr4JEozYQW7Ah3x3Kkha/maSELeIEtHUs0SO/8pgKxeE+llsYNqDbb+\
-U5u3Garg9Ed+os0fh3cYVSIBAQHJGVMytktmcnogY+QGbzuVjLCq7ldqXs79lTOZ\
-u4h0cx2VhylLKiKxMPRLzn68nPwBBJqGfCTNyYrfhY2duyDzFTWGK7u7Ce/pJe1Y\
-rRgweAUUQHWZTT58rYAO5ZsRR6Fl8MoAAAE=\
+AKYP/OQDx82nI/uQ5UeNf3p7cQtbEHtuP/yG6MMFzeaBoLhoYfD+7q05srz+Gujq\
+bPYN4ImuAUIlXTMAtfNVqq9aAQEByRlTMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz\
+mbuIdHMdlYfR21FTnmACJ4zyZi2JLW9GbflwLRhQesPbHXD5CcLqCXb/ad5o+o3q\
+A6XEJzHNKkrq/iIL+U3bA7AENOlelY8hAAAB\
 -----END TACK EXTENSION-----";
 /*
-key fingerprint = vqhrw.sxivq.wyzxx.tguez.6okk2
+key fingerprint = ha2gz.wki3m.jwvrz.mazmj.h6c2a
 min_generation  = 1
 generation      = 1
 expiration      = 2026-12-16T01:55Z
 target_hash     = 32b64b66727a2063e4066f3b958cb0aa
                   ee576a5ecefd953399bb8874731d9587
-activation_flag = enabled
+activation_flags = first_active
 */
 
 uint8_t tackExtE[2048];
@@ -229,7 +229,7 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
 
     TCHECK(tackTestProcessInit());
 
-    tack = tackExtensionGetTack(tackExtET1);
+    tack = tackExtensionGetTack(tackExtET1, 0);
     keyHash = tackTackGetTargetHash(tack);
 
     /* Test with NULL input */
@@ -243,7 +243,7 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
     TCHECK(tackProcessWellFormed(&ctx, 
                tackExtET1, tackExtET1Len, keyHash, 123, crypto));
     assert(ctx.tackExt == tackExtET1);
-    assert(ctx.tack[0] == tackExtensionGetTack(tackExtET1));
+    assert(ctx.tack[0] == tackExtensionGetTack(tackExtET1, 0));
     assert(ctx.breakSigFlags == 0);
 
     /* Test tack ext lengths (copied code for E, ET1, EB1, EB1T2 */
@@ -287,34 +287,34 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
     
     /* Test bad breaksigs length */
     /* Modify the low-order byte of the 2-byte length to be non-multiple of 128 */
-    tackExtEB1T2[2+TACK_LENGTH]++;
+    tackExtEB1T2[3+TACK_LENGTH]++;
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
                    tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, crypto),
                TACK_ERR_BAD_BREAKSIGS_LENGTH);
-    tackExtEB1T2[2+TACK_LENGTH]--;
+    tackExtEB1T2[3+TACK_LENGTH]--;
     /* Modify the high-order byte of the 2-byte length to be 4 (=9 break sigs)  */
-    tackExtEB1T2[1+TACK_LENGTH]=4;
+    tackExtEB1T2[2+TACK_LENGTH]=4;
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
                    tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, crypto),
                TACK_ERR_BAD_BREAKSIGS_LENGTH);
-    tackExtEB1T2[1+TACK_LENGTH]=0;
+    tackExtEB1T2[2+TACK_LENGTH]=0;
 
     /* Test bad activation flag */
-    tackExtET1[tackExtET1Len-1]+=1; /* 1->2 */
+    tackExtET1[tackExtET1Len-1]+=3; /* 1->4 */
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
                    tackExtET1, tackExtET1Len, keyHash, 123, crypto),
                TACK_ERR_BAD_ACTIVATION_FLAG);
-    tackExtET1[tackExtET1Len-1]-=1;
+    tackExtET1[tackExtET1Len-1]-=3;
 
     /* Test bad generation (mingeneration > generation) */
-    tackExtET1[65]++;
+    tackExtET1[66]++;
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
                    tackExtET1, tackExtET1Len, keyHash, 123, crypto),
                TACK_ERR_BAD_GENERATION);
-    tackExtET1[65]--;
+    tackExtET1[66]--;
 
     /* Test good/bad expiration */
-    tack = tackExtensionGetTack(tackExtET1);
+    tack = tackExtensionGetTack(tackExtET1, 0);
     expirationTime = tackTackGetExpiration(tack);
 
     TCHECK(tackProcessWellFormed(&ctx, 
@@ -362,7 +362,7 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
 
     TCHECK(tackTestProcessInit());
 
-    tack = tackExtensionGetTack(tackExtET1);
+    tack = tackExtensionGetTack(tackExtET1, 0);
     keyHash = tackTackGetTargetHash(tack);
 
     /* Prepare context for ET1, EB1, EB1T2, EBmaxT2, ET1M */
@@ -435,9 +435,12 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     /* Try setting a larger minGen (254) with a name that comes before the other
        names, to ensure that only the largest minGen is processed */
     TCHECK_VAL(store.process(&ctxET1M, "a.com", currentTime), TACK_OK_UNPINNED);
-    store.setMinGeneration("rnx3y.35xdl.hssy4.bop3v.zifgu", 253);
     uint8_t minGen;
-    store.getMinGeneration("rnx3y.35xdl.hssy4.bop3v.zifgu", &minGen);
+    store.getMinGeneration("2jgim.5jn33.3gc6r.he4gi.3mope", &minGen);
+    assert(minGen == 254);
+
+    store.setMinGeneration("2jgim.5jn33.3gc6r.he4gi.3mope", 253);
+    store.getMinGeneration("2jgim.5jn33.3gc6r.he4gi.3mope", &minGen);
     assert(minGen == 254);
 
     // Check that serialize -> deserialize -> serialize yields same string
