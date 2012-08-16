@@ -33,7 +33,6 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
     ctx->numTacks = tackExtensionGetNumTacks(tackExt);
     for (tackIndex = 0; tackIndex < ctx->numTacks; tackIndex++) {
         tack = tackExtensionGetTack(tackExt, tackIndex);
-        ctx->tack[tackIndex] = tack;
 
         if (tackTackGetExpiration(tack) <= currentTime)
             return TACK_ERR_EXPIRED_EXPIRATION;
@@ -44,7 +43,8 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
         if ((retval=tackTackVerifySignature(tack, crypto)) != TACK_OK)
             return retval;  
 
-        /* Store fingerprint into context */
+        /* Store tack and fingerprint into context */
+        ctx->tack[tackIndex] = tack;
         if ((retval=tackTackGetKeyFingerprint(tack, ctx->tackFingerprint[0], 
                                               crypto)) != TACK_OK)
             return retval;
@@ -120,15 +120,14 @@ TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
                                             &minGenerationVal)) < TACK_OK)
             return retval;
 
-        /* If the store DOES have a key... */
+        /* If the store DOES have a key (ie not TACK_OK_NOT_FOUND): */
         if (retval == TACK_OK) {
             /* Use breakSigFlags to memorize which sigs have already been verified */
             mustDeleteKey = 0;
             if (ctx->breakSigFlags & (1<<count))
                 mustDeleteKey = 1;
             else {
-                retval = tackBreakSigVerifySignature(breakSig, crypto);
-                if (retval != TACK_OK)
+                if ((retval = tackBreakSigVerifySignature(breakSig, crypto)) != TACK_OK)
                     return retval;
                 ctx->breakSigFlags |= (1<<count);
                 mustDeleteKey = 1;
@@ -156,7 +155,7 @@ TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
         tack = ctx->tack[tackIndex];
         tackFingerprint = ctx->tackFingerprint[tackIndex];
 
-        /* If there's a tack, check its generation against the store's min_generation */
+        /* Check tack's generation against the store's min_generation */
         retval = store->getMinGeneration(storeArg, tackFingerprint, &minGeneration);
         if (retval < TACK_OK)
             return retval;        
@@ -252,7 +251,7 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
         TackNameRecord* nameRecord = pair->records + pinIndex;
 
         if (!pinMatchesTack[pinIndex]) {
-            deleteMask |= (1 << pinIndex);
+            deleteMask |= (1 << pinIndex);  /* mark pin for deletion */
             madeChanges = 1;
         }
         else if (pinMatchesActiveTack[pinIndex]) {
