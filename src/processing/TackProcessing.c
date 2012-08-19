@@ -246,18 +246,22 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     char* tackFingerprint = NULL;
     TackNameRecord* newRecord = NULL;
 
-    /* First, evaluate relevant pins for deletion or activation */
+    /* The first step in pin activation is to evaluate each relevant pin
+       (there may be one or two): */
     for (pinIndex = 0; pinIndex < pair->numPins; pinIndex++) {
         TackNameRecord* nameRecord = pair->records + pinIndex;
 
+        /* If a pin has no matching tacks [...] the pin SHALL be deleted, 
+           since it is contradicted by the connection. */
         if (!pinMatchesTack[pinIndex]) {
             deleteMask |= (1 << pinIndex);  /* mark pin for deletion */
             madeChanges = 1;
         }
-        else if (pinMatchesActiveTack[pinIndex]) {
-            /* If there is a relevant pin and matching tack, the pin's "end time"
-               SHALL be set using the below formula: */
-            
+
+        /* If a pin has matching tacks, its handling will depend on whether
+           at least one of the tacks is active.  [...] If so, then the pin SHALL have 
+           its "end time" set based on the current, initial, and end times: */
+        else if (pinMatchesActiveTack[pinIndex]) {            
             /* Ignore if current time < initialTime; would cause negative time delta */
             if (currentTime > nameRecord->initialTime) {
                 
@@ -276,24 +280,31 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     }
     tackPairDeleteRecords(pair, deleteMask);
 
-    /* Then, add pins for unmatched tacks */
+    /* The remaining step in pin activation is to add new inactive pins for
+       any unmatched tacks: */
     for (tackIndex = 0; tackIndex < ctx->numTacks; tackIndex++) {
         tack = ctx->tack[tackIndex];
         tackFingerprint = ctx->tackFingerprint[tackIndex];
 
         if (!tackMatchesPin[tackIndex]) {
-            /* If there is no relevant pin a new pin SHALL be created: */
-            newRecord = pair->records + pair->numPins;
+            /* There are always sufficient empty "slots" in the pin store for adding
+               new pins without exceeding the limit of two pins per hostname */
+            if (pair->numPins == 2)
+                return TACK_ERR_ASSERTION;
 
+            /* Add a new name record */
+            newRecord = pair->records + pair->numPins;
             newRecord->initialTime = currentTime;
             newRecord->endTime = 0;            
             strcpy(newRecord->fingerprint, tackFingerprint);
             pair->numPins++;
+            madeChanges = 1;
+
+            /* Add a new key record */
             retval=store->setMinGeneration(storeArg, tackFingerprint, 
                                            tackTackGetMinGeneration(tack));
             if (retval != TACK_OK)
                 return retval;
-            madeChanges = 1;
         }
     }
 

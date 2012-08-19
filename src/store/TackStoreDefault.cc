@@ -227,13 +227,13 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
                     pair.numPins = 1;
                 }
                 else if (pair.numPins == 1) {
-                    /* Write out existing unpaired element, replace with new one */
+                    /* Set existing unpaired element, replace with new one */
                     if (strcmp(prevName, name) != 0) {
                         if ((retval = setNameRecordPair(prevName, &pair)) != TACK_OK)
                             return retval;
                         memcpy(pair.records+0, &nameRecord, sizeof(TackNameRecord));
                     }
-                    /* Write out a pair of name records */
+                    /* Set a pair of name records */
                     else {
                         memcpy(pair.records+1, &nameRecord, sizeof(TackNameRecord));
                         if ((retval = setNameRecordPair(name, &pair)) != TACK_OK)
