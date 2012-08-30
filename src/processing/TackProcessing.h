@@ -32,7 +32,7 @@ typedef struct {
 TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
                                   uint8_t* tackExt, uint32_t tackExtLen,
                                   uint8_t keyHash[TACK_HASH_LENGTH],
-                                  uint32_t tmin, uint32_t tmax,
+                                  uint32_t currentTime,
                                   TackCryptoFuncs* crypto);
 
 /* Call once for each store, after the above well-formed check.
@@ -44,7 +44,7 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
 */
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              const void* name,
-                             uint32_t tmin, uint32_t tmax,
+                             uint32_t currentTime,
                              uint8_t pinActivation,
                              TackStoreFuncs* store, 
                              void* storeArg, 
@@ -66,11 +66,11 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
                             uint8_t pinMatchesTack[2],
                             uint8_t pinMatchesActiveTack[2],
                             uint8_t tackMatchesPin[2],
-                            uint32_t tmin, uint32_t tmax, const void* name,
+                            uint32_t currentTime, const void* name,
                             TackStoreFuncs* store, void* storeArg);
 
 TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
-                                     uint32_t tmin, uint32_t tmax,
+                                     uint32_t currentTime,
                                      TackNameRecordPair* pair,
                                      uint8_t pinIsActive[2],
                                      uint8_t pinMatchesTack[2],

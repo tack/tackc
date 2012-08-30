@@ -34,7 +34,7 @@ public:
     // Main entry point for client processing
     TACK_RETVAL process(TackProcessingContext* ctx,
                         const std::string& name,
-                        uint32_t tmin, uint32_t tmax);
+                        uint32_t currentTime);
 
     // Define the below functions in a subclass
     virtual TACK_RETVAL getMinGeneration(const std::string& keyFingerprint, 

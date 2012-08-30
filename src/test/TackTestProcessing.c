@@ -233,7 +233,7 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
     keyHash = tackTackGetTargetHash(tack);
 
     /* Test with NULL input */
-    TCHECK(tackProcessWellFormed(&ctx, NULL, 170, keyHash, 123, 124, crypto));
+    TCHECK(tackProcessWellFormed(&ctx, NULL, 170, keyHash, 123, crypto));
     assert(ctx.tackExt == NULL);
     assert(ctx.tack[0] == NULL);
     assert(strlen(ctx.tackFingerprint[0]) == 0);
@@ -241,47 +241,47 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
 
     /* Test normal behavior */
     TCHECK(tackProcessWellFormed(&ctx, 
-               tackExtET1, tackExtET1Len, keyHash, 123, 124, crypto));
+               tackExtET1, tackExtET1Len, keyHash, 123, crypto));
     assert(ctx.tackExt == tackExtET1);
     assert(ctx.tack[0] == tackExtensionGetTack(tackExtET1, 0));
     assert(ctx.breakSigFlags == 0);
 
     /* Test tack ext lengths (copied code for E, ET1, EB1, EB1T2 */
     /* Test that errors are returned for a range of bad lengths */
-    TCHECK(tackProcessWellFormed(&ctx, tackExtE, tackExtELen, keyHash, 123, 124, crypto));
+    TCHECK(tackProcessWellFormed(&ctx, tackExtE, tackExtELen, keyHash, 123, crypto));
     for (count=0; count < tackExtELen+10; count++) {
         if (count == tackExtELen) continue;
-        TCHECK_VAL(tackProcessWellFormed(&ctx, tackExtE, count, keyHash, 123, 124, crypto),
+        TCHECK_VAL(tackProcessWellFormed(&ctx, tackExtE, count, keyHash, 123, crypto),
                    TACK_ERR_BAD_TACKEXT_LENGTH);
     }
 
-    TCHECK(tackProcessWellFormed(&ctx, tackExtET1, tackExtET1Len, keyHash, 123, 124, crypto));
+    TCHECK(tackProcessWellFormed(&ctx, tackExtET1, tackExtET1Len, keyHash, 123, crypto));
     for (count=0; count < tackExtET1Len+10; count++) {
         if (count == tackExtET1Len) continue;
-        TCHECK_VAL(tackProcessWellFormed(&ctx, tackExtET1, count, keyHash, 123, 124, crypto),
+        TCHECK_VAL(tackProcessWellFormed(&ctx, tackExtET1, count, keyHash, 123, crypto),
                    TACK_ERR_BAD_TACKEXT_LENGTH);
     }
 
-    TCHECK(tackProcessWellFormed(&ctx, tackExtEB1, tackExtEB1Len, keyHash, 123, 124, 
+    TCHECK(tackProcessWellFormed(&ctx, tackExtEB1, tackExtEB1Len, keyHash, 123, 
                                  crypto));
     for (count=0; count < tackExtEB1Len+10; count++) {
         if (count == tackExtEB1Len) continue;
-        TCHECK_VAL(tackProcessWellFormed(&ctx, tackExtEB1, count, keyHash, 123, 124, crypto),
+        TCHECK_VAL(tackProcessWellFormed(&ctx, tackExtEB1, count, keyHash, 123, crypto),
                    TACK_ERR_BAD_TACKEXT_LENGTH);
     }
 
-    TCHECK(tackProcessWellFormed(&ctx, tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, 124, 
+    TCHECK(tackProcessWellFormed(&ctx, tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, 
                                  crypto));
     for (count=0; count < tackExtEB1T2Len+10; count++) {
         if (count == tackExtEB1T2Len) continue;
-        TCHECK_VAL(tackProcessWellFormed(&ctx, tackExtEB1T2, count, keyHash, 123, 124, crypto),
+        TCHECK_VAL(tackProcessWellFormed(&ctx, tackExtEB1T2, count, keyHash, 123, crypto),
                    TACK_ERR_BAD_TACKEXT_LENGTH);
     }
 
     /* Test bad tacklength */
     *tackExtET1 += 1;
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                   tackExtET1, tackExtET1Len, keyHash, 123, 124, crypto),
+                   tackExtET1, tackExtET1Len, keyHash, 123, crypto),
                TACK_ERR_BAD_TACK_LENGTH);
     *tackExtET1 -= 1;
     
@@ -289,27 +289,27 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
     /* Modify the low-order byte of the 2-byte length to be non-multiple of 128 */
     tackExtEB1T2[3+TACK_LENGTH]++;
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                   tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, 124, crypto),
+                   tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, crypto),
                TACK_ERR_BAD_BREAKSIGS_LENGTH);
     tackExtEB1T2[3+TACK_LENGTH]--;
     /* Modify the high-order byte of the 2-byte length to be 4 (=9 break sigs)  */
     tackExtEB1T2[2+TACK_LENGTH]=4;
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                   tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, 124, crypto),
+                   tackExtEB1T2, tackExtEB1T2Len, keyHash, 123, crypto),
                TACK_ERR_BAD_BREAKSIGS_LENGTH);
     tackExtEB1T2[2+TACK_LENGTH]=0;
 
     /* Test bad activation flag */
     tackExtET1[tackExtET1Len-1]+=3; /* 1->4 */
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                   tackExtET1, tackExtET1Len, keyHash, 123, 124, crypto),
+                   tackExtET1, tackExtET1Len, keyHash, 123, crypto),
                TACK_ERR_BAD_ACTIVATION_FLAG);
     tackExtET1[tackExtET1Len-1]-=3;
 
     /* Test bad generation (mingeneration > generation) */
     tackExtET1[66]++;
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                   tackExtET1, tackExtET1Len, keyHash, 123, 124, crypto),
+                   tackExtET1, tackExtET1Len, keyHash, 123, crypto),
                TACK_ERR_BAD_GENERATION);
     tackExtET1[66]--;
 
@@ -318,33 +318,29 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
     expirationTime = tackTackGetExpiration(tack);
 
     TCHECK(tackProcessWellFormed(&ctx, 
-                                 tackExtET1, tackExtET1Len, keyHash, 
-                                 expirationTime-2, expirationTime-1, crypto));
+               tackExtET1, tackExtET1Len, keyHash, expirationTime-1, crypto));
     
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                                     tackExtET1, tackExtET1Len, keyHash, 
-                                     expirationTime+1, expirationTime+2, crypto),
+                   tackExtET1, tackExtET1Len, keyHash, expirationTime, crypto),
                TACK_ERR_EXPIRED_EXPIRATION);
     
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                                     tackExtET1, tackExtET1Len, keyHash, 
-                                     expirationTime+1, expirationTime+2, crypto),
+                   tackExtET1, tackExtET1Len, keyHash, expirationTime+1, crypto),
                TACK_ERR_EXPIRED_EXPIRATION);
     
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                                     tackExtET1, tackExtET1Len, keyHash, 
-                                     0xFFFFFFFF, 0xFFFFFFFF, crypto),
+                   tackExtET1, tackExtET1Len, keyHash, 0xFFFFFFFF, crypto),
                TACK_ERR_EXPIRED_EXPIRATION);
 
     /* Test bad targetHash */
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                                     tackExtET1, tackExtET1Len, keyHash+1, 123, 124, crypto),
+                   tackExtET1, tackExtET1Len, keyHash+1, 123, crypto),
                TACK_ERR_MISMATCHED_TARGET_HASH);
 
     /* Test bad signature */
     tackExtET1[160]++;
     TCHECK_VAL(tackProcessWellFormed(&ctx, 
-                                     tackExtET1, tackExtET1Len, keyHash, 123, 124, crypto),
+                   tackExtET1, tackExtET1Len, keyHash, 123, crypto),
         TACK_ERR_BAD_SIGNATURE);
     tackExtET1[160]--;
 
@@ -371,74 +367,74 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
 
     /* Prepare context for ET1, EB1, EB1T2, EBmaxT2, ET1M */
     TCHECK(tackProcessWellFormed(&ctxET1, 
-                                 tackExtET1, tackExtET1Len, keyHash, currentTime, currentTime+1, crypto));
+               tackExtET1, tackExtET1Len, keyHash, currentTime, crypto));
 
     TCHECK(tackProcessWellFormed(&ctxEB1, 
-               tackExtEB1, tackExtEB1Len, keyHash, currentTime, currentTime+1, crypto));
+               tackExtEB1, tackExtEB1Len, keyHash, currentTime, crypto));
 
     TCHECK(tackProcessWellFormed(&ctxEB1T2, 
-               tackExtEB1T2, tackExtEB1T2Len, keyHash, currentTime, currentTime+1, crypto));
+               tackExtEB1T2, tackExtEB1T2Len, keyHash, currentTime, crypto));
 
     TCHECK(tackProcessWellFormed(&ctxEBmaxT2, 
-               tackExtEBmaxT2, tackExtEBmaxT2Len, keyHash, currentTime, currentTime+1, crypto));
+               tackExtEBmaxT2, tackExtEBmaxT2Len, keyHash, currentTime, crypto));
 
     TCHECK(tackProcessWellFormed(&ctxET1M, 
-               tackExtET1M, tackExtET1MLen, keyHash, currentTime, currentTime+1, crypto));
+               tackExtET1M, tackExtET1MLen, keyHash, currentTime, crypto));
 
     TCHECK(tackProcessWellFormed(&ctxET2, 
-               tackExtET2, tackExtET2Len, keyHash, currentTime, currentTime+1, crypto));
+               tackExtET2, tackExtET2Len, keyHash, currentTime, crypto));
     
     store.setCryptoFuncs(crypto);
     store.setPinActivation(true);
     store.setDirtyFlagEnabled(true);
 
     store.setDirtyFlag(false);
-    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime), TACK_OK_UNPINNED);
     assert(store.getDirtyFlag() == true);
 
     store.setDirtyFlag(false);
-    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+10, currentTime+11), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+10), TACK_OK_UNPINNED);
     assert(store.getDirtyFlag() == true);
 
-    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+18, currentTime+19), TACK_OK_ACCEPTED);
-    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+100, currentTime+101), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+199, currentTime+200), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+396, currentTime+397), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+18), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+199), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+396), TACK_OK_ACCEPTED);
     store.setPinActivation(false);
-    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+1000, currentTime+1001), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+1001, currentTime+1002), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+1000), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+1001), TACK_OK_UNPINNED);
     store.setPinActivation(true);
 
-    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+10, currentTime+11), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+10, currentTime+11), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+10), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+10), TACK_OK_ACCEPTED);
 
     store.setDirtyFlag(false);
-    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime, currentTime+1), TACK_OK_REJECTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime), TACK_OK_REJECTED);
     assert(store.getDirtyFlag() == false);
 
     store.setPinActivation(false);
-    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime, currentTime+1), TACK_OK_REJECTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime), TACK_OK_REJECTED);
     store.setPinActivation(true);
-    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+1000, currentTime+1001), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2000, currentTime+2001), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+1000), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2000), TACK_OK_UNPINNED);
     store.setPinActivation(false);
-    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2001, currentTime+2002), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2001), TACK_OK_ACCEPTED);
     store.setPinActivation(true);
-    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2001, currentTime+2002), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2001), TACK_OK_ACCEPTED);
 
     store.setPinActivation(false);
     store.setDirtyFlag(false);
-    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+11, currentTime+12), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+11), TACK_OK_ACCEPTED);
     assert(store.getDirtyFlag() == false);
     store.setPinActivation(true);
 
     /* Ensure there is a pin for key 0 in the store, for following minGen test */
-    TCHECK_VAL(store.process(&ctxET1, "third.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "third.com", currentTime), TACK_OK_UNPINNED);
 
     /* Try setting a larger minGen (254) with a name that comes before the other
        names, to ensure that only the largest minGen is processed */
-    TCHECK_VAL(store.process(&ctxET1M, "a.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1M, "a.com", currentTime), TACK_OK_UNPINNED);
     uint8_t minGen;
     store.getMinGeneration("2jgim.5jn33.3gc6r.he4gi.3mope", &minGen);
     assert(minGen == 254);
@@ -473,36 +469,37 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
 
     // OK new round of tests for break sigs and generations
     store.clear();
-    TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "x2.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "x3.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x2.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x3.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime), TACK_OK_UNPINNED);
     assert(store.numPinned() == 4 && store.numKeys() == 2);
 
     // Try break sig EB1
-    TCHECK_VAL(store.process(&ctxEB1, "x1.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxEB1, "x1.com", currentTime), TACK_OK_UNPINNED);
     assert(store.numPinned() == 1 && store.numKeys() == 1);
 
     // Try break sig EB1T2 *and* revocation, as it has a lower min_generation
     // than the ET2
-    TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
-    TCHECK_VAL(retval = store.process(&ctxEB1T2, "x1.com", currentTime, currentTime+1), 
+    TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(retval = store.process(&ctxEB1T2, "x1.com", currentTime), 
                TACK_ERR_REVOKED_GENERATION);
     assert(store.numPinned() == 1 && store.numKeys() == 1);
 
     // Reset, try another break signature case, with a min_generation update (ET2)
     store.clear();
-    TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime, currentTime+1), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime+10, currentTime+11), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxEBmaxT2, "x1.com", currentTime+11, currentTime+12), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x1.com", currentTime+10), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxEBmaxT2, "x1.com", currentTime+11), TACK_OK_UNPINNED);
     assert(store.numPinned() == 1 && store.numKeys() == 1);
 
-    TCHECK_VAL(store.process(&ctxEBmaxT2, "x1.com", currentTime+100, currentTime+101), TACK_OK_UNPINNED);
-    TCHECK_VAL(store.process(&ctxEBmaxT2, "x1.com", currentTime+101, currentTime+102), TACK_OK_ACCEPTED);
-    TCHECK_VAL(store.process(&ctxET2, "x1.com", currentTime+101, currentTime+102), TACK_OK_ACCEPTED);
-    TCHECK_VAL(store.process(&ctxEBmaxT2, "x1.com", currentTime+101, currentTime+102), 
+    TCHECK_VAL(store.process(&ctxEBmaxT2, "x1.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxEBmaxT2, "x1.com", currentTime+101), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "x1.com", currentTime+101), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxEBmaxT2, "x1.com", currentTime+101), 
                TACK_ERR_REVOKED_GENERATION);
 
+    
     return TACK_OK;
 }
 

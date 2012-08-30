@@ -12,8 +12,7 @@
 TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
                                   uint8_t* tackExt, uint32_t tackExtLen,
                                   uint8_t keyHash[TACK_HASH_LENGTH],
-                                  uint32_t tmin, uint32_t tmax, 
-                                  TackCryptoFuncs* crypto)
+                                  uint32_t currentTime, TackCryptoFuncs* crypto)
 {    
     uint8_t tackIndex = 0;
     uint8_t* tack;
@@ -35,7 +34,7 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
     for (tackIndex = 0; tackIndex < ctx->numTacks; tackIndex++) {
         tack = tackExtensionGetTack(tackExt, tackIndex);
 
-        if (tackTackGetExpiration(tack) < tmin)
+        if (tackTackGetExpiration(tack) <= currentTime)
             return TACK_ERR_EXPIRED_EXPIRATION;
 
         if (memcmp(tackTackGetTargetHash(tack), keyHash, TACK_HASH_LENGTH) != 0)
@@ -55,7 +54,7 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
 
 TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              const void* name,
-                             uint32_t tmin, uint32_t tmax,
+                             uint32_t currentTime,
                              uint8_t pinActivation,
                              TackStoreFuncs* store, void* storeArg, 
                              TackCryptoFuncs* crypto)
@@ -84,14 +83,13 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     if ((retval = tackProcessPins(ctx, &pair, 
                                   pinIsActive, pinMatchesTack, pinMatchesActiveTack,
                                   tackMatchesPin, 
-                                  tmin, tmax, 
-                                  name, store, storeArg)) < TACK_OK)
+                                  currentTime, name, store, storeArg)) < TACK_OK)
         return retval;
     resultRetval = retval;
 
     /* Perform pin activation (optional) */
     if (pinActivation && resultRetval != TACK_OK_REJECTED)
-        if ((retval=tackProcessPinActivation(ctx, tmin, tmax, &pair, 
+        if ((retval=tackProcessPinActivation(ctx, currentTime, &pair, 
                                              pinIsActive, pinMatchesTack, 
                                              pinMatchesActiveTack, tackMatchesPin,
                                              name, store, storeArg)) < TACK_OK)
@@ -184,7 +182,7 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
                             uint8_t pinMatchesTack[2], 
                             uint8_t pinMatchesActiveTack[2], 
                             uint8_t tackMatchesPin[2],
-                            uint32_t tmin, uint32_t tmax, const void* name,
+                            uint32_t currentTime, const void* name,
                             TackStoreFuncs* store, void* storeArg) 
 {
     uint8_t pinIndex = 0, tackIndex = 0;
@@ -202,7 +200,7 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
         TackNameRecord* record = pair->records + pinIndex;
         
         /* Record whether pin is active */
-        if (record->endTime >= tmax)
+        if (record->endTime > currentTime)
             pinIsActive[pinIndex] = 1;
         
         /* Record whether pin and tacks match */
@@ -230,7 +228,7 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
 }
 
 TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
-                                     uint32_t tmin, uint32_t tmax,
+                                     uint32_t currentTime,
                                      TackNameRecordPair* pair,
                                      uint8_t pinIsActive[2],
                                      uint8_t pinMatchesTack[2],
@@ -265,18 +263,19 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
            its "end time" set based on the current, initial, and end times: */
         else if (pinMatchesActiveTack[pinIndex]) {            
             /* Ignore if current time < initialTime; would cause negative time delta */
-            if (tmin > nameRecord->initialTime) {
+            if (currentTime > nameRecord->initialTime) {
                 
-                timeDelta = tmin - nameRecord->initialTime;
+                /* It's OK to undercount but not overcount the delta, so subtract 1 */
+                timeDelta = currentTime - nameRecord->initialTime - 1;
                 if (timeDelta > (30 * 24 * 60))
                     timeDelta = (30 * 24 * 60);
                 
                 /* If the new endTime differs from existing, update it.*/
-                if (tmin + timeDelta != nameRecord->endTime) {            
-                    nameRecord->endTime = tmin + timeDelta;
+                if (currentTime + timeDelta != nameRecord->endTime) {            
+                    nameRecord->endTime = currentTime + timeDelta;
                     madeChanges = 1;
                 }        
-            }
+            }    
         }
     }
     tackPairDeleteRecords(pair, deleteMask);
@@ -295,7 +294,7 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
 
             /* Add a new name record */
             newRecord = pair->records + pair->numPins;
-            newRecord->initialTime = tmax;
+            newRecord->initialTime = currentTime;
             newRecord->endTime = 0;            
             strcpy(newRecord->fingerprint, tackFingerprint);
             pair->numPins++;

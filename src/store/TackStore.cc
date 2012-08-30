@@ -91,10 +91,10 @@ static TackStoreFuncs storeFuncs = {
 
 TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                                const std::string& name,
-                               uint32_t tmin, uint32_t tmax)
+                               uint32_t currentTime)
 {
     if (!crypto_) return TACK_ERR_ASSERTION;
-    return tackProcessStore(ctx, &name, tmin, tmax, 
+    return tackProcessStore(ctx, &name, currentTime, 
                             (uint8_t)pinActivation_, 
                             &storeFuncs, 
                             this, crypto_);
