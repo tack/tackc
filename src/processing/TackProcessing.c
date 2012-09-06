@@ -45,7 +45,7 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
 
         /* Store tack and fingerprint into context */
         ctx->tack[tackIndex] = tack;
-        if ((retval=tackTackGetKeyFingerprint(tack, ctx->tackFingerprint[0], 
+        if ((retval=tackTackGetKeyFingerprint(tack, ctx->tackFingerprint[tackIndex], 
                                               crypto)) != TACK_OK)
             return retval;
     }
@@ -105,12 +105,13 @@ TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
     TACK_RETVAL retval = TACK_ERR;
     char breakFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
     uint8_t* breakSig = NULL;
-    uint8_t minGenerationVal = 0, mustDeleteKey = 0, count = 0;
+    uint8_t minGenerationVal = 0, mustDeleteKey = 0, breakSigIndex = 0;
 
     /* Iterate through break sigs */
-    for (count = 0; count < tackExtensionGetNumBreakSigs(ctx->tackExt); count++) {
+    for (breakSigIndex = 0; breakSigIndex < tackExtensionGetNumBreakSigs(ctx->tackExt); 
+         breakSigIndex++) {
         /* Get the fingerprint for each break sig */
-        breakSig = tackExtensionGetBreakSig(ctx->tackExt, count);
+        breakSig = tackExtensionGetBreakSig(ctx->tackExt, breakSigIndex);
         retval=tackBreakSigGetKeyFingerprint(breakSig, breakFingerprint, crypto);
         if (retval != TACK_OK)
             return retval;
@@ -124,12 +125,12 @@ TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
         if (retval == TACK_OK) {
             /* Use breakSigFlags to memorize which sigs have already been verified */
             mustDeleteKey = 0;
-            if (ctx->breakSigFlags & (1<<count))
+            if (ctx->breakSigFlags & (1<<breakSigIndex))
                 mustDeleteKey = 1;
             else {
                 if ((retval = tackBreakSigVerifySignature(breakSig, crypto)) != TACK_OK)
                     return retval;
-                ctx->breakSigFlags |= (1<<count);
+                ctx->breakSigFlags |= (1<<breakSigIndex);
                 mustDeleteKey = 1;
             }
             /* Delete the key and all associated pins */
