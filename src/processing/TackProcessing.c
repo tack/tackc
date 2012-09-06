@@ -159,9 +159,9 @@ TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
         /* Check tack's generation against the store's min_generation */
         retval = store->getMinGeneration(storeArg, tackFingerprint, &minGeneration);
         if (retval < TACK_OK)
-            return retval;        
+            return retval;
         if (retval == TACK_OK_NOT_FOUND)
-            return TACK_OK;
+            continue;
         
         if (tackTackGetGeneration(tack) < minGeneration)
             return TACK_ERR_REVOKED_GENERATION;
