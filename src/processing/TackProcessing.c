@@ -222,7 +222,7 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
             if (pinMatchesTack[pinIndex])
                 retval = TACK_OK_ACCEPTED;
             else
-                return TACK_OK_REJECTED;
+                return TACK_OK_REJECTED; /* return immediately */
         }
     }
     return retval;
@@ -252,16 +252,21 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     for (pinIndex = 0; pinIndex < pair->numPins; pinIndex++) {
         TackNameRecord* nameRecord = pair->records + pinIndex;
 
-        /* If a pin has no matching tacks [...] the pin SHALL be deleted, 
-           since it is contradicted by the connection. */
+        /* If a pin has no matching tacks, its handling will depend on
+           whether the pin is active.  If active, the connection will
+           have been rejected, skipping pin activation.  If inactive,
+           the pin SHALL be deleted, since it is contradicted by the
+           connection. */
         if (!pinMatchesTack[pinIndex]) {
             deleteMask |= (1 << pinIndex);  /* mark pin for deletion */
             madeChanges = 1;
         }
 
-        /* If a pin has matching tacks, its handling will depend on whether
-           at least one of the tacks is active.  [...] If so, then the pin SHALL have 
-           its "end time" set based on the current, initial, and end times: */
+        /* If a pin has matching tacks, its handling will depend on
+           whether at least one of the tacks is active.  If not, the
+           pin is left unchanged.  If so, then the pin SHALL have its
+           "end time" set based on the current, initial, and end
+           times: */
         else if (pinMatchesActiveTack[pinIndex]) {            
             /* Ignore if current time < initialTime; would cause negative time delta */
             if (currentTime > nameRecord->initialTime) {
@@ -275,8 +280,8 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                 if (currentTime + timeDelta != nameRecord->endTime) {            
                     nameRecord->endTime = currentTime + timeDelta;
                     madeChanges = 1;
-                }        
-            }    
+                }
+            }
         }
     }
     tackPairDeleteRecords(pair, deleteMask);
