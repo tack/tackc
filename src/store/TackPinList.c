@@ -19,9 +19,9 @@ TACK_RETVAL tackPinListWriteEntry(char* list, uint32_t* listLen,
     int ret = 0;
 
     ret = snprintf(buf, bufLen,
-                   "\"%s\": [\"%s\", %u, %u, %u]", 
-                   name, nameRecord->fingerprint, minGeneration,
-                   nameRecord->initialTime, nameRecord->endTime);
+                   "\"%s\": [%u, %u, \"%s\", %u]", 
+                   name, nameRecord->initialTime, nameRecord->endTime,
+                   nameRecord->fingerprint, minGeneration);
     if (ret >= bufLen)
         return TACK_ERR_UNDERSIZED_BUFFER;
     
@@ -48,9 +48,8 @@ TACK_RETVAL tackPinListParseEntry(const char* list, uint32_t* listLen,
     memset(nameBuf, 0, sizeof(nameBuf));
     memset(fingerprintBuf, 0, sizeof(fingerprintBuf));
     
-    ret = sscanf(list, "\"%255[^\"]\": [\"%29c\", %hhu, %u, %u]%n", 
-                 nameBuf, fingerprintBuf, 
-                  &minGen, &initialTime, &endTime, &numChars);
+    ret = sscanf(list, "\"%255[^\"]\": [%u, %u, \"%29c\", %hhu]%n", 
+                 nameBuf, &initialTime, &endTime, fingerprintBuf, &minGen, &numChars);
     
     if (ret != 5) {
         return TACK_ERR_BAD_PINLIST;
