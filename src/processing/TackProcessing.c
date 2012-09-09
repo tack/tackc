@@ -24,15 +24,18 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
     if (!tackExt)
         return TACK_OK;
 
-    /* Check extension syntax */
+    /* Check extension lengths */
     if ((retval = tackExtensionSyntaxCheck(tackExt, tackExtLen)) != TACK_OK)
         return retval;
     ctx->tackExt = tackExt;
     
-    /* Check tack's expiration, target_hash, and signature */
+    /* Check tack's generation, expiration, target_hash, and signature */
     ctx->numTacks = tackExtensionGetNumTacks(tackExt);
     for (tackIndex = 0; tackIndex < ctx->numTacks; tackIndex++) {
         tack = tackExtensionGetTack(tackExt, tackIndex);
+        
+        if (tackTackGetGeneration(tack) < tackTackGetMinGeneration(tack))
+            return TACK_ERR_BAD_GENERATION;
 
         if (tackTackGetExpiration(tack) <= currentTime)
             return TACK_ERR_EXPIRED_EXPIRATION;
@@ -49,13 +52,16 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
                                               crypto)) != TACK_OK)
             return retval;
     }
+    
+    /* Check that there aren't two equal TACK keys */
+    if (strcmp(ctx->tackFingerprint[0], ctx->tackFingerprint[1]) == 0)
+        return TACK_ERR_EQUAL_TACK_KEYS;
+
     return TACK_OK;
 }
 
-TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
-                             const void* name,
-                             uint32_t currentTime,
-                             uint8_t pinActivation,
+TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
+                             uint32_t currentTime, uint8_t pinActivation,
                              TackStoreFuncs* store, void* storeArg, 
                              TackCryptoFuncs* crypto)
 {
@@ -69,105 +75,51 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
     /* These values are doubled for a pair of tacks */
     uint8_t tackMatchesPin[2] = {0,0};
 
-    /* Delete pins based on break signatures */
-    if (ctx->tackExt)
-        if ((retval = tackProcessBreakSigs(ctx, store, storeArg, crypto)) != TACK_OK)
-            return retval;
-
-    /* Handle the tack's generation and min_generation (if any) */
-    if (ctx->numTacks)
-        if ((retval = tackProcessGeneration(ctx, store, storeArg)) != TACK_OK)
-            return retval;
+    /* Handle tack min_generation and generation */
+    if ((retval = tackProcessGeneration(ctx, store, storeArg)) != TACK_OK)
+        return retval;
 
     /* Get the relevant pins.  Determine the store's status. */
-    if ((retval = tackProcessPins(ctx, &pair, 
-                                  pinIsActive, pinMatchesTack, pinMatchesActiveTack,
-                                  tackMatchesPin, 
+    if ((retval = tackProcessPins(ctx, &pair, pinIsActive, pinMatchesTack, 
+                                  pinMatchesActiveTack, tackMatchesPin, 
                                   currentTime, name, store, storeArg)) < TACK_OK)
         return retval;
     resultRetval = retval;
 
     /* Perform pin activation (optional) */
     if (pinActivation && resultRetval != TACK_OK_REJECTED)
-        if ((retval=tackProcessPinActivation(ctx, currentTime, &pair, 
-                                             pinIsActive, pinMatchesTack, 
-                                             pinMatchesActiveTack, tackMatchesPin,
-                                             name, store, storeArg)) < TACK_OK)
+        if ((retval=tackProcessPinActivation(ctx, currentTime, &pair, pinIsActive, 
+                                  pinMatchesTack, pinMatchesActiveTack, 
+                                  tackMatchesPin, name, store, storeArg)) != TACK_OK)
             return retval;
     
     return resultRetval;
-}
-
-TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
-                                        TackStoreFuncs* store, void* storeArg, 
-                                        TackCryptoFuncs* crypto) 
-{
-    TACK_RETVAL retval = TACK_ERR;
-    char breakFingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-    uint8_t* breakSig = NULL;
-    uint8_t minGenerationVal = 0, mustDeleteKey = 0, breakSigIndex = 0;
-
-    /* Iterate through break sigs */
-    for (breakSigIndex = 0; breakSigIndex < tackExtensionGetNumBreakSigs(ctx->tackExt); 
-         breakSigIndex++) {
-        /* Get the fingerprint for each break sig */
-        breakSig = tackExtensionGetBreakSig(ctx->tackExt, breakSigIndex);
-        retval=tackBreakSigGetKeyFingerprint(breakSig, breakFingerprint, crypto);
-        if (retval != TACK_OK)
-            return retval;
-
-        /* Check if the store has a key for each break sig */
-        if ((retval=store->getMinGeneration(storeArg, breakFingerprint, 
-                                            &minGenerationVal)) < TACK_OK)
-            return retval;
-
-        /* If the store DOES have a key (ie not TACK_OK_NOT_FOUND): */
-        if (retval == TACK_OK) {
-            /* Use breakSigFlags to memorize which sigs have already been verified */
-            mustDeleteKey = 0;
-            if (ctx->breakSigFlags & (1<<breakSigIndex))
-                mustDeleteKey = 1;
-            else {
-                if ((retval = tackBreakSigVerifySignature(breakSig, crypto)) != TACK_OK)
-                    return retval;
-                ctx->breakSigFlags |= (1<<breakSigIndex);
-                mustDeleteKey = 1;
-            }
-            /* Delete the key and all associated pins */
-            if (mustDeleteKey) {
-                if ((retval = store->deleteKey(storeArg, breakFingerprint)) != TACK_OK)
-                    return retval;
-            }
-        }
-    }
-    return TACK_OK;
 }
 
 TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
                                   TackStoreFuncs* store, void* storeArg) 
 {
     TACK_RETVAL retval = TACK_ERR;
-    uint8_t minGeneration = 0;
-    uint8_t tackIndex = 0;
+    uint8_t tackIndex = 0, minGeneration = 0;
     uint8_t* tack = NULL;
     char* tackFingerprint = NULL;
 
     for (tackIndex = 0; tackIndex < ctx->numTacks; tackIndex++) {
         tack = ctx->tack[tackIndex];
         tackFingerprint = ctx->tackFingerprint[tackIndex];
-
-        /* Check tack's generation against the store's min_generation */
+        
         retval = store->getMinGeneration(storeArg, tackFingerprint, &minGeneration);
         if (retval < TACK_OK)
             return retval;
         if (retval == TACK_OK_NOT_FOUND)
             continue;
-        
+
+        /* Check tack's generation against the store's min_generation */
         if (tackTackGetGeneration(tack) < minGeneration)
-            return TACK_ERR_REVOKED_GENERATION;
+            return TACK_ERR_REVOKED_GENERATION;        
         
         /* If the tack's min_generation is greater, update the store */
-        if (tackTackGetMinGeneration(tack) > minGeneration) {
+        else if (tackTackGetMinGeneration(tack) > minGeneration) {
             retval = store->setMinGeneration(storeArg, tackFingerprint, 
                                              tackTackGetMinGeneration(tack));
             if (retval != TACK_OK)
@@ -175,10 +127,9 @@ TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
         }
     }
     return TACK_OK;
-}   
+}
 
-TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
-                            TackNameRecordPair* pair,
+TACK_RETVAL tackProcessPins(TackProcessingContext* ctx, TackNameRecordPair* pair,
                             uint8_t pinIsActive[2], 
                             uint8_t pinMatchesTack[2], 
                             uint8_t pinMatchesActiveTack[2], 
@@ -189,6 +140,7 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
     uint8_t pinIndex = 0, tackIndex = 0;
     uint8_t* tack = NULL;
     char* tackFingerprint = NULL;
+    TackNameRecord* record = NULL;
     TACK_RETVAL retval = TACK_ERR;
 
     /* Get the relevant pin pair, if any */
@@ -198,7 +150,7 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
     /* For each pin, do... */
     retval = TACK_OK_UNPINNED;
     for (pinIndex=0; pinIndex < pair->numPins; pinIndex++) {
-        TackNameRecord* record = pair->records + pinIndex;
+        record = pair->records + pinIndex;
         
         /* Record whether pin is active */
         if (record->endTime > currentTime)
@@ -240,17 +192,15 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
 {
     TACK_RETVAL retval = TACK_OK;
     uint32_t timeDelta = 0;
-    uint8_t pinIndex = 0, tackIndex = 0;
-    uint8_t madeChanges = 0;
-    uint8_t deleteMask = 0;
+    uint8_t pinIndex = 0, tackIndex = 0, madeChanges = 0, deleteMask = 0;
     uint8_t* tack = NULL;
     char* tackFingerprint = NULL;
-    TackNameRecord* newRecord = NULL;
+    TackNameRecord* nameRecord = NULL;
 
     /* The first step in pin activation is to evaluate each relevant pin
        (there may be one or two): */
     for (pinIndex = 0; pinIndex < pair->numPins; pinIndex++) {
-        TackNameRecord* nameRecord = pair->records + pinIndex;
+        nameRecord = pair->records + pinIndex;
 
         /* If a pin has no matching tacks, its handling will depend on
            whether the pin is active.  If active, the connection will
@@ -287,10 +237,12 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     tackPairDeleteRecords(pair, deleteMask);
 
     /* The remaining step in pin activation is to add new inactive pins for
-       any unmatched tacks: */
+       any unmatched active tacks: */
     for (tackIndex = 0; tackIndex < ctx->numTacks; tackIndex++) {
         tack = ctx->tack[tackIndex];
         tackFingerprint = ctx->tackFingerprint[tackIndex];
+        if (tackExtensionGetActivationFlag(ctx->tackExt, tackIndex) == 0)
+            continue;
 
         if (!tackMatchesPin[tackIndex]) {
             /* There are always sufficient empty "slots" in the pin store for adding
@@ -299,10 +251,10 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
                 return TACK_ERR_ASSERTION;
 
             /* Add a new name record */
-            newRecord = pair->records + pair->numPins;
-            newRecord->initialTime = currentTime;
-            newRecord->endTime = 0;            
-            strcpy(newRecord->fingerprint, tackFingerprint);
+            nameRecord = pair->records + pair->numPins;
+            nameRecord->initialTime = currentTime;
+            nameRecord->endTime = 0;            
+            strcpy(nameRecord->fingerprint, tackFingerprint);
             pair->numPins++;
             madeChanges = 1;
 

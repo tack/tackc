@@ -23,7 +23,6 @@ typedef struct {
     uint8_t numTacks;
     uint8_t* tack[2];
     char tackFingerprint[2][TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-    uint8_t breakSigFlags; /* Bit flags storing which break sigs have been verified */
 } TackProcessingContext;
 
 
@@ -50,12 +49,7 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              void* storeArg, 
                              TackCryptoFuncs* crypto);
 
-/* Helper functions for tackProcessStore */
-TACK_RETVAL tackProcessBreakSigs(TackProcessingContext* ctx,
-                                 TackStoreFuncs* store, 
-                                 void* storeArg, 
-                                 TackCryptoFuncs* crypto);
-    
+/* Helper functions for tackProcessStore */    
 TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
                                   TackStoreFuncs* store, 
                                   void* storeArg);

@@ -23,8 +23,6 @@ public:
                                          uint8_t* minGeneration) OVERRIDE;
     virtual TACK_RETVAL setMinGeneration(const std::string& keyFingerprint, 
                                          uint8_t minGeneration) OVERRIDE;
-    virtual TACK_RETVAL deleteKey(const std::string& keyFingerprint) OVERRIDE;
-
     virtual TACK_RETVAL getNameRecordPair(const std::string& name, 
                                           TackNameRecordPair* pair) OVERRIDE;
     virtual TACK_RETVAL setNameRecordPair(const std::string& name, 

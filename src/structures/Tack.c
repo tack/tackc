@@ -26,13 +26,6 @@ uint8_t* tackTackGetTargetHash(uint8_t* tack) {
 uint8_t* tackTackGetSignature(uint8_t* tack) {
     return tack + TACK_PUBKEY_LENGTH + 6 + TACK_HASH_LENGTH; }
 
-TACK_RETVAL tackTackSyntaxCheck(uint8_t* tack)
-{
-    if (tackTackGetGeneration(tack) < tackTackGetMinGeneration(tack))
-        return TACK_ERR_BAD_GENERATION;
-    return TACK_OK;
-}
-
 TACK_RETVAL tackTackGetKeyFingerprint(uint8_t* tack, 
                                       char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1], 
                                       TackCryptoFuncs* crypto)

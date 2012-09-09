@@ -1,6 +1,5 @@
 
 HEADERS = src/structures/Tack.h \
-	src/structures/TackBreakSig.h \
 	src/structures/TackExtension.h \
 	src/util/TackRetval.h \
 	src/util/TackUtil.h \
@@ -13,7 +12,6 @@ HEADERS = src/structures/Tack.h \
 
 
 SRCS = src/structures/Tack.c \
-	src/structures/TackBreakSig.c \
 	src/structures/TackExtension.c \
 	src/util/TackRetval.c \
 	src/util/TackUtil.c \

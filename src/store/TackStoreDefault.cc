@@ -30,42 +30,6 @@ TACK_RETVAL TackStoreDefault::setMinGeneration(const std::string& keyFingerprint
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::deleteKey(const std::string& keyFingerprint)
-{
-    uint8_t deleteMask = 0, count = 0;
-    std::map<std::string, uint8_t>::iterator ki = keyRecords_.find(keyFingerprint);
-    if (ki == keyRecords_.end())
-        return TACK_OK_NOT_FOUND;
-
-    std::map<std::string, TackNameRecordPair>::iterator ni = nameRecords_.begin();
-    std::map<std::string, TackNameRecordPair>::iterator ni2;
-
-    // Iterate over pin pairs
-    while (ni != nameRecords_.end()) {
-        ni2 = ni;
-        ni2++;
-        
-        // Iterate over the pins in this pair, recording which ones to delete
-        deleteMask = 0;
-        TackNameRecordPair* pair = &(ni->second);
-        for (count = 0; count < pair->numPins; count++) {
-            TackNameRecord* nameRecord = &(pair->records[count]);
-            if (nameRecord->fingerprint == keyFingerprint)
-                deleteMask |= (1 << count);
-        }
-        // Then delete them
-        if (deleteMask) {
-            tackPairDeleteRecords(pair, deleteMask);
-            if (pair->numPins == 0)
-                nameRecords_.erase(ni);        
-        }
-        ni = ni2;
-    }
-
-    keyRecords_.erase(ki);
-    return TACK_OK;
-}
-
 TACK_RETVAL TackStoreDefault::getNameRecordPair(const std::string& name, 
                                             TackNameRecordPair* pair)
 {
@@ -236,6 +200,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
                     /* Set a pair of name records */
                     else {
                         memcpy(pair.records+1, &nameRecord, sizeof(TackNameRecord));
+                        pair.numPins = 2;
                         if ((retval = setNameRecordPair(name, &pair)) != TACK_OK)
                             return retval;
                         pair.numPins = 0;

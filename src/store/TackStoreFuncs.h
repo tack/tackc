@@ -41,10 +41,6 @@ typedef TACK_RETVAL (*TackSetMinGenerationFunc)(const void* arg,
                                                 const char* keyFingerprint, 
                                                 uint8_t minGeneration);
 
-/* Deletes all pins referencing this key, if none then TACK_OK_NOT_FOUND. */
-typedef TACK_RETVAL (*TackDeleteKeyFunc)(const void* arg, 
-                                         const char* keyFingerprint);
-
 /* Returns TACK_OK_NOT_FOUND if no name record */
 typedef TACK_RETVAL (*TackGetNameRecordPairFunc)(const void* arg, 
                                                  const void* name, 
@@ -60,7 +56,6 @@ typedef TACK_RETVAL (*TackSetNameRecordPairFunc)(const void* arg,
 typedef struct {
     TackGetMinGenerationFunc getMinGeneration;
     TackSetMinGenerationFunc setMinGeneration; /* Generations and pin activation */
-    TackDeleteKeyFunc deleteKey; /* Break signatures */
     TackGetNameRecordPairFunc getNameRecordPair;
     TackSetNameRecordPairFunc setNameRecordPair;
 } TackStoreFuncs;
