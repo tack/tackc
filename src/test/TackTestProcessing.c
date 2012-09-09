@@ -476,7 +476,6 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     TCHECK_VAL(store.process(&ctxET1, "X.com", currentTime), TACK_ERR_REVOKED_GENERATION);
     TCHECK_VAL(store.process(&ctxET2, "X.com", currentTime), TACK_OK_UNPINNED);
 
-
     store.getMinGeneration("gv6qp.hmd4y.tsjxo.wcakm.sotjm", &minGen);
     assert(minGen == 1);
     store.getMinGeneration("w6v4n.wofh4.cqtjq.adcxi.teugp", &minGen);

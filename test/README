@@ -1,0 +1,159 @@
+
+We have a pair of TACK Keys (K1, K2)
+
+Each key has a pair of Tacks (T1, T1m) and (T2, T2m).
+The 'm' versions contain higher min_generations:
+T1(0,0), T1m(1,1)
+T2(100,254), T2m(254,255)
+
+The T2 tacks expire 1 day later than the T1 ones
+
+The tacks are packed into extensions as per below, without activation flags set:
+
+ET1, ET1m
+ET2, ET2m
+ET1T2
+ET2mT1m
+ET1T1m
+
+
+----BEGIN TACK EXTENSION-----
+AKYmSlxQLWzgRMLJQWi6Ol+OkJmhrhDnZ1wqarwuhJLmQV09qt3UGUYvBogGKQLI
+/ziQ2AVWhKph6KurwrANInQHAAAByRlTMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz
+mbuIdHMdlYfMMSPSsvUElDb/G6akJ48jLLAtAHwP3Pf9fyTs/yMi0ojZMTLXbTVb
+l0wdyKnsLnOv3yR8qOXD9QYbbLzop0LNAA==
+-----END TACK EXTENSION-----
+/Users/trevp/w/tackc/test2$ tack v ET1.pem 
+key fingerprint = gv6qp.hmd4y.tsjxo.wcakm.sotjm
+min_generation  = 0
+generation      = 0
+expiration      = 2026-12-16T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+activation_flags = 0
+
+
+-----BEGIN TACK EXTENSION-----
+AKYmSlxQLWzgRMLJQWi6Ol+OkJmhrhDnZ1wqarwuhJLmQV09qt3UGUYvBogGKQLI
+/ziQ2AVWhKph6KurwrANInQHAQEByRlTMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz
+mbuIdHMdlYde9WR8Tncu7pMoOHDOtysqJ8FuuNAT8dEcLcquRxu0o41r5MygnsxH
+ZiO3FlW0Qjw8y9ABo7wViNpx5rOevIZWAA==
+-----END TACK EXTENSION-----
+/Users/trevp/w/tackc/test2$ tack v ET1m.pem 
+key fingerprint = gv6qp.hmd4y.tsjxo.wcakm.sotjm
+min_generation  = 1
+generation      = 1
+expiration      = 2026-12-16T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+
+
+-----BEGIN TACK EXTENSION-----
+AKa9pBxgjx6GyZorFfwRrfEjYdh/B6iLoE+kzTSX11U/HQRM1FOQYVw0ZptDfcyX
+W9oQjhDZQSYm9CNDSoFqKDqcZP4ByR7zMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz
+mbuIdHMdlYflR5CmjDponB6KRhGro008Duvb2iTxoZW52nlIHujlVrxUY/KwWOtw
+WBlKfHkrbbIAqWFapNsM23585P5ms8z6AA==
+-----END TACK EXTENSION-----
+/Users/trevp/w/tackc/test2$ tack v ET2.pem 
+key fingerprint = w6v4n.wofh4.cqtjq.adcxi.teugp
+min_generation  = 100
+generation      = 254
+expiration      = 2026-12-17T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+activation_flags = 0
+
+
+-----BEGIN TACK EXTENSION-----
+AKa9pBxgjx6GyZorFfwRrfEjYdh/B6iLoE+kzTSX11U/HQRM1FOQYVw0ZptDfcyX
+W9oQjhDZQSYm9CNDSoFqKDqc/v8ByR7zMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz
+mbuIdHMdlYeQ9pdb13GiJmNZ05pylEaCG2rHlPSVKSqUqnLY6FNdq2fXC7yl6qIF
+c0KY1SYP0IS/QsWXlA//IvjpIIlfZyOXAA==
+-----END TACK EXTENSION-----
+/Users/trevp/w/tackc/test2$ tack v ET2m.pem 
+key fingerprint = w6v4n.wofh4.cqtjq.adcxi.teugp
+min_generation  = 254
+generation      = 255
+expiration      = 2026-12-17T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+activation_flags = 0
+
+
+-----BEGIN TACK EXTENSION-----
+AUwmSlxQLWzgRMLJQWi6Ol+OkJmhrhDnZ1wqarwuhJLmQV09qt3UGUYvBogGKQLI
+/ziQ2AVWhKph6KurwrANInQHAAAByRlTMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz
+mbuIdHMdlYfMMSPSsvUElDb/G6akJ48jLLAtAHwP3Pf9fyTs/yMi0ojZMTLXbTVb
+l0wdyKnsLnOv3yR8qOXD9QYbbLzop0LNvaQcYI8ehsmaKxX8Ea3xI2HYfweoi6BP
+pM00l9dVPx0ETNRTkGFcNGabQ33Ml1vaEI4Q2UEmJvQjQ0qBaig6nGT+Acke8zK2
+S2ZyeiBj5AZvO5WMsKruV2pezv2VM5m7iHRzHZWH5UeQpow6aJweikYRq6NNPA7r
+29ok8aGVudp5SB7o5Va8VGPysFjrcFgZSnx5K22yAKlhWqTbDNt+fOT+ZrPM+gA=
+-----END TACK EXTENSION-----
+/Users/trevp/w/tackc/test2$ 
+/Users/trevp/w/tackc/test2$ tack v ET1T2.pem 
+key fingerprint = gv6qp.hmd4y.tsjxo.wcakm.sotjm
+min_generation  = 0
+generation      = 0
+expiration      = 2026-12-16T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+key fingerprint = w6v4n.wofh4.cqtjq.adcxi.teugp
+min_generation  = 100
+generation      = 254
+expiration      = 2026-12-17T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+activation_flags = 0
+
+
+
+
+-----BEGIN TACK EXTENSION-----
+AUy9pBxgjx6GyZorFfwRrfEjYdh/B6iLoE+kzTSX11U/HQRM1FOQYVw0ZptDfcyX
+W9oQjhDZQSYm9CNDSoFqKDqc/v8ByR7zMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz
+mbuIdHMdlYeQ9pdb13GiJmNZ05pylEaCG2rHlPSVKSqUqnLY6FNdq2fXC7yl6qIF
+c0KY1SYP0IS/QsWXlA//IvjpIIlfZyOXJkpcUC1s4ETCyUFoujpfjpCZoa4Q52dc
+Kmq8LoSS5kFdPard1BlGLwaIBikCyP84kNgFVoSqYeirq8KwDSJ0BwEBAckZUzK2
+S2ZyeiBj5AZvO5WMsKruV2pezv2VM5m7iHRzHZWHXvVkfE53Lu6TKDhwzrcrKifB
+brjQE/HRHC3KrkcbtKONa+TMoJ7MR2YjtxZVtEI8PMvQAaO8FYjaceaznryGVgA=
+-----END TACK EXTENSION-----
+/Users/trevp/w/tackc/test2$ 
+/Users/trevp/w/tackc/test2$ tack v ET2mT1m.pem 
+key fingerprint = w6v4n.wofh4.cqtjq.adcxi.teugp
+min_generation  = 254
+generation      = 255
+expiration      = 2026-12-17T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+key fingerprint = gv6qp.hmd4y.tsjxo.wcakm.sotjm
+min_generation  = 1
+generation      = 1
+expiration      = 2026-12-16T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+activation_flags = 0
+
+
+----BEGIN TACK EXTENSION-----
+AUwmSlxQLWzgRMLJQWi6Ol+OkJmhrhDnZ1wqarwuhJLmQV09qt3UGUYvBogGKQLI
+/ziQ2AVWhKph6KurwrANInQHAAAByRlTMrZLZnJ6IGPkBm87lYywqu5Xal7O/ZUz
+mbuIdHMdlYfMMSPSsvUElDb/G6akJ48jLLAtAHwP3Pf9fyTs/yMi0ojZMTLXbTVb
+l0wdyKnsLnOv3yR8qOXD9QYbbLzop0LNJkpcUC1s4ETCyUFoujpfjpCZoa4Q52dc
+Kmq8LoSS5kFdPard1BlGLwaIBikCyP84kNgFVoSqYeirq8KwDSJ0BwEBAckZUzK2
+S2ZyeiBj5AZvO5WMsKruV2pezv2VM5m7iHRzHZWHXvVkfE53Lu6TKDhwzrcrKifB
+brjQE/HRHC3KrkcbtKONa+TMoJ7MR2YjtxZVtEI8PMvQAaO8FYjaceaznryGVgA=
+-----END TACK EXTENSION-----
+/Users/trevp/w/tackc/test2$ tack v ET1T1m.pem 
+key fingerprint = gv6qp.hmd4y.tsjxo.wcakm.sotjm
+min_generation  = 0
+generation      = 0
+expiration      = 2026-12-16T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+key fingerprint = gv6qp.hmd4y.tsjxo.wcakm.sotjm
+min_generation  = 1
+generation      = 1
+expiration      = 2026-12-16T01:55Z
+target_hash     = 32b64b66727a2063e4066f3b958cb0aa
+                  ee576a5ecefd953399bb8874731d9587
+activation_flags = 0
