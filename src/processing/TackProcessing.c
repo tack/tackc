@@ -24,7 +24,7 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
     if (!tackExt)
         return TACK_OK;
 
-    /* Check extension lengths */
+    /* Check extension lengths and activation flags <= 3 */
     if ((retval = tackExtensionSyntaxCheck(tackExt, tackExtLen)) != TACK_OK)
         return retval;
     ctx->tackExt = tackExt;
@@ -84,13 +84,13 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
                                   pinMatchesActiveTack, tackMatchesPin, 
                                   currentTime, name, store, storeArg)) < TACK_OK)
         return retval;
-    resultRetval = retval;
+    resultRetval = retval; /* Record status (ACCEPTED/REJECTED/UNPINNED) for return */
 
     /* Perform pin activation (optional) */
     if (pinActivation && resultRetval != TACK_OK_REJECTED)
-        if ((retval=tackProcessPinActivation(ctx, currentTime, &pair, pinIsActive, 
-                                  pinMatchesTack, pinMatchesActiveTack, 
-                                  tackMatchesPin, name, store, storeArg)) != TACK_OK)
+        if ((retval=tackProcessPinActivation(ctx, &pair, pinIsActive, pinMatchesTack, 
+                                         pinMatchesActiveTack, tackMatchesPin, 
+                                         currentTime, name, store, storeArg)) != TACK_OK)
             return retval;
     
     return resultRetval;
@@ -151,12 +151,11 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx, TackNameRecordPair* pair
     retval = TACK_OK_UNPINNED;
     for (pinIndex=0; pinIndex < pair->numPins; pinIndex++) {
         record = pair->records + pinIndex;
-        
-        /* Record whether pin is active */
+
+        /* Populate (pinIsActive, pinMatchesTack, pinMatchesActiveTack, tackMatchesPin) */
         if (record->endTime > currentTime)
             pinIsActive[pinIndex] = 1;
-        
-        /* Record whether pin and tacks match */
+
         for (tackIndex=0; tackIndex < ctx->numTacks; tackIndex++) {
             tack = ctx->tack[tackIndex];
             tackFingerprint = ctx->tackFingerprint[tackIndex];
@@ -181,13 +180,12 @@ TACK_RETVAL tackProcessPins(TackProcessingContext* ctx, TackNameRecordPair* pair
 }
 
 TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
-                                     uint32_t currentTime,
                                      TackNameRecordPair* pair,
                                      uint8_t pinIsActive[2],
                                      uint8_t pinMatchesTack[2],
                                      uint8_t pinMatchesActiveTack[2],
                                      uint8_t tackMatchesPin[2],
-                                     const void* name,
+                                     uint32_t currentTime, const void* name,
                                      TackStoreFuncs* store, void* storeArg) 
 {
     TACK_RETVAL retval = TACK_OK;
@@ -197,26 +195,22 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
     char* tackFingerprint = NULL;
     TackNameRecord* nameRecord = NULL;
 
-    /* The first step in pin activation is to evaluate each relevant pin
-       (there may be one or two): */
+    /* The first step in pin activation is to evaluate each relevant pin */
     for (pinIndex = 0; pinIndex < pair->numPins; pinIndex++) {
         nameRecord = pair->records + pinIndex;
 
-        /* If a pin has no matching tacks, its handling will depend on
-           whether the pin is active.  If active, the connection will
-           have been rejected, skipping pin activation.  If inactive,
-           the pin SHALL be deleted, since it is contradicted by the
-           connection. */
+        /* If a pin has no matching tack, its handling will depend on whether the pin
+           is active. If active, the connection will have been rejected, skipping pin
+           activation. If inactive, the pin SHALL be deleted, since it is contradicted by
+           the connection. */
         if (!pinMatchesTack[pinIndex]) {
             deleteMask |= (1 << pinIndex);  /* mark pin for deletion */
             madeChanges = 1;
         }
 
-        /* If a pin has matching tacks, its handling will depend on
-           whether at least one of the tacks is active.  If not, the
-           pin is left unchanged.  If so, then the pin SHALL have its
-           "end time" set based on the current, initial, and end
-           times: */
+        /* If a pin has a matching tack, its handling will depend on whether the tack
+           is active. If inactive, the pin is left unchanged. If active, the pin SHALL
+           have its "end time" set based on the current, initial, and end times: */
         else if (pinMatchesActiveTack[pinIndex]) {            
             /* Ignore if current time < initialTime; would cause negative time delta */
             if (currentTime > nameRecord->initialTime) {
@@ -258,7 +252,7 @@ TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
             pair->numPins++;
             madeChanges = 1;
 
-            /* Add a new key record */
+            /* Add a new key record (unless it already exists) */
             retval=store->setMinGeneration(storeArg, tackFingerprint, 
                                            tackTackGetMinGeneration(tack));
             if (retval != TACK_OK)
