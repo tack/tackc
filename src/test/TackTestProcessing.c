@@ -402,14 +402,11 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     /* Test dirty flag does not get set by inactive tack */
     store.setDirtyFlag(false);
     setActivationFlag(tackExtET1, 0);
-
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime), TACK_OK_UNPINNED);
     assert(store.getDirtyFlag() == false);
 
+    /* Test dirty flag does get set by active tack */
     setActivationFlag(tackExtET1, 1);
-
-    /* Test dirty flag does get set by active tacks */
-    store.setDirtyFlag(false);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime), TACK_OK_UNPINNED);
     assert(store.getDirtyFlag() == true);
 
@@ -417,19 +414,18 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     store.setDirtyFlag(false);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+10), TACK_OK_UNPINNED);
     assert(store.getDirtyFlag() == true);
-
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+18), TACK_OK_ACCEPTED);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+100), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+199), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+396), TACK_OK_ACCEPTED);
 
-    /* Test that activation time is not extended if off for the store */
+    /* Test that activation time is not extended if activation is off for the store */
     store.setPinActivation(false);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+1000), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+1001), TACK_OK_UNPINNED);
-    store.setPinActivation(true);
 
     /* Test pin activation logic for a second pin */
+    store.setPinActivation(true);
     setActivationFlag(tackExtET2, 1);
     TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET2, "y.com", currentTime+10), TACK_OK_UNPINNED);
@@ -442,9 +438,9 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
 
     store.setPinActivation(false);
     TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime), TACK_OK_REJECTED);
-    store.setPinActivation(true);
 
     /* Test that the second tack can supercede the first pin */
+    store.setPinActivation(true);
     TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+1000), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+2000), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+2001), TACK_OK_REJECTED);
@@ -460,8 +456,86 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     assert(store.getDirtyFlag() == false);
 
     /* TODO test some contradicting pins */
+    /* --------------------------------- */
+    store.clear();
+    store.setPinActivation(true);
+
+    setActivationFlag(tackExtET1, 1);
+    setActivationFlag(tackExtET2, 1);
+
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+101), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+102), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+200), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+201), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+201), TACK_OK_REJECTED);
 
     /* TODO test some pairs of pins */
+    /* ---------------------------- */
+    store.clear();
+    store.setPinActivation(true);
+
+    setActivationFlag(tackExtET1, 1);
+    setActivationFlag(tackExtET2, 1);
+    setActivationFlag(tackExtET1T2, 3);
+    setActivationFlag(tackExtET2mT1m, 3);
+
+    /* Check that 2 active tacks set a pair of pins */
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+101), TACK_OK_REJECTED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+101), TACK_OK_REJECTED);
+    TCHECK_VAL(store.process(&ctxET2mT1m, "x.com", currentTime+101), TACK_OK_ACCEPTED);
+
+    /* Check 2 tacks, only 1 active at a time */
+    setActivationFlag(tackExtET1T2, 1);
+    setActivationFlag(tackExtET2mT1m, 2);
+    store.clear();
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2mT1m, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1m, "x.com", currentTime+101), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2mT1m, "x.com", currentTime+101), TACK_OK_ACCEPTED);
+    TCHECK_VAL(store.process(&ctxET2m, "x.com", currentTime+101), TACK_OK_REJECTED);
+
+    /* Check 2 tacks -> 1 */
+    setActivationFlag(tackExtET1T2, 3);
+    setActivationFlag(tackExtET2mT1m, 3);
+    store.clear();
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime+101), TACK_OK_ACCEPTED);
+
+    store.clear();
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+101), TACK_OK_ACCEPTED);
+
+    store.clear();
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime), TACK_OK_UNPINNED);
+    setActivationFlag(tackExtET1T2, 2);
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime+101), TACK_OK_ACCEPTED);
+
+    /* Check 1 tack -> 2 */
+    setActivationFlag(tackExtET1, 1);
+    setActivationFlag(tackExtET2, 1);
+    setActivationFlag(tackExtET1T2, 3);
+    setActivationFlag(tackExtET2mT1m, 3);
+
+    store.clear();
+    TCHECK_VAL(store.process(&ctxET1, "x.com", currentTime), TACK_OK_UNPINNED);
+    setActivationFlag(tackExtET1T2, 1);
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1m, "x.com", currentTime+101), TACK_OK_ACCEPTED);
+
+    store.clear();
+    setActivationFlag(tackExtET1T2, 3);
+    TCHECK_VAL(store.process(&ctxET2, "x.com", currentTime), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET1T2, "x.com", currentTime+100), TACK_OK_UNPINNED);
+    TCHECK_VAL(store.process(&ctxET2m, "x.com", currentTime+101), TACK_OK_ACCEPTED);
+     
+ 
 
     /* Prepare for mingen testing */
     store.clear();
