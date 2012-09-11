@@ -7,7 +7,6 @@
 #include "TackUtil.h"
 #include "TackProcessing.h"
 #include "TackExtension.h"
-#include "TackStoreFuncs.h"
 
 TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
                                   uint8_t* tackExt, uint32_t tackExtLen,
