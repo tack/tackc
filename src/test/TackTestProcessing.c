@@ -582,7 +582,6 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
     TCHECK_VAL(store.process(&ctxET2, "b.com", currentTime), TACK_OK_UNPINNED);
     TCHECK_VAL(store.process(&ctxET2mT1m, "a.com", currentTime), TACK_OK_UNPINNED);
 
-
     // Check that serialize -> deserialize -> serialize yields same string
     TACK_RETVAL retval;
     char outTest[1024];

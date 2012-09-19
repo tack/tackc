@@ -1,6 +1,7 @@
 #include "TackStoreDefault.h"
 #include "TackPinList.h"
 #include "TackStoreFuncs.h"
+#include <stdio.h>
 
 // These don't do anything but Chromium wants them:
 TackStoreDefault::TackStoreDefault(){}
@@ -68,20 +69,36 @@ TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
     std::map<std::string, TackPinPair>::iterator ni;
     uint32_t oldListLen = 0;
     uint8_t minGeneration = 0;
-    uint8_t count = 0;
     TACK_RETVAL retval = TACK_OK; /* default return */
 
     if (*listLen < 2) /* account for the NULL */
         return TACK_ERR_UNDERSIZED_BUFFER;
-    *list++ = '{';
+    *list++ = '[';
     *listLen -= 1;
 
+    // Iterate through all pins (map guarantees to sort alphabetically by name)
     bool firstTime = true;
     for (ni=pins_.begin(); ni != pins_.end(); ni++)  {
+        TackPinPair* pair = &ni->second;
+        int count = 0;
+        int countInc = 1;
+        int countLimit = pair->numPins;
 
-        // Iterate through all pin pairs, then each in pin the pair...
-        for (count=0; count < ni->second.numPins; count++) {
-            TackPin* pin = &(ni->second.pins[count]);
+        // If there are two pins, determine if we need to reverse the serialization
+        // order to write out the pair alphabetically-sorted by fingerprint
+        if (pair->numPins == 2) {
+            std::string f0(pair->pins[0].fingerprint);
+            std::string f1(pair->pins[1].fingerprint);
+            if (f0 > f1) {
+                count = 1;
+                countInc = -1;
+                countLimit = -1;
+            }
+        }
+
+        // Iterate through each in pin the pair...
+        for (; count != countLimit; count += countInc) {
+            TackPin* pin = &pair->pins[count];
 
             retval=getMinGeneration(pin->fingerprint, &minGeneration);
             if (retval != TACK_OK)
@@ -119,7 +136,7 @@ TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
     if (*listLen < 4)
         return TACK_ERR_UNDERSIZED_BUFFER;
     *list++ = '\n';
-    *list++ = '}';
+    *list++ = ']';
     *list++ = '\n';
     *list++ = 0;
     *listLen -= 3;
@@ -163,7 +180,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
         {}
 
         else if (state == 0) { // Start
-            if (*list == '{')
+            if (*list == '[')
                 state = 1;
             else {
                 return TACK_ERR_BAD_PINLIST;
@@ -171,7 +188,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
         }
 
         else if (state == 1)  { // Before entry
-            if (*list == '}') {
+            if (*list == ']') {
                 break;
             }
             else {
@@ -216,7 +233,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
         else if (state == 2) { // After entry
             if (*list == ',')
                 state = 1;
-            else if (*list == '}') {
+            else if (*list == ']') {
                 break;
             }
             else {
