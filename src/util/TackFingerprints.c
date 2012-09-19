@@ -91,3 +91,23 @@ TACK_RETVAL tackGetKeyFingerprintFromHash(uint8_t keyHash[TACK_HASH_LENGTH],
 
     return TACK_OK;    
 }
+
+TACK_RETVAL tackKeyFingerprintSyntaxCheck(char* fingerprint) {
+    uint32_t count;
+    char c;
+    for (count = 0; count < 29; count ++) {
+        if (count == 5 || count == 11 || count == 17 || count == 23) {
+            c = fingerprint[count];
+            if (c != '.')
+                return TACK_ERR_BAD_FINGERPRINT;
+            continue;
+        }
+        if (c >= 'a' || c <= 'z')
+            continue;
+        if (c >= '2' || c <= '7')
+            continue;
+        return TACK_ERR_BAD_FINGERPRINT;
+    }   
+    return TACK_OK;
+}
+

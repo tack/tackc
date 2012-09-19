@@ -36,6 +36,7 @@ const char* tackRetvalString(TACK_RETVAL retval)
     case TACK_ERR_BAD_BASE64: return "BAD BASE64";
     case TACK_ERR_UNDERSIZED_BUFFER: return "UNDERSIZED BUFFER";
     case TACK_ERR_BAD_PINLIST: return "BAD PINLIST";
+    case TACK_ERR_BAD_FINGERPRINT: return "BAD FINGERPRINT";
     default: return "uknown error?!";
     }
 }	

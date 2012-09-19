@@ -37,6 +37,7 @@ TACK_RETVAL tackPinListParseEntry(const char* list, uint32_t* listLen,
                                   char* name, TackPin* pin, 
                                   uint8_t* minGeneration)
 {
+    TACK_RETVAL retval = TACK_ERR;
     uint32_t initialTime = 0;
     uint32_t endTime = 0;
     uint8_t minGen = 0;
@@ -61,6 +62,8 @@ TACK_RETVAL tackPinListParseEntry(const char* list, uint32_t* listLen,
     
     if (strlen(fingerprintBuf) != 29)
         return TACK_ERR_BAD_PINLIST;
+    if ((retval = tackKeyFingerprintSyntaxCheck(fingerprintBuf)) != TACK_OK)
+        return retval;
     
     strcpy(name, nameBuf);
     strcpy(pin->fingerprint, fingerprintBuf);

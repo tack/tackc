@@ -23,6 +23,8 @@ TACK_RETVAL tackGetKeyFingerprint(uint8_t publicKey[TACK_PUBKEY_LENGTH],
 TACK_RETVAL tackGetKeyFingerprintFromHash(uint8_t keyHash[TACK_HASH_LENGTH], 
                                           char output[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1]);
 
+TACK_RETVAL tackKeyFingerprintSyntaxCheck(char* fingerprint);
+
 #ifdef __cplusplus
 }
 #endif
