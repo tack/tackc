@@ -35,9 +35,6 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
                                   TackCryptoFuncs* crypto);
 
 /* Call once for each store, after the above well-formed check.
-   Relies on tackProcessStoreHelper() to do client-processing logic,
-   but handles interaction with the store. 
-
    Returns TACK_OK_ACCEPTED, TACK_OK_REJECTED, TACK_OK_UNPINNED, or error
 */
 TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store, 

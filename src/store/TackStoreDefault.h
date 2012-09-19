@@ -29,7 +29,6 @@ public:
                                    const TackPinPair* pair) OVERRIDE;
 
     virtual TACK_RETVAL serialize(char* list, uint32_t* listLen) OVERRIDE;
-
     virtual TACK_RETVAL deserialize(const char* list, uint32_t* listLen) OVERRIDE;
 
     virtual TACK_RETVAL clear() OVERRIDE;
@@ -38,6 +37,9 @@ public:
     virtual uint32_t numKeys() OVERRIDE;
 
 private:
+
+    // Used by deserialize()
+    TACK_RETVAL addPin(const std::string& name, const TackPin* pin);
     
     // Maps names to pin pairs
     std::map<std::string, TackPinPair> pins_;

@@ -61,6 +61,22 @@ TACK_RETVAL TackStoreDefault::clear()
     return TACK_OK;
 }
 
+TACK_RETVAL TackStoreDefault::addPin(const std::string& name, const TackPin* pin) 
+{
+    TackPinPair pair;
+    TACK_RETVAL retval;
+
+    if ((retval=getPinPair(name, &pair)) < TACK_OK)
+        return retval;
+    if (pair.numPins == 2)
+        return TACK_ERR_BAD_PINLIST;
+    else {
+        memcpy(&pair.pins[pair.numPins], pin, sizeof(TackPin));
+        pair.numPins++;
+    }    
+    return setPinPair(name, &pair);
+}
+
 
 /* Specify the length of the buffer - will not be overwritten, but only
    listLen-1 chars can actually be stored, due to final NULL */
@@ -156,7 +172,6 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
     char name[256]; // 255-char length plus NULL
     char prevName[256]; // " "
     TackPin pin;
-    TackPinPair pair;
     uint8_t minGeneration = 0;
     uint32_t oldListLen = 0;
 
@@ -164,7 +179,6 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
     memset(name, 0, sizeof(name));
     memset(prevName, 0, sizeof(prevName));
     memset(&pin, 0, sizeof(TackPin));
-    memset(&pair, 0, sizeof(TackPinPair));
 
     while (1) {
 
@@ -197,32 +211,14 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
                 retval = tackPinListParseEntry(list, listLen,
                                                name, &pin, &minGeneration);
 
-                /* Set key record first */
+                /* Add key record */
                 retval = setMinGeneration(pin.fingerprint, minGeneration);
                 if (retval != TACK_OK)
                     return retval;
 
-                /* Add pin into pair */
-                if (pair.numPins == 0) {                    
-                    memcpy(pair.pins, &pin, sizeof(TackPin));
-                    pair.numPins = 1;
-                }
-                else if (pair.numPins == 1) {
-                    /* Set existing unpaired element, replace with new one */
-                    if (strcmp(prevName, name) != 0) {
-                        if ((retval = setPinPair(prevName, &pair)) != TACK_OK)
-                            return retval;
-                        memcpy(pair.pins+0, &pin, sizeof(TackPin));
-                    }
-                    /* Set a pair of pins */
-                    else {
-                        memcpy(pair.pins+1, &pin, sizeof(TackPin));
-                        pair.numPins = 2;
-                        if ((retval = setPinPair(name, &pair)) != TACK_OK)
-                            return retval;
-                        pair.numPins = 0;
-                    }
-                }
+                /* Add pin */
+                if ((retval = addPin(name, &pin)) != TACK_OK)
+                    return retval;
 
                 list += (oldListLen - *listLen);
                 state = 2;
@@ -243,12 +239,6 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
         list++;
         *listLen -= 1;
     }
-           
-    if (pair.numPins) {
-        if ((retval = setPinPair(name, &pair)) != TACK_OK)
-            return retval;
-    }
-
     return TACK_OK;
 }
 
