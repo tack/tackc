@@ -23,10 +23,10 @@ public:
                                          uint8_t* minGeneration) OVERRIDE;
     virtual TACK_RETVAL setMinGeneration(const std::string& keyFingerprint, 
                                          uint8_t minGeneration) OVERRIDE;
-    virtual TACK_RETVAL getNameRecordPair(const std::string& name, 
-                                          TackNameRecordPair* pair) OVERRIDE;
-    virtual TACK_RETVAL setNameRecordPair(const std::string& name, 
-                                          const TackNameRecordPair* pair) OVERRIDE;
+    virtual TACK_RETVAL getPinPair(const std::string& name, 
+                                   TackPinPair* pair) OVERRIDE;
+    virtual TACK_RETVAL setPinPair(const std::string& name, 
+                                   const TackPinPair* pair) OVERRIDE;
 
     virtual TACK_RETVAL serialize(char* list, uint32_t* listLen) OVERRIDE;
 
@@ -39,11 +39,11 @@ public:
 
 private:
     
-    // Maps names to name record pairs
-    std::map<std::string, TackNameRecordPair> nameRecords_;
+    // Maps names to pin pairs
+    std::map<std::string, TackPinPair> pins_;
     
     // Maps key fingerprints to minGenerations
-    std::map<std::string, uint8_t> keyRecords_;
+    std::map<std::string, uint8_t> keys_;
 };
 
 #endif

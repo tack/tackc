@@ -42,10 +42,10 @@ public:
     virtual TACK_RETVAL setMinGeneration(const std::string& keyFingerprint, 
                                         uint8_t minGeneration) = 0;
 
-    virtual TACK_RETVAL getNameRecordPair(const std::string& name, 
-                                          TackNameRecordPair* pair) = 0;
-    virtual TACK_RETVAL setNameRecordPair(const std::string& name, 
-                                          const TackNameRecordPair* pair) = 0;  
+    virtual TACK_RETVAL getPinPair(const std::string& name, 
+                                   TackPinPair* pair) = 0;
+    virtual TACK_RETVAL setPinPair(const std::string& name, 
+                                   const TackPinPair* pair) = 0;  
 
     virtual TACK_RETVAL serialize(char* list, uint32_t* listLen) = 0;
     virtual TACK_RETVAL deserialize(const char* list, uint32_t* listLen) = 0;

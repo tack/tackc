@@ -16,11 +16,11 @@ extern "C" {
 
 
 TACK_RETVAL tackPinListWriteEntry(char* list, uint32_t* listLen, 
-                                  const char* name, TackNameRecord* nameRecord, 
+                                  const char* name, TackPin* pin, 
                                   uint8_t minGeneration);
 
 TACK_RETVAL tackPinListParseEntry(const char* list, uint32_t* listLen, 
-                                  char* name, TackNameRecord* nameRecord, 
+                                  char* name, TackPin* pin, 
                                   uint8_t* minGeneration);
 
 #ifdef __cplusplus

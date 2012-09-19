@@ -9,7 +9,7 @@
 #include "TackPinList.h"
 
 TACK_RETVAL tackPinListWriteEntry(char* list, uint32_t* listLen, 
-                                    const char* name, TackNameRecord* nameRecord, 
+                                    const char* name, TackPin* pin, 
                                     uint8_t minGeneration)
 {
     /* Write into a separate buffer first, so we can determine length of the 
@@ -20,8 +20,8 @@ TACK_RETVAL tackPinListWriteEntry(char* list, uint32_t* listLen,
 
     ret = snprintf(buf, bufLen,
                    "\"%s\": [%u, %u, \"%s\", %u]", 
-                   name, nameRecord->initialTime, nameRecord->endTime,
-                   nameRecord->fingerprint, minGeneration);
+                   name, pin->initialTime, pin->endTime,
+                   pin->fingerprint, minGeneration);
     if (ret >= bufLen)
         return TACK_ERR_UNDERSIZED_BUFFER;
     
@@ -34,7 +34,7 @@ TACK_RETVAL tackPinListWriteEntry(char* list, uint32_t* listLen,
 }
 
 TACK_RETVAL tackPinListParseEntry(const char* list, uint32_t* listLen, 
-                                  char* name, TackNameRecord* nameRecord, 
+                                  char* name, TackPin* pin, 
                                   uint8_t* minGeneration)
 {
     uint32_t initialTime = 0;
@@ -63,9 +63,9 @@ TACK_RETVAL tackPinListParseEntry(const char* list, uint32_t* listLen,
         return TACK_ERR_BAD_PINLIST;
     
     strcpy(name, nameBuf);
-    strcpy(nameRecord->fingerprint, fingerprintBuf);
-    nameRecord->initialTime = initialTime;
-    nameRecord->endTime = endTime;
+    strcpy(pin->fingerprint, fingerprintBuf);
+    pin->initialTime = initialTime;
+    pin->endTime = endTime;
     *minGeneration = minGen;
     *listLen -= numChars;
     

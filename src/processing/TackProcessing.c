@@ -69,9 +69,9 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
     uint8_t pinIsActive = 0, pinMatchesTack = 0, pinMatchesActiveTack = 0;
     uint8_t tackMatchesPin[2] = {0,0};
     uint32_t endTime = 0;
-    TackNameRecordPair pair, newPair;
-    TackNameRecord* pin = &(pair.records[0]);
-    TackNameRecord* newPin = &(newPair.records[0]);
+    TackPinPair pair, newPair;
+    TackPin* pin = &(pair.pins[0]);
+    TackPin* newPin = &(newPair.pins[0]);
 
     /* Check tack generations and update min_generations */
     for (t = 0; t < ctx->numTacks; t++) {
@@ -89,10 +89,10 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
         } 
     }
 
-    if ((retval=store->getNameRecordPair(storeArg, name, &pair)) < TACK_OK)
+    if ((retval=store->getPinPair(storeArg, name, &pair)) < TACK_OK)
         return retval;
     for (p=0; p < pair.numPins; p++) {
-        pin = &(pair.records[p]);
+        pin = &(pair.pins[p]);
         pinIsActive = pinMatchesTack = pinMatchesActiveTack = 0;
 
         /* Fill in variables indicating pin/tack matches */
@@ -126,7 +126,7 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
                     if (endTime != pin->endTime)
                         madeChanges = 1; /* Activate pin */
                 }
-                memcpy(newPin, pin, sizeof(TackNameRecord));
+                memcpy(newPin, pin, sizeof(TackPin));
                 newPin->endTime = endTime;
                 newPin++;
             }
@@ -150,8 +150,8 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
         }
         /* Commit pin activation changes */
         if (madeChanges) {
-            newPair.numPins = (newPin - &(newPair.records[0]));
-            if ((retval=store->setNameRecordPair(storeArg, name, &newPair)) != TACK_OK)
+            newPair.numPins = (newPin - &(newPair.pins[0]));
+            if ((retval=store->setPinPair(storeArg, name, &newPair)) != TACK_OK)
                 return retval;
         }
     }

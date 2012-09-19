@@ -19,12 +19,12 @@ typedef struct {
     uint32_t initialTime;
     uint32_t endTime;
     char fingerprint[TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
-} TackNameRecord;
+} TackPin;
 
 typedef struct {
     uint8_t numPins;
-    TackNameRecord records[2];
-} TackNameRecordPair;
+    TackPin pins[2];
+} TackPinPair;
 
 
 /* Store functions used to communicate with the store: */
@@ -41,23 +41,23 @@ typedef TACK_RETVAL (*TackSetMinGenerationFunc)(const void* arg,
                                                 const char* keyFingerprint, 
                                                 uint8_t minGeneration);
 
-/* Returns TACK_OK_NOT_FOUND if no name record */
-typedef TACK_RETVAL (*TackGetNameRecordPairFunc)(const void* arg, 
+/* Returns TACK_OK_NOT_FOUND if no pins */
+typedef TACK_RETVAL (*TackGetPinPairFunc)(const void* arg, 
                                                  const void* name, 
-                                                 TackNameRecordPair* pair);
+                                                 TackPinPair* pair);
 
-/* Returns TACK_OK_NOT_FOUND if no name record */
-typedef TACK_RETVAL (*TackSetNameRecordPairFunc)(const void* arg, 
+/* Returns TACK_OK_NOT_FOUND if no pins */
+typedef TACK_RETVAL (*TackSetPinPairFunc)(const void* arg, 
                                                  const void* name, 
-                                                 const TackNameRecordPair* pair);
+                                                 const TackPinPair* pair);
 
 /* The store functions, plus a state "arg", are packaged into this struct
    for convenient parameter passing */
 typedef struct {
     TackGetMinGenerationFunc getMinGeneration;
     TackSetMinGenerationFunc setMinGeneration; /* Generations and pin activation */
-    TackGetNameRecordPairFunc getNameRecordPair;
-    TackSetNameRecordPairFunc setNameRecordPair;
+    TackGetPinPairFunc getPinPair;
+    TackSetPinPairFunc setPinPair;
 } TackStoreFuncs;
 
 #ifdef __cplusplus

@@ -29,20 +29,20 @@ static TACK_RETVAL tackStoreSetMinGeneration(const void* arg, const char* keyFin
     return retval;
 }
 
-static TACK_RETVAL tackStoreGetNameRecordPair(const void* arg, const void* name, 
-                                              TackNameRecordPair* pair)
+static TACK_RETVAL tackStoreGetPinPair(const void* arg, const void* name, 
+                                              TackPinPair* pair)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
-    return store->getNameRecordPair(*nameStr, pair);
+    return store->getPinPair(*nameStr, pair);
 }
 
-static TACK_RETVAL tackStoreSetNameRecordPair(const void* arg, const void* name, 
-                                              const TackNameRecordPair* pair)
+static TACK_RETVAL tackStoreSetPinPair(const void* arg, const void* name, 
+                                              const TackPinPair* pair)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
-    TACK_RETVAL retval = store->setNameRecordPair(*nameStr, pair);
+    TACK_RETVAL retval = store->setPinPair(*nameStr, pair);
     if (retval == TACK_OK) {
         store->setDirtyFlag(true);
     }
@@ -75,8 +75,8 @@ bool TackStore::getDirtyFlagEnabled() { return dirtyFlagEnabled_;}
 static TackStoreFuncs storeFuncs = {
     tackStoreGetMinGeneration,
     tackStoreSetMinGeneration,
-    tackStoreGetNameRecordPair,
-    tackStoreSetNameRecordPair,
+    tackStoreGetPinPair,
+    tackStoreSetPinPair,
 };
 
 TACK_RETVAL TackStore::process(TackProcessingContext* ctx,

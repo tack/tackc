@@ -10,8 +10,8 @@ TackStoreDefault::~TackStoreDefault(){}
 TACK_RETVAL TackStoreDefault::getMinGeneration(const std::string& keyFingerprint, 
                                            uint8_t* minGeneration)
 {
-    std::map<std::string, uint8_t>::iterator ki = keyRecords_.find(keyFingerprint);
-    if (ki == keyRecords_.end())
+    std::map<std::string, uint8_t>::iterator ki = keys_.find(keyFingerprint);
+    if (ki == keys_.end())
         return TACK_OK_NOT_FOUND;
 
     *minGeneration = ki->second;
@@ -21,20 +21,20 @@ TACK_RETVAL TackStoreDefault::getMinGeneration(const std::string& keyFingerprint
 TACK_RETVAL TackStoreDefault::setMinGeneration(const std::string& keyFingerprint, 
                                                uint8_t minGeneration)
 {
-    std::map<std::string, uint8_t>::iterator ki = keyRecords_.find(keyFingerprint);
-    if (ki == keyRecords_.end())
-        keyRecords_[keyFingerprint] = minGeneration;
+    std::map<std::string, uint8_t>::iterator ki = keys_.find(keyFingerprint);
+    if (ki == keys_.end())
+        keys_[keyFingerprint] = minGeneration;
     else if (minGeneration > ki->second)
         ki->second = minGeneration;
 
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::getNameRecordPair(const std::string& name, 
-                                            TackNameRecordPair* pair)
+TACK_RETVAL TackStoreDefault::getPinPair(const std::string& name, 
+                                            TackPinPair* pair)
 {
-    std::map<std::string, TackNameRecordPair>::iterator ni = nameRecords_.find(name);
-    if (ni == nameRecords_.end()) {
+    std::map<std::string, TackPinPair>::iterator ni = pins_.find(name);
+    if (ni == pins_.end()) {
         pair->numPins = 0;
         return TACK_OK_NOT_FOUND;
     }
@@ -43,20 +43,20 @@ TACK_RETVAL TackStoreDefault::getNameRecordPair(const std::string& name,
     return TACK_OK;
 }
 
-TACK_RETVAL TackStoreDefault::setNameRecordPair(const std::string& name, 
-                                            const TackNameRecordPair* pair)
+TACK_RETVAL TackStoreDefault::setPinPair(const std::string& name, 
+                                            const TackPinPair* pair)
 {
     if (pair->numPins == 0)
-        nameRecords_.erase(name);
+        pins_.erase(name);
     else
-        nameRecords_[name] = *pair;
+        pins_[name] = *pair;
     return TACK_OK;
 }
 
 TACK_RETVAL TackStoreDefault::clear()
 {
-    nameRecords_.clear();
-    keyRecords_.clear();
+    pins_.clear();
+    keys_.clear();
     return TACK_OK;
 }
 
@@ -65,7 +65,7 @@ TACK_RETVAL TackStoreDefault::clear()
    listLen-1 chars can actually be stored, due to final NULL */
 TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
 {
-    std::map<std::string, TackNameRecordPair>::iterator ni;
+    std::map<std::string, TackPinPair>::iterator ni;
     uint32_t oldListLen = 0;
     uint8_t minGeneration = 0;
     uint8_t count = 0;
@@ -77,13 +77,13 @@ TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
     *listLen -= 1;
 
     bool firstTime = true;
-    for (ni=nameRecords_.begin(); ni != nameRecords_.end(); ni++)  {
+    for (ni=pins_.begin(); ni != pins_.end(); ni++)  {
 
         // Iterate through all pin pairs, then each in pin the pair...
         for (count=0; count < ni->second.numPins; count++) {
-            TackNameRecord* nameRecord = &(ni->second.records[count]);
+            TackPin* pin = &(ni->second.pins[count]);
 
-            retval=getMinGeneration(nameRecord->fingerprint, &minGeneration);
+            retval=getMinGeneration(pin->fingerprint, &minGeneration);
             if (retval != TACK_OK)
                 return retval;
             
@@ -105,7 +105,7 @@ TACK_RETVAL TackStoreDefault::serialize(char* list, uint32_t* listLen)
             // Write the entry
             oldListLen = *listLen;
             if ((retval=tackPinListWriteEntry(list, listLen,
-                                              ni->first.c_str(), nameRecord,
+                                              ni->first.c_str(), pin,
                                               minGeneration)) != TACK_OK)
                 return retval;
             
@@ -138,16 +138,16 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
     TACK_RETVAL retval = TACK_ERR;
     char name[256]; // 255-char length plus NULL
     char prevName[256]; // " "
-    TackNameRecord nameRecord;
-    TackNameRecordPair pair;
+    TackPin pin;
+    TackPinPair pair;
     uint8_t minGeneration = 0;
     uint32_t oldListLen = 0;
 
     clear();
     memset(name, 0, sizeof(name));
     memset(prevName, 0, sizeof(prevName));
-    memset(&nameRecord, 0, sizeof(TackNameRecord));
-    memset(&pair, 0, sizeof(TackNameRecordPair));
+    memset(&pin, 0, sizeof(TackPin));
+    memset(&pair, 0, sizeof(TackPinPair));
 
     while (1) {
 
@@ -178,30 +178,30 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
                 oldListLen = *listLen;
                 strcpy(prevName, name);
                 retval = tackPinListParseEntry(list, listLen,
-                                               name, &nameRecord, &minGeneration);
+                                               name, &pin, &minGeneration);
 
                 /* Set key record first */
-                retval = setMinGeneration(nameRecord.fingerprint, minGeneration);
+                retval = setMinGeneration(pin.fingerprint, minGeneration);
                 if (retval != TACK_OK)
                     return retval;
 
-                /* Add name record into pair */
+                /* Add pin into pair */
                 if (pair.numPins == 0) {                    
-                    memcpy(pair.records, &nameRecord, sizeof(TackNameRecord));
+                    memcpy(pair.pins, &pin, sizeof(TackPin));
                     pair.numPins = 1;
                 }
                 else if (pair.numPins == 1) {
                     /* Set existing unpaired element, replace with new one */
                     if (strcmp(prevName, name) != 0) {
-                        if ((retval = setNameRecordPair(prevName, &pair)) != TACK_OK)
+                        if ((retval = setPinPair(prevName, &pair)) != TACK_OK)
                             return retval;
-                        memcpy(pair.records+0, &nameRecord, sizeof(TackNameRecord));
+                        memcpy(pair.pins+0, &pin, sizeof(TackPin));
                     }
-                    /* Set a pair of name records */
+                    /* Set a pair of pins */
                     else {
-                        memcpy(pair.records+1, &nameRecord, sizeof(TackNameRecord));
+                        memcpy(pair.pins+1, &pin, sizeof(TackPin));
                         pair.numPins = 2;
-                        if ((retval = setNameRecordPair(name, &pair)) != TACK_OK)
+                        if ((retval = setPinPair(name, &pair)) != TACK_OK)
                             return retval;
                         pair.numPins = 0;
                     }
@@ -228,7 +228,7 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
     }
            
     if (pair.numPins) {
-        if ((retval = setNameRecordPair(name, &pair)) != TACK_OK)
+        if ((retval = setPinPair(name, &pair)) != TACK_OK)
             return retval;
     }
 
@@ -237,10 +237,10 @@ TACK_RETVAL TackStoreDefault::deserialize(const char* list, uint32_t* listLen)
 
 uint32_t TackStoreDefault::numPinned()
 {
-    return nameRecords_.size();
+    return pins_.size();
 }
 
 uint32_t TackStoreDefault::numKeys()
 {
-    return keyRecords_.size();
+    return keys_.size();
 }
