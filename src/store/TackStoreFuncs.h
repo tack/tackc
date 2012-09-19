@@ -43,13 +43,13 @@ typedef TACK_RETVAL (*TackSetMinGenerationFunc)(const void* arg,
 
 /* Returns TACK_OK_NOT_FOUND if no pins */
 typedef TACK_RETVAL (*TackGetPinPairFunc)(const void* arg, 
-                                                 const void* name, 
-                                                 TackPinPair* pair);
+                                          const void* name, 
+                                          TackPinPair* pair);
 
 /* Returns TACK_OK_NOT_FOUND if no pins */
 typedef TACK_RETVAL (*TackSetPinPairFunc)(const void* arg, 
-                                                 const void* name, 
-                                                 const TackPinPair* pair);
+                                          const void* name, 
+                                          const TackPinPair* pair);
 
 /* The store functions, plus a state "arg", are packaged into this struct
    for convenient parameter passing */

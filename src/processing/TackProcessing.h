@@ -39,14 +39,10 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
    but handles interaction with the store. 
 
    Returns TACK_OK_ACCEPTED, TACK_OK_REJECTED, TACK_OK_UNPINNED, or error
-
 */
-TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
-                             const void* name,
-                             uint32_t currentTime,
-                             uint8_t pinActivation,
-                             TackStoreFuncs* store, 
-                             void* storeArg, 
+TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store, 
+                             TackProcessingContext* ctx,  uint8_t pinActivation,
+                             const void* name, uint32_t currentTime, 
                              TackCryptoFuncs* crypto);
 
 #ifdef __cplusplus

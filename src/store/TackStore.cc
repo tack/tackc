@@ -30,7 +30,7 @@ static TACK_RETVAL tackStoreSetMinGeneration(const void* arg, const char* keyFin
 }
 
 static TACK_RETVAL tackStoreGetPinPair(const void* arg, const void* name, 
-                                              TackPinPair* pair)
+                                       TackPinPair* pair)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
@@ -38,7 +38,7 @@ static TACK_RETVAL tackStoreGetPinPair(const void* arg, const void* name,
 }
 
 static TACK_RETVAL tackStoreSetPinPair(const void* arg, const void* name, 
-                                              const TackPinPair* pair)
+                                       const TackPinPair* pair)
 {
     TackStore* store = (TackStore*)arg;
     std::string* nameStr = (std::string*)name;
@@ -84,8 +84,6 @@ TACK_RETVAL TackStore::process(TackProcessingContext* ctx,
                                uint32_t currentTime)
 {
     if (!crypto_) return TACK_ERR_ASSERTION;
-    return tackProcessStore(ctx, &name, currentTime, 
-                            (uint8_t)pinActivation_, 
-                            &storeFuncs, 
-                            this, crypto_);
+    return tackProcessStore(this, &storeFuncs, ctx, (uint8_t)pinActivation_, &name, 
+                            currentTime, crypto_);
 }

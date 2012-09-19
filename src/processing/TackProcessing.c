@@ -59,9 +59,9 @@ TACK_RETVAL tackProcessWellFormed(TackProcessingContext* ctx,
     return TACK_OK;
 }
 
-TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
-                             uint32_t currentTime, uint8_t pinActivation,
-                             TackStoreFuncs* store, void* storeArg, 
+TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store, 
+                             TackProcessingContext* ctx,  uint8_t pinActivation,
+                             const void* name, uint32_t currentTime, 
                              TackCryptoFuncs* crypto)
 {
     TACK_RETVAL retval = TACK_ERR, status = TACK_OK_UNPINNED;
