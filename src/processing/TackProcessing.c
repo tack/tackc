@@ -71,7 +71,8 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
     uint32_t endTime = 0;
     TackPinPair pair, newPair;
     TackPin* pin = &(pair.pins[0]);
-    TackPin* newPin = &(newPair.pins[0]);
+    memset(&pair, 0, sizeof(TackPinPair));
+    memset(&newPair, 0, sizeof(TackPinPair));
 
     /* Check tack generations and update min_generations */
     for (t = 0; t < ctx->numTacks; t++) {
@@ -89,10 +90,12 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
         } 
     }
 
+    /* Iterate over pins and tacks, calculating the return status
+       and handling the first step of pin activation (delete and activate) */
     if ((retval=store->getPinPair(storeArg, name, &pair)) < TACK_OK)
         return retval;
     for (p=0; p < pair.numPins; p++) {
-        pin = &(pair.pins[p]);
+        pin = &pair.pins[p];
         pinIsActive = pinMatchesTack = pinMatchesActiveTack = 0;
 
         /* Fill in variables indicating pin/tack matches */
@@ -101,34 +104,37 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
         for (t=0; t < ctx->numTacks; t++) {
             if (strcmp(pin->fingerprint, ctx->fingerprints[t]) == 0) { 
                 pinMatchesTack = 1;
-                pinMatchesActiveTack = tackExtGetActivationFlag(ctx->tackExt, t);
+                pinMatchesActiveTack = tackExtIsActive(ctx->tackExt, t);
                 tackMatchesPin[t] = 1;
             } 
         }
 
-        /* Determine connection status */
+        /* Determine the store's status */
         if (pinIsActive) {
             if (!pinMatchesTack)
                 return TACK_OK_REJECTED; /* return immediately */
             status = TACK_OK_ACCEPTED;
         }
 
-        /* Pin activation (first step: delete and activate) */
+        /* Pin activation (first step: consider each pin for deletion / activation) */
         if (pinActivation) {
             if (!pinMatchesTack)
-                madeChanges = 1; /* Delete pin (by not appending to newPins) */
+                madeChanges = 1; /* Delete pin (by not appending to newPair) */
             else {
                 endTime = pin->endTime;
                 if (pinMatchesActiveTack && currentTime > pin->initialTime) {
-                    endTime = currentTime + currentTime - pin->initialTime - 1;
+                    endTime = currentTime + (currentTime - pin->initialTime) - 1;
                     if (endTime > currentTime + 30*24*60) 
                         endTime = currentTime + 30*24*60;
                     if (endTime != pin->endTime)
                         madeChanges = 1; /* Activate pin */
                 }
-                memcpy(newPin, pin, sizeof(TackPin));
-                newPin->endTime = endTime;
-                newPin++;
+                /* Append old pin to newPair, possibly extending endTime */
+                if (newPair.numPins > 1)
+                    return TACK_ERR_ASSERTION;
+                memcpy(&newPair.pins[newPair.numPins], pin, sizeof(TackPin));
+                newPair.pins[newPair.numPins].endTime = endTime;
+                newPair.numPins++;
             }
         }
     }
@@ -136,11 +142,13 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
     /* Pin activation (second step: add new pins) */
     if (pinActivation) {
         for (t = 0; t < ctx->numTacks; t++) {
-            if (tackExtGetActivationFlag(ctx->tackExt, t) && !tackMatchesPin[t]) {
-                newPin->initialTime = currentTime;
-                newPin->endTime = 0;            
-                strcpy(newPin->fingerprint, ctx->fingerprints[t]);
-                newPin++;
+            if (tackExtIsActive(ctx->tackExt, t) && !tackMatchesPin[t]) {
+                if (newPair.numPins > 1)
+                    return TACK_ERR_ASSERTION;
+                newPair.pins[newPair.numPins].initialTime = currentTime;
+                newPair.pins[newPair.numPins].endTime = 0;            
+                strcpy(newPair.pins[newPair.numPins].fingerprint, ctx->fingerprints[t]);
+                newPair.numPins++;
                 madeChanges = 1;
                 retval=store->setMinGeneration(storeArg, ctx->fingerprints[t], 
                                                tackTackGetMinGeneration(ctx->tacks[t]));
@@ -150,7 +158,6 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx, const void* name,
         }
         /* Commit pin activation changes */
         if (madeChanges) {
-            newPair.numPins = (newPin - &(newPair.pins[0]));
             if ((retval=store->setPinPair(storeArg, name, &newPair)) != TACK_OK)
                 return retval;
         }

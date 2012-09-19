@@ -19,7 +19,7 @@ extern "C" {
 uint8_t  tackExtGetNumTacks(uint8_t* tackExt);
 uint8_t* tackExtGetTack(uint8_t* tackExt, uint8_t index);
 uint8_t  tackExtGetActivationFlags(uint8_t* tackExt);
-uint8_t  tackExtGetActivationFlag(uint8_t* tackExt, uint8_t index);
+uint8_t  tackExtIsActive(uint8_t* tackExt, uint8_t index);
 
 TACK_RETVAL tackExtSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 

@@ -26,7 +26,7 @@ uint8_t tackExtGetActivationFlags(uint8_t* tackExt) {
     return *(tackExtPostTacks(tackExt));
 }
 
-uint8_t tackExtGetActivationFlag(uint8_t* tackExt, uint8_t index) {
+uint8_t tackExtIsActive(uint8_t* tackExt, uint8_t index) {
     return (*(tackExtPostTacks(tackExt))) & (1 << index);
 }
 
