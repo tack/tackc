@@ -21,8 +21,8 @@ extern "C" {
 typedef struct {
     uint8_t* tackExt;
     uint8_t numTacks;
-    uint8_t* tack[2];
-    char tackFingerprint[2][TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
+    uint8_t* tacks[2];
+    char fingerprints[2][TACK_KEY_FINGERPRINT_TEXT_LENGTH+1];
 } TackProcessingContext;
 
 
@@ -48,29 +48,6 @@ TACK_RETVAL tackProcessStore(TackProcessingContext* ctx,
                              TackStoreFuncs* store, 
                              void* storeArg, 
                              TackCryptoFuncs* crypto);
-
-/* Helper functions for tackProcessStore */    
-TACK_RETVAL tackProcessGeneration(TackProcessingContext* ctx,
-                                  TackStoreFuncs* store, 
-                                  void* storeArg);
-
-TACK_RETVAL tackProcessPins(TackProcessingContext* ctx,
-                            TackNameRecordPair* pair,
-                            uint8_t pinIsActive[2], 
-                            uint8_t pinMatchesTack[2],
-                            uint8_t pinMatchesActiveTack[2],
-                            uint8_t tackMatchesPin[2],
-                            uint32_t currentTime, const void* name,
-                            TackStoreFuncs* store, void* storeArg);
-
-TACK_RETVAL tackProcessPinActivation(TackProcessingContext* ctx,
-                                     TackNameRecordPair* pair,
-                                     uint8_t pinIsActive[2],
-                                     uint8_t pinMatchesTack[2],
-                                     uint8_t pinMatchesActiveTack[2],
-                                     uint8_t tackMatchesPin[2],
-                                     uint32_t currentTime, const void* name,
-                                     TackStoreFuncs* store, void* storeArg);
 
 #ifdef __cplusplus
 }

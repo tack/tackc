@@ -247,29 +247,29 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
 
     TCHECK(tackTestProcessInit());
 
-    tack = tackExtensionGetTack(tackExtET1, 0);
+    tack = tackExtGetTack(tackExtET1, 0);
     keyHash = tackTackGetTargetHash(tack);
 
     /* Test with NULL input */
     TCHECK(tackProcessWellFormed(&ctx, NULL, 169, keyHash, 123, crypto));
     assert(ctx.tackExt == NULL);
-    assert(ctx.tack[0] == NULL);
-    assert(ctx.tack[1] == NULL);
-    assert(strlen(ctx.tackFingerprint[0]) == 0);
-    assert(strlen(ctx.tackFingerprint[1]) == 0);
+    assert(ctx.tacks[0] == NULL);
+    assert(ctx.tacks[1] == NULL);
+    assert(strlen(ctx.fingerprints[0]) == 0);
+    assert(strlen(ctx.fingerprints[1]) == 0);
 
     /* Test normal behavior (ET1, ET1T2) */
     TCHECK(tackProcessWellFormed(&ctx, 
                tackExtET1, tackExtET1Len, keyHash, 123, crypto));
     assert(ctx.tackExt == tackExtET1);
-    assert(ctx.tack[0] == tackExtensionGetTack(tackExtET1, 0));
-    assert(ctx.tack[1] == NULL);
+    assert(ctx.tacks[0] == tackExtGetTack(tackExtET1, 0));
+    assert(ctx.tacks[1] == NULL);
 
     TCHECK(tackProcessWellFormed(&ctx, 
                tackExtET1T2, tackExtET1T2Len, keyHash, 123, crypto));
     assert(ctx.tackExt == tackExtET1T2);
-    assert(ctx.tack[0] == tackExtensionGetTack(tackExtET1T2, 0));
-    assert(ctx.tack[1] == tackExtensionGetTack(tackExtET1T2, 1));
+    assert(ctx.tacks[0] == tackExtGetTack(tackExtET1T2, 0));
+    assert(ctx.tacks[1] == tackExtGetTack(tackExtET1T2, 1));
 
     /* Test tack ext lengths (ET1, ET1T2) */
     /* Test that errors are returned for a range of bad lengths */
@@ -315,7 +315,7 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
     tackExtET1[66]--;
 
     /* Test good/bad expiration */
-    tack = tackExtensionGetTack(tackExtET1, 0);
+    tack = tackExtGetTack(tackExtET1, 0);
     expirationTime = tackTackGetExpiration(tack);
 
     TCHECK(tackProcessWellFormed(&ctx, 
@@ -358,7 +358,7 @@ TACK_RETVAL tackTestProcessWellFormed(TackCryptoFuncs* crypto) {
 
 static void setActivationFlag(uint8_t* tackExt, uint8_t activationFlag)
 {
-    *tackExtensionPostTacks(tackExt) = activationFlag;
+    *tackExtPostTacks(tackExt) = activationFlag;
 }
 
 TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
@@ -372,7 +372,7 @@ TACK_RETVAL tackTestStore(TackCryptoFuncs* crypto)
 
     TCHECK(tackTestProcessInit());
 
-    tack = tackExtensionGetTack(tackExtET1, 0);
+    tack = tackExtGetTack(tackExtET1, 0);
     keyHash = tackTackGetTargetHash(tack);
 
     /* Prepare contexts*/

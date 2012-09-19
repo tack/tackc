@@ -17,7 +17,6 @@ SRCS = src/structures/Tack.c \
 	src/util/TackUtil.c \
 	src/util/TackFingerprints.c \
 	src/processing/TackProcessing.c \
-	src/store/TackStoreFuncs.c \
 	src/store/TackPinList.c \
 	src/test/TackMain.c \
 	src/test/TackTestProcessing.c

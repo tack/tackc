@@ -16,15 +16,15 @@ extern "C" {
 
 #define TACK_TACK_MAXCOUNT 2
 
-uint8_t  tackExtensionGetNumTacks(uint8_t* tackExt);
-uint8_t* tackExtensionGetTack(uint8_t* tackExt, uint8_t index);
-uint8_t  tackExtensionGetActivationFlags(uint8_t* tackExt);
-uint8_t  tackExtensionGetActivationFlag(uint8_t* tackExt, uint8_t index);
+uint8_t  tackExtGetNumTacks(uint8_t* tackExt);
+uint8_t* tackExtGetTack(uint8_t* tackExt, uint8_t index);
+uint8_t  tackExtGetActivationFlags(uint8_t* tackExt);
+uint8_t  tackExtGetActivationFlag(uint8_t* tackExt, uint8_t index);
 
-TACK_RETVAL tackExtensionSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
+TACK_RETVAL tackExtSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 
 /* Mostly internal helper function, but may be useful in working with tackExts */
-uint8_t* tackExtensionPostTacks(uint8_t* tackExt);
+uint8_t* tackExtPostTacks(uint8_t* tackExt);
 
 #ifdef __cplusplus
 }

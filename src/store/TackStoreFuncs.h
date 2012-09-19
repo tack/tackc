@@ -60,8 +60,6 @@ typedef struct {
     TackSetNameRecordPairFunc setNameRecordPair;
 } TackStoreFuncs;
 
-void tackPairDeleteRecords(TackNameRecordPair* pair, uint8_t deleteMask);
-
 #ifdef __cplusplus
 }
 #endif
