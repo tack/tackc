@@ -26,6 +26,9 @@ typedef struct {
     TackPin pins[2];
 } TackPinPair;
 
+TACK_RETVAL appendPin(TackPinPair* pair, uint32_t initialTime, uint32_t endTime, 
+                      char* fingerprint);
+
 
 /* Store functions used to communicate with the store: */
 

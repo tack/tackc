@@ -71,7 +71,6 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
     uint32_t endTime = 0;
     TackPinPair pair, newPair;
     TackPin* pin = &(pair.pins[0]);
-    memset(&pair, 0, sizeof(TackPinPair));
     memset(&newPair, 0, sizeof(TackPinPair));
 
     /* Check tack generations and update min_generations */
@@ -130,11 +129,8 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
                         madeChanges = 1; /* Activate pin */
                 }
                 /* Append old pin to newPair, possibly extending endTime */
-                if (newPair.numPins > 1)
-                    return TACK_ERR_ASSERTION;
-                memcpy(&newPair.pins[newPair.numPins], pin, sizeof(TackPin));
-                newPair.pins[newPair.numPins].endTime = endTime;
-                newPair.numPins++;
+                retval = appendPin(&newPair, pin->initialTime, endTime, pin->fingerprint);
+                if (retval != TACK_OK) return retval;
             }
         }
     }
@@ -143,17 +139,12 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
     if (pinActivation) {
         for (t = 0; t < ctx->numTacks; t++) {
             if (tackExtIsActive(ctx->tackExt, t) && !tackMatchesPin[t]) {
-                if (newPair.numPins > 1)
-                    return TACK_ERR_ASSERTION;
-                newPair.pins[newPair.numPins].initialTime = currentTime;
-                newPair.pins[newPair.numPins].endTime = 0;            
-                strcpy(newPair.pins[newPair.numPins].fingerprint, ctx->fingerprints[t]);
-                newPair.numPins++;
-                madeChanges = 1;
                 retval=store->setMinGeneration(storeArg, ctx->fingerprints[t], 
                                                tackTackGetMinGeneration(ctx->tacks[t]));
-                if (retval != TACK_OK)
-                    return retval;
+                if (retval != TACK_OK) return retval;
+                retval = appendPin(&newPair, currentTime, 0, ctx->fingerprints[t]);
+                if (retval != TACK_OK) return retval;
+                madeChanges = 1;
             }
         }
         /* Commit pin activation changes */
