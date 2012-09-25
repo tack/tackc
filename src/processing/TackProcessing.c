@@ -66,8 +66,8 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
 {
     TACK_RETVAL retval = TACK_ERR, status = TACK_OK_UNPINNED;
     uint8_t p = 0, t = 0, minGeneration = 0, madeChanges = 0;
-    uint8_t pinIsActive = 0, pinMatchesTack = 0, pinMatchesActiveTack = 0;
-    uint8_t tackMatchesPin[2] = {0,0};
+    uint8_t pinIsActive[2] = {0,0}, pinMatchesTack[2] = {0,0};
+    uint8_t pinMatchesActiveTack[2] = {0,0}, tackMatchesPin[2] = {0,0};
     uint32_t endTime = 0;
     TackPinPair pair, newPair;
     TackPin* pin = &(pair.pins[0]);
@@ -89,39 +89,40 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
         } 
     }
 
-    /* Iterate over pins and tacks, calculating the return status
-       and handling the first step of pin activation (delete and activate) */
+	/* Determine the store's status */
     if ((retval=store->getPinPair(storeArg, name, &pair)) < TACK_OK)
         return retval;
     for (p=0; p < pair.numPins; p++) {
         pin = &pair.pins[p];
-        pinIsActive = pinMatchesTack = pinMatchesActiveTack = 0;
 
-        /* Fill in variables indicating pin/tack matches */
         if (pin->endTime > currentTime)
-            pinIsActive = 1;
+            pinIsActive[p] = 1;
         for (t=0; t < ctx->numTacks; t++) {
             if (strcmp(pin->fingerprint, ctx->fingerprints[t]) == 0) { 
-                pinMatchesTack = 1;
-                pinMatchesActiveTack = tackExtIsActive(ctx->tackExt, t);
+                pinMatchesTack[p] = 1;
+                pinMatchesActiveTack[p] = tackExtIsActive(ctx->tackExt, t);
                 tackMatchesPin[t] = 1;
             } 
         }
-
-        /* Determine the store's status */
-        if (pinIsActive) {
-            if (!pinMatchesTack)
+        if (pinIsActive[p]) {
+            if (!pinMatchesTack[p])
                 return TACK_OK_REJECTED; /* return immediately */
             status = TACK_OK_ACCEPTED;
         }
+    }
 
-        /* Pin activation (first step: consider each pin for deletion / activation) */
-        if (pinActivation) {
-            if (!pinMatchesTack)
+	/* Perform pin activation */
+    if (pinActivation) {
+   
+        /* Delete unmatched pins and activate matched pins with active tacks */
+        for (p=0; p < pair.numPins; p++) {
+            pin = &pair.pins[p];
+            
+            if (!pinMatchesTack[p])
                 madeChanges = 1; /* Delete pin (by not appending to newPair) */
             else {
                 endTime = pin->endTime;
-                if (pinMatchesActiveTack && currentTime > pin->initialTime) {
+                if (pinMatchesActiveTack[p] && currentTime > pin->initialTime) {
                     endTime = currentTime + (currentTime - pin->initialTime) - 1;
                     if (endTime > currentTime + 30*24*60) 
                         endTime = currentTime + 30*24*60;
@@ -133,10 +134,7 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
                 if (retval != TACK_OK) return retval;
             }
         }
-    }
-
-    /* Pin activation (second step: add new pins) */
-    if (pinActivation) {
+        /* Add new inactive pins for any unmatched active tacks */
         for (t = 0; t < ctx->numTacks; t++) {
             if (tackExtIsActive(ctx->tackExt, t) && !tackMatchesPin[t]) {
                 retval=store->setMinGeneration(storeArg, ctx->fingerprints[t], 
