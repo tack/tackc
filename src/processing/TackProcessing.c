@@ -77,7 +77,7 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
     for (t = 0; t < ctx->numTacks; t++) {
         retval = store->getMinGeneration(storeArg, ctx->fingerprints[t], &minGeneration);
         if (retval < TACK_OK) return retval;
-
+        
         if (retval != TACK_OK_NOT_FOUND) {
             if (tackTackGetGeneration(ctx->tacks[t]) < minGeneration)
                 return TACK_ERR_REVOKED_GENERATION;            
@@ -88,8 +88,8 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
             } 
         } 
     }
-
-	/* Determine the store's status */
+    
+    /* Determine the store's status */
     if ((retval=store->getPinPair(storeArg, name, &pair)) < TACK_OK)
         return retval;
     for (p=0; p < pair.numPins; p++) {
@@ -111,9 +111,9 @@ TACK_RETVAL tackProcessStore(void* storeArg, TackStoreFuncs* store,
         }
     }
 
-	/* Perform pin activation */
+    /* Perform pin activation */
     if (pinActivation) {
-   
+        
         /* Delete unmatched pins and activate matched pins with active tacks */
         for (p=0; p < pair.numPins; p++) {
             pin = &pair.pins[p];
