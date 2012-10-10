@@ -30,6 +30,10 @@ uint8_t tackExtIsActive(uint8_t* tackExt, uint8_t index) {
     return (*(tackExtPostTacks(tackExt))) & (1 << index);
 }
 
+uint16_t tackExtGetLength(uint8_t* tackExt) {
+	return ptou16(tackExt) + 3;
+}
+
 TACK_RETVAL tackExtSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen)
 {
     if (tackExtLen == 3 + TACK_LENGTH) {

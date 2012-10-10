@@ -20,6 +20,7 @@ uint8_t  tackExtGetNumTacks(uint8_t* tackExt);
 uint8_t* tackExtGetTack(uint8_t* tackExt, uint8_t index);
 uint8_t  tackExtGetActivationFlags(uint8_t* tackExt);
 uint8_t  tackExtIsActive(uint8_t* tackExt, uint8_t index);
+uint16_t tackExtGetLength(uint8_t* tackExt);
 
 TACK_RETVAL tackExtSyntaxCheck(uint8_t* tackExt, uint32_t tackExtLen);
 
